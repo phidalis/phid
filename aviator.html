@@ -286,7 +286,7 @@
       <button onclick="setDepAmt(10000)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm hover:border-orange-500/50 transition">KES<br>10,000</button>
     </div>
     <div class="text-white/30 text-xs text-center mb-3">— or enter custom amount —</div>
-    <input id="depInput" type="number" min="50" placeholder="Amount (KES min. 50)" class="inp text-center text-xl font-mono mb-4" oninput="depAmtChanged()">
+    <input id="depInput" type="number" min="100" placeholder="Amount (KES min. 1000)" class="inp text-center text-xl font-mono mb-4" oninput="depAmtChanged()">
     <div class="mb-5">
       <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-2">M-Pesa Number</label>
       <div class="inp flex items-center justify-between" style="cursor:default;">
@@ -298,7 +298,7 @@
     <button id="depBtn" onclick="initiateDeposit()" class="btn-orange w-full py-5 text-xl flex items-center justify-center gap-3">
       <span id="depBtnTxt">PAY WITH M-PESA</span>
     </button>
-    <p class="text-center text-white/20 text-xs mt-4">Minimum deposit: KES 50 · Powered by PayHero</p>
+    <p class="text-center text-white/20 text-xs mt-4">Minimum deposit: KES 100 · Powered by PayHero</p>
   </div>
 
   <!-- Step 2: waiting for payment -->
