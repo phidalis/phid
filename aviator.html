@@ -286,7 +286,7 @@
       <button onclick="setDepAmt(10000)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm hover:border-orange-500/50 transition">KES<br>10,000</button>
     </div>
     <div class="text-white/30 text-xs text-center mb-3">— or enter custom amount —</div>
-    <input id="depInput" type="number" min="100" placeholder="Amount (KES min. 1000)" class="inp text-center text-xl font-mono mb-4" oninput="depAmtChanged()">
+    <input id="depInput" type="number" min="100" placeholder="Amount (KES min. 100 )" class="inp text-center text-xl font-mono mb-4" oninput="depAmtChanged()">
     <div class="mb-5">
       <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-2">M-Pesa Number</label>
       <div class="inp flex items-center justify-between" style="cursor:default;">
@@ -745,7 +745,7 @@ window.openDeposit = function() {
   document.getElementById('depPhoneDisplay').textContent = phone;
 };
 window.closeDeposit = function() {
-  cancelPoll();
+  window.cancelPoll && window.cancelPoll();
   document.getElementById('depositScreen').classList.remove('open');
 };
 
@@ -866,11 +866,15 @@ function showDepFailed(msg) {
 
 window.cancelPoll = function() {
   clearTimeout(depPollTimer);
-  closeDeposit();
+  document.getElementById('depositScreen').classList.remove('open');
 };
 
 window.retryDeposit = function() {
+  clearTimeout(depPollTimer);
   document.getElementById('depStep2').style.display = 'none';
+  document.getElementById('depFailed').style.display = 'none';
+  document.getElementById('depSuccess').style.display = 'none';
+  document.getElementById('depPending').style.display = 'flex';
   document.getElementById('depStep1').style.display = 'block';
   document.getElementById('depBtn').disabled = false;
   document.getElementById('depBtn').innerHTML = `<span id="depBtnTxt">PAY WITH M-PESA</span>`;
