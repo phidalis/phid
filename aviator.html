@@ -766,7 +766,7 @@ window.initiateDeposit = async function() {
     const amt = parseInt(document.getElementById('depInput').value) || 0;
     const phone = userData?.phone || (USER?.email?.split('@')[0] || '');
     
-    if (amt < 30) {
+    if (amt < 100) {
         showToast('Minimum deposit is KES 100', 'red');
         return;
     }
@@ -1211,8 +1211,8 @@ setInterval(()=>{if(!isPlaying)return;const p=liveBetsData.filter(e=>!e.payout);
 function updateWithdrawals(){const fresh=liveBetsData.filter(e=>e.payout&&e.payout>1000).slice(0,3).map(e=>({user:e.user,amount:e.payout}));withdrawData=[...fresh,...WITHDRAW_SEED].slice(0,8);}
 function renderWithdrawals(){const wdBal=document.getElementById('wdBalDisplay');if(wdBal)wdBal.textContent=balance.toLocaleString();const methods=['M-Pesa','M-Pesa','Airtel','M-Pesa','Bank','M-Pesa','Airtel','M-Pesa'];document.getElementById('withdrawList').innerHTML=withdrawData.map((w,i)=>`<div class="flex items-center px-4 py-3 gap-3"><div class="w-9 h-9 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-base flex-shrink-0">⬇️</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${w.user}</div><div class="text-white/35 text-xs">${methods[i%methods.length]} · just now</div></div><div class="text-right flex-shrink-0"><div class="font-black font-mono text-emerald-400 text-sm">KES ${Number(w.amount).toLocaleString()}</div><div class="text-xs mt-0.5"><span class="status-success px-2 py-0.5 rounded-full text-xs font-bold">SUCCESS</span></div></div></div>`).join('');}
 
-function renderChat(){const box=document.getElementById('chatBox');const myName=userData?userData.name.split(' ')[0]:'You';box.innerHTML=chatLog.map(m=>`<div class="flex gap-2"><span class="${m.user===myName||m.user==='You'?'text-orange-400':'text-purple-400'} font-bold flex-shrink-0">${m.user}:</span><span class="text-white/75">${m.msg}</span></div>`).join('');box.scrollTop=box.scrollHeight;}
-window.sendChat=function(){const inp=document.getElementById('chatInput');const text=inp.value.trim();if(!text)return;const myName=userData?userData.name.split(' ')[0]:'You';chatLog.push({user:myName,msg:text});inp.value='';renderChat();setTimeout(()=>{const replies=['Nice one! 🔥','Let\'s go!','Same here 🤞','Risky play lol','Hope it hits!'];const users=['Emily','BrianJ','Mulee','Wanjiku99','Njugu256'];chatLog.push({user:users[Math.floor(Math.random()*users.length)],msg:replies[Math.floor(Math.random()*replies.length)]});renderChat();},1000+Math.random()*1500);};
+function renderChat(){const box=document.getElementById('chatBox');const myName=userData?(userData.name||userData.displayName||userData.username||userData.email||'You').split(' ')[0]:'You';box.innerHTML=chatLog.map(m=>`<div class="flex gap-2"><span class="${m.user===myName||m.user==='You'?'text-orange-400':'text-purple-400'} font-bold flex-shrink-0">${m.user}:</span><span class="text-white/75">${m.msg}</span></div>`).join('');box.scrollTop=box.scrollHeight;}
+window.sendChat=function(){const inp=document.getElementById('chatInput');const text=inp.value.trim();if(!text)return;const myName=userData?(userData.name||userData.displayName||userData.username||userData.email||'You').split(' ')[0]:'You';chatLog.push({user:myName,msg:text});inp.value='';renderChat();setTimeout(()=>{const replies=['Nice one! 🔥','Let\'s go!','Same here 🤞','Risky play lol','Hope it hits!'];const users=['Emily','BrianJ','Mulee','Wanjiku99','Njugu256'];chatLog.push({user:users[Math.floor(Math.random()*users.length)],msg:replies[Math.floor(Math.random()*replies.length)]});renderChat();},1000+Math.random()*1500);};
 setInterval(()=>{const msgs=['🔥 On fire!','Anyone else cashing early?','2x feels safe rn','let it ride!!','omg that crash 😭'];const users=['Emily','BrianJ','Mulee','Wanjiku99','Njugu256','Steve254','Akinyi'];if(Math.random()>0.7){chatLog.push({user:users[Math.floor(Math.random()*users.length)],msg:msgs[Math.floor(Math.random()*msgs.length)]});if(chatLog.length>40)chatLog.shift();const cp=document.getElementById('chatPanel');if(cp.style.display!=='none')renderChat();}},5000);
 
 window.switchTab=function(n){document.getElementById('stakePanel').style.display=n===0?'block':'none';document.getElementById('aiPanel').style.display=n===1?'block':'none';document.getElementById('tabBtn0').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===0?'tab-on':'tab-off');document.getElementById('tabBtn1').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===1?'tab-on':'tab-off');if(n===1)runAI();};
@@ -1241,7 +1241,7 @@ function initGame() {
   renderWithdrawals();
   refreshBetUI();
   switchLiveTab(0);
-  const name = userData ? userData.name.split(' ')[0] : 'Player';
+  const name = userData ? (userData.name||userData.displayName||userData.username||userData.email||'Player').split(' ')[0] : 'Player';
   showToast(`Welcome back, ${name}! 👋`, 'purple');
   if (balance === 0) setTimeout(() => showToast('Balance is KES 0 — tap + DEPOSIT to play!', 'red'), 1800);
   // Show idle overlay — rounds are driven by Firestore onSnapshot (startQueueListener)
