@@ -143,7 +143,7 @@ app.post('/api/callback', async (req, res) => {
     if (success && db) {
       // Extract userId from external_reference: DEP_<uid>_<timestamp>
       let userId = null;
-      const match = userRef.match(/^DEP_(.+)_(\d{13})$/);
+      const match = userRef.match(/^DEP_(.+)_(\d{13,})$/);
       if (match) userId = match[1];
 
       // Fallback: check paymentStore for stored userId
@@ -174,7 +174,7 @@ app.post('/api/callback', async (req, res) => {
           // Check if doc exists — update() throws if missing
           const snap = await userDocRef.get();
 
-          if (snap.exists) {
+          if (snap.exists === true || (typeof snap.exists === 'function' && snap.exists())) {
             // Document exists: use increment + arrayUnion
             await userDocRef.update({
               balance:           admin.firestore.FieldValue.increment(amount),
