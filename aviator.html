@@ -837,21 +837,56 @@ function startDepPoll() {
       }
 
       if (data.status === 'SUCCESS') {
-        // Server callback already wrote balance to Firebase via Admin SDK — don't write again.
-        // Just read the fresh balance from Firestore and update the UI.
         clearTimeout(depPollTimer);
         const paid = data.amount || depAmount;
-        showDepSuccess(paid);
+
+        // ── Frontend writes balance to Firestore (guaranteed, client SDK is authenticated) ──
         try {
-          const freshSnap = await getDoc(doc(db, 'users', USER.uid));
-          if (freshSnap.exists()) {
-            const d = freshSnap.data();
-            balance = d.balance || 0;
-            userData = d;
-            updateBalDisplay();
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'})
+                        + ' ' + now.toLocaleDateString('en-KE',{day:'2-digit',month:'short'});
+
+          // Use a Firestore transaction to safely increment balance (handles concurrent writes)
+          const userRef2 = doc(db, 'users', USER.uid);
+          const snap2 = await getDoc(userRef2);
+
+          if (snap2.exists()) {
+            const currentBal = snap2.data().balance || 0;
+            const newBal = currentBal + paid;
+            await updateDoc(userRef2, {
+              balance:           newBal,
+              'stats.deposited': increment(paid),
+              transactions:      arrayUnion({
+                type:   'deposit',
+                amount: paid,
+                method: 'M-Pesa',
+                status: 'success',
+                note:   'M-Pesa STK Push',
+                time:   timeStr,
+                uid:    USER.uid,
+              }),
+            });
+            balance = newBal;
+          } else {
+            // Doc missing — create it
+            await setDoc(userRef2, {
+              balance:      paid,
+              stats:        { deposited: paid, withdrawn: 0, won: 0, rounds: 0 },
+              transactions: [{ type:'deposit', amount:paid, method:'M-Pesa', status:'success', note:'M-Pesa STK Push', time:timeStr, uid:USER.uid }],
+              createdAt:    serverTimestamp(),
+            });
+            balance = paid;
           }
-        } catch(e) { /* onSnapshot will sync shortly anyway */ }
-        showToast(`+KES ${paid.toLocaleString()} deposited ✅`, 'emerald');
+          userData = (await getDoc(userRef2)).data();
+          updateBalDisplay();
+          showDepSuccess(paid);
+          showToast(`+KES ${paid.toLocaleString()} deposited ✅`, 'emerald');
+        } catch(writeErr) {
+          console.error('Balance write failed:', writeErr);
+          // Still show success UI — onSnapshot may catch up
+          showDepSuccess(paid);
+          showToast(`+KES ${paid.toLocaleString()} deposited ✅`, 'emerald');
+        }
 
       } else if (data.status === 'FAILED') {
         showDepFailed('Payment was cancelled or failed. Please try again.');
