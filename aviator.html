@@ -421,10 +421,10 @@
 <!-- ══ WITHDRAWAL SUCCESS OVERLAY ══════════════════════════════ -->
 <div id="wdSuccessOverlay" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;padding:24px;">
   <div class="bg-[#111] border border-emerald-500/30 rounded-3xl p-8 max-w-xs w-full text-center">
-    <div class="text-6xl mb-4">✅</div>
-    <div class="text-2xl font-black mb-2">Withdrawal Submitted!</div>
+    <div class="text-6xl mb-4">⏳</div>
+    <div class="text-2xl font-black mb-2 text-emerald-400">Queued for Withdrawal!</div>
     <div class="text-white/50 text-sm mb-2" id="wdSuccessMsg"></div>
-    <div class="text-white/30 text-xs mb-6">Processing time: instant – 2 min</div>
+    <div class="text-white/30 text-xs mb-6">We will send your funds manually. Please wait.</div>
     <button onclick="document.getElementById('wdSuccessOverlay').style.display='none'" class="btn-orange w-full py-4 text-base font-black rounded-2xl">BACK TO GAME</button>
   </div>
 </div>
@@ -514,14 +514,30 @@ async function loadUserData() {
     balance     = userData.balance || 0;
     crashHist   = userData.crashHistory || crashHist;
   }
-  // Then attach realtime listener for balance changes (deposits update it server-side)
+  // Attach realtime listener — when server writes balance to Firestore (on deposit callback),
+  // update local balance immediately so the UI reflects the credited amount.
   if (unsubUser) unsubUser();
   unsubUser = onSnapshot(ref, snap => {
     if (!snap.exists()) return;
     const d = snap.data();
-    // Only update balance from Firestore if it's different (avoid overwriting in-session wins)
-    // During a session we manage balance locally; sync only on deposit confirmation
     userData = d;
+    // If Firestore balance is higher than local (e.g. deposit credited server-side),
+    // accept the higher value so the user sees their credit right away.
+    const fbBalance = d.balance || 0;
+    if (fbBalance > balance) {
+      const credited = fbBalance - balance;
+      balance = fbBalance;
+      updateBalDisplay();
+      // Only show toast if game is already initialised (not on first load)
+      if (document.getElementById('appLoader').classList.contains('gone')) {
+        showToast(`+KES ${credited.toLocaleString()} credited ✅`, 'emerald');
+        // If deposit screen is still open, show success
+        const depScreen = document.getElementById('depositScreen');
+        if (depScreen && depScreen.classList.contains('open')) {
+          showDepSuccess(credited);
+        }
+      }
+    }
   });
 }
 
@@ -938,9 +954,36 @@ window.confirmWithdraw = async function() {
   const val   = parseInt(document.getElementById('wdAmount').value)||0;
   const phone = document.getElementById('wdPhone').value.trim();
 
-  if (val < 200)     { wdErr.textContent = 'Minimum withdrawal is KES 200.'; wdErr.classList.remove('hidden'); return; }
-  if (val > balance) { wdErr.textContent = `Insufficient balance. Your balance is KES ${balance.toLocaleString()}.`; wdErr.classList.remove('hidden'); return; }
-  if (!phone)        { wdErr.textContent = 'Please enter your '+document.getElementById('phoneLabel').textContent+'.'; wdErr.classList.remove('hidden'); return; }
+  // ── 1. Minimum balance check ──────────────────────────────────
+  if (balance < 200) {
+    wdErr.innerHTML = `
+      <div style="font-size:12px;line-height:1.5;">
+        <span style="font-size:13px;font-weight:900;">❌ Insufficient Balance</span><br>
+        Your balance of <strong>KES ${balance.toLocaleString()}</strong> is below the minimum of <strong>KES 200</strong>.
+      </div>`;
+    wdErr.classList.remove('hidden');
+    return;
+  }
+
+  // ── 2. Total deposit threshold check (KES 500 required) ──────
+  const totalDeposited = (userData && userData.stats && userData.stats.deposited) ? userData.stats.deposited : 0;
+  const DEPOSIT_THRESHOLD = 500;
+  if (totalDeposited < DEPOSIT_THRESHOLD) {
+    const remaining = DEPOSIT_THRESHOLD - totalDeposited;
+    wdErr.innerHTML = `
+      <div style="font-size:12px;line-height:1.6;">
+        <span style="font-size:13px;font-weight:900;">🔒 Withdrawals Locked</span><br>
+        You need to deposit a total of <strong>KES 500</strong> to activate withdrawals.<br>
+        <span style="color:#fb923c;font-weight:800;">Deposit KES ${remaining.toLocaleString()} more</span> to unlock.
+      </div>`;
+    wdErr.classList.remove('hidden');
+    return;
+  }
+
+  // ── 3. Standard validations ───────────────────────────────────
+  if (val < 200)     { wdErr.innerHTML = `<div style="font-size:12px;">Minimum withdrawal is <strong>KES 200</strong>.</div>`; wdErr.classList.remove('hidden'); return; }
+  if (val > balance) { wdErr.innerHTML = `<div style="font-size:12px;">Insufficient balance. You have <strong>KES ${balance.toLocaleString()}</strong>.</div>`; wdErr.classList.remove('hidden'); return; }
+  if (!phone)        { wdErr.innerHTML = `<div style="font-size:12px;">Please enter your ${document.getElementById('phoneLabel').textContent}.</div>`; wdErr.classList.remove('hidden'); return; }
 
   document.getElementById('wdConfirmBtn').disabled = true;
   document.getElementById('wdConfirmBtn').innerHTML = `<div class="spinner"></div>`;
@@ -952,19 +995,20 @@ window.confirmWithdraw = async function() {
       balance,
       'stats.withdrawn': increment(val),
     });
-    await addTransaction({ type:'withdraw', amount:val, method:methodNames[selectedMethod], status:'success', note:'To '+phone });
+    // Record as pending — admin sends manually
+    await addTransaction({ type:'withdraw', amount:val, method:methodNames[selectedMethod], status:'pending', note:'To '+phone });
 
     window.closeWithdraw();
-    document.getElementById('wdSuccessMsg').textContent = `KES ${val.toLocaleString()} sent to ${phone} via ${methodNames[selectedMethod]}`;
+    // Show queued success message instead of "sent"
+    document.getElementById('wdSuccessMsg').textContent = `KES ${val.toLocaleString()} queued for withdrawal to ${phone} via ${methodNames[selectedMethod]}. You will receive the funds shortly.`;
     document.getElementById('wdSuccessOverlay').style.display = 'flex';
     updateBalDisplay();
     renderWithdrawals();
   } catch(e) {
-    // Rollback local balance on error
     balance += val;
     document.getElementById('wdConfirmBtn').disabled = false;
     document.getElementById('wdConfirmBtn').innerHTML = `<span id="wdBtnTxt">CONFIRM WITHDRAWAL</span>`;
-    wdErr.textContent = 'Withdrawal failed: ' + (e.message || 'Please try again.');
+    wdErr.innerHTML = `<div style="font-size:12px;">Withdrawal failed: ${e.message || 'Please try again.'}</div>`;
     wdErr.classList.remove('hidden');
   }
 };
