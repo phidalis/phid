@@ -135,9 +135,11 @@ app.post('/api/callback', async (req, res) => {
 
     const finalStatus = success ? 'SUCCESS' : 'FAILED';
 
-    // Update in-memory store
-    if (userRef)    paymentStore[userRef]    = { status: finalStatus, amount };
-    if (checkoutId) paymentStore[checkoutId] = { status: finalStatus, amount };
+    // Update in-memory store — PRESERVE userId from the original deposit entry
+    const existingByRef      = paymentStore[userRef]      || {};
+    const existingByCheckout = paymentStore[checkoutId]   || {};
+    if (userRef)    paymentStore[userRef]    = { status: finalStatus, amount, userId: existingByRef.userId      || null };
+    if (checkoutId) paymentStore[checkoutId] = { status: finalStatus, amount, userId: existingByCheckout.userId || null };
 
     // Write to Firebase if payment succeeded
     if (success && db) {
