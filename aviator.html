@@ -463,7 +463,7 @@ const FIREBASE_CONFIG = {
 // ║  YOUR RENDER BACKEND URL (where PayHero API key lives)      ║
 // ║  e.g. "https://your-app.onrender.com"                      ║
 // ╚══════════════════════════════════════════════════════════════╝
-const BACKEND_URL = "https://REPLACE_WITH_YOUR_RENDER_URL";
+const BACKEND_URL = "https://sportybet-jjiu.onrender.com/aviator.html";
 
 import { initializeApp }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -520,22 +520,19 @@ async function loadUserData() {
   unsubUser = onSnapshot(ref, snap => {
     if (!snap.exists()) return;
     const d = snap.data();
+    const prevBalance = balance;
     userData = d;
-    // If Firestore balance is higher than local (e.g. deposit credited server-side),
-    // accept the higher value so the user sees their credit right away.
-    const fbBalance = d.balance || 0;
-    if (fbBalance > balance) {
-      const credited = fbBalance - balance;
-      balance = fbBalance;
-      updateBalDisplay();
-      // Only show toast if game is already initialised (not on first load)
-      if (document.getElementById('appLoader').classList.contains('gone')) {
-        showToast(`+KES ${credited.toLocaleString()} credited ✅`, 'emerald');
-        // If deposit screen is still open, show success
-        const depScreen = document.getElementById('depositScreen');
-        if (depScreen && depScreen.classList.contains('open')) {
-          showDepSuccess(credited);
-        }
+    // Always sync balance from Firestore — this is the source of truth.
+    // Covers: deposits credited by server, balance after game wins/losses, login restores.
+    balance = d.balance || 0;
+    updateBalDisplay();
+    // Show credited toast if balance went up (deposit arrived) and game is already loaded
+    if (balance > prevBalance && document.getElementById('appLoader').classList.contains('gone')) {
+      const credited = balance - prevBalance;
+      showToast(`+KES ${credited.toLocaleString()} credited ✅`, 'emerald');
+      const depScreen = document.getElementById('depositScreen');
+      if (depScreen && depScreen.classList.contains('open')) {
+        showDepSuccess(credited);
       }
     }
   });
@@ -779,7 +776,7 @@ window.initiateDeposit = async function() {
     
     try {
         const extRef = `DEP_${USER.uid}_${Date.now()}`;
-        const response = await fetch(`/api/deposit`, {
+        const response = await fetch(`${BACKEND_URL}/api/deposit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -831,7 +828,7 @@ function startDepPoll() {
       let data = { status: 'PENDING' };
 
       for (const ref of refs) {
-        const res = await fetch(`/api/deposit/status?reference=${encodeURIComponent(ref)}`);
+        const res = await fetch(`${BACKEND_URL}/api/deposit/status?reference=${encodeURIComponent(ref)}`);
         const d   = await res.json();
         if (d.status === 'SUCCESS' || d.status === 'FAILED') {
           data = d;
@@ -840,15 +837,19 @@ function startDepPoll() {
       }
 
       if (data.status === 'SUCCESS') {
+        // Server callback already updated Firebase balance via Admin SDK.
+        // Just show the success UI — onSnapshot will sync the new balance automatically.
         const paid = data.amount || depAmount;
-        balance += paid;
-        await saveUserField({
-          balance:           balance,
-          'stats.deposited': increment(paid),
-        });
-        await addTransaction({ type: 'deposit', amount: paid, method: 'M-Pesa', status: 'success', note: 'PayHero STK' });
+        clearTimeout(depPollTimer);
         showDepSuccess(paid);
-        updateBalDisplay();
+        // Force-read Firestore now to get the server-credited balance
+        const freshSnap = await getDoc(doc(db, 'users', USER.uid));
+        if (freshSnap.exists()) {
+          const d = freshSnap.data();
+          balance = d.balance || 0;
+          userData = d;
+          updateBalDisplay();
+        }
         showToast(`+KES ${paid.toLocaleString()} deposited ✅`, 'emerald');
 
       } else if (data.status === 'FAILED') {
