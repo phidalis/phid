@@ -766,7 +766,7 @@ window.initiateDeposit = async function() {
     const amt = parseInt(document.getElementById('depInput').value) || 0;
     const phone = userData?.phone || (USER?.email?.split('@')[0] || '');
     
-    if (amt < 100) {
+    if (amt < 30) {
         showToast('Minimum deposit is KES 100', 'red');
         return;
     }
