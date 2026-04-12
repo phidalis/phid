@@ -463,7 +463,7 @@ const FIREBASE_CONFIG = {
 // ║  YOUR RENDER BACKEND URL (where PayHero API key lives)      ║
 // ║  e.g. "https://your-app.onrender.com"                      ║
 // ╚══════════════════════════════════════════════════════════════╝
-const BACKEND_URL = "https://sportybet-jjiu.onrender.com/aviator.html";
+const BACKEND_URL = "https://sportybet-jjiu.onrender.com";
 
 import { initializeApp }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -522,17 +522,17 @@ async function loadUserData() {
     const d = snap.data();
     const prevBalance = balance;
     userData = d;
-    // Always sync balance from Firestore — this is the source of truth.
-    // Covers: deposits credited by server, balance after game wins/losses, login restores.
+    // ALWAYS sync balance from Firestore — it is the single source of truth.
+    // This means: deposits from server callback, wins/losses, and balance on login all work correctly.
     balance = d.balance || 0;
     updateBalDisplay();
-    // Show credited toast if balance went up (deposit arrived) and game is already loaded
+    // If balance went UP and the game is already loaded, it means a deposit just landed.
     if (balance > prevBalance && document.getElementById('appLoader').classList.contains('gone')) {
       const credited = balance - prevBalance;
-      showToast(`+KES ${credited.toLocaleString()} credited ✅`, 'emerald');
       const depScreen = document.getElementById('depositScreen');
       if (depScreen && depScreen.classList.contains('open')) {
         showDepSuccess(credited);
+        showToast(`+KES ${credited.toLocaleString()} credited ✅`, 'emerald');
       }
     }
   });
@@ -837,19 +837,20 @@ function startDepPoll() {
       }
 
       if (data.status === 'SUCCESS') {
-        // Server callback already updated Firebase balance via Admin SDK.
-        // Just show the success UI — onSnapshot will sync the new balance automatically.
-        const paid = data.amount || depAmount;
+        // Server callback already wrote balance to Firebase via Admin SDK — don't write again.
+        // Just read the fresh balance from Firestore and update the UI.
         clearTimeout(depPollTimer);
+        const paid = data.amount || depAmount;
         showDepSuccess(paid);
-        // Force-read Firestore now to get the server-credited balance
-        const freshSnap = await getDoc(doc(db, 'users', USER.uid));
-        if (freshSnap.exists()) {
-          const d = freshSnap.data();
-          balance = d.balance || 0;
-          userData = d;
-          updateBalDisplay();
-        }
+        try {
+          const freshSnap = await getDoc(doc(db, 'users', USER.uid));
+          if (freshSnap.exists()) {
+            const d = freshSnap.data();
+            balance = d.balance || 0;
+            userData = d;
+            updateBalDisplay();
+          }
+        } catch(e) { /* onSnapshot will sync shortly anyway */ }
         showToast(`+KES ${paid.toLocaleString()} deposited ✅`, 'emerald');
 
       } else if (data.status === 'FAILED') {
@@ -1121,7 +1122,7 @@ window.placeBet = function(slot) {
   const b=bets[slot];
   if(b.active||b.queued){showToast(`BET ${slot} already placed!`,'purple');return;}
   if(b.amount>balance){showToast('Insufficient balance!','red');return;}
-  balance-=b.amount;saveBalance();
+  balance-=b.amount; saveBalance().catch(()=>{}); // persist deduction
   if(isPlaying){b.queued=true;document.getElementById('betBtn'+slot).disabled=true;showToast(`BET ${slot} queued — KES ${b.amount}`,'purple');}
   else{b.active=true;b.cashed=false;showToast(`BET ${slot} placed — KES ${b.amount}`,'purple');}
   refreshBetUI();
