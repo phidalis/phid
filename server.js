@@ -143,7 +143,7 @@ app.post('/api/callback', async (req, res) => {
     if (success && db) {
       // Extract userId from external_reference: DEP_<uid>_<timestamp>
       let userId = null;
-      const match = userRef.match(/^DEP_([^_]+)_\d+$/);
+      const match = userRef.match(/^DEP_(.+)_(\d{13})$/);
       if (match) userId = match[1];
 
       // Fallback: check paymentStore for stored userId
