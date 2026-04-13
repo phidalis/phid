@@ -632,10 +632,11 @@ function startQueueListener() {
       crashIndex = d.index  || 0;
 
       // How much of the 7s betting window is left?
-      const elapsed    = Date.now() - bettingMs;
+      const _now       = Date.now();
+      const elapsed    = (bettingMs > 0 && bettingMs < _now) ? (_now - bettingMs) : 0;
       const BETTING_MS = 7000;
-      const remaining  = Math.max(300, BETTING_MS - elapsed);
-      const cdSecs     = Math.ceil(remaining / 1000);
+      const remaining  = Math.min(7000, Math.max(500, BETTING_MS - elapsed));
+      const cdSecs     = Math.min(7, Math.max(1, Math.ceil(remaining / 1000)));
 
       startCountdown(cdSecs, () => {});
 
@@ -671,8 +672,9 @@ function startRoundLocally(crash, serverStart) {
   cancelAnimationFrame(rafId); drawFrame();
 
   // Schedule crash based on server start time (accounts for late joiners)
-  const elapsed   = Date.now() - roundStart;
-  const totalMs   = (Math.log(crashAt) / RATE) * 1000;
+  const _rs       = (roundStart > 0 && roundStart <= Date.now()) ? roundStart : Date.now();
+  const elapsed   = Date.now() - _rs;
+  const totalMs   = (Math.log(Math.max(1.01, crashAt)) / RATE) * 1000;
   const remaining = Math.max(0, totalMs - elapsed);
 
   crashTimer = setTimeout(() => { if (isPlaying) endRoundLocally(crashAt); }, remaining);
@@ -1147,7 +1149,7 @@ function drawFrame() {
 }
 
 // genCrash() removed — crash points now come from Firestore shared queue
-function startCountdown(secs,cb){clearInterval(cdTimer);const el=document.getElementById('cdValue');el.textContent=secs;let n=secs;cdTimer=setInterval(()=>{n--;el.textContent=n;if(n<=0){clearInterval(cdTimer);cb();}},1000);}
+function startCountdown(secs,cb){clearInterval(cdTimer);const el=document.getElementById('cdValue');const safeSecs=Math.min(7,Math.max(1,Math.round(secs)));el.textContent=safeSecs;let n=safeSecs;cdTimer=setInterval(()=>{n--;el.textContent=Math.max(0,n);if(n<=0){clearInterval(cdTimer);cb();}},1000);}
 
 // beginRound() replaced by localBeginRound() + Firestore realtime listener
 
