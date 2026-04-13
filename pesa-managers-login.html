@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pesa Manager • Admin Login</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    *, *::before, *::after { font-family: 'Inter', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #050508; color: white; overflow: hidden; }
+
+    /* ── Background ── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(160,32,240,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(160,32,240,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(160,32,240,0.18) 0%, transparent 70%);
+    }
+
+    /* ── Container ── */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px 20px;
+    }
+
+    /* ── Logo / Brand ── */
+    .brand { text-align: center; margin-bottom: 36px; }
+    .brand-icon {
+      width: 68px; height: 68px; border-radius: 22px; margin: 0 auto 14px;
+      background: linear-gradient(135deg, #a020f0, #7c3aed);
+      box-shadow: 0 8px 32px rgba(160,32,240,0.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px;
+    }
+    .brand-title {
+      font-size: 22px; font-weight: 900; letter-spacing: -0.5px;
+      color: white;
+    }
+    .brand-sub { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+
+    /* ── Card ── */
+    .card {
+      width: 100%; max-width: 380px;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 32px 28px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+    .card-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: rgba(255,255,255,0.38); margin-bottom: 28px; }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.5); margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .field-wrap { position: relative; }
+    .inp {
+      width: 100%; padding: 14px 16px; padding-right: 44px;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 14px; color: white; font-size: 15px;
+      outline: none; transition: border-color 0.2s, background 0.2s;
+    }
+    .inp:focus { border-color: #a020f0; background: rgba(160,32,240,0.08); }
+    .inp::placeholder { color: rgba(255,255,255,0.22); }
+    .eye-btn {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: rgba(255,255,255,0.35);
+      cursor: pointer; font-size: 18px; padding: 0; line-height: 1;
+      transition: color 0.2s;
+    }
+    .eye-btn:hover { color: rgba(255,255,255,0.7); }
+
+    /* ── Error ── */
+    .err-box {
+      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5; border-radius: 12px; padding: 12px 14px;
+      font-size: 13px; margin-bottom: 16px; display: none; align-items: center; gap: 8px;
+    }
+    .err-box.show { display: flex; }
+
+    /* ── Button ── */
+    .btn-primary {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, #a020f0, #7c3aed);
+      box-shadow: 0 6px 24px rgba(160,32,240,0.45);
+      border: none; border-radius: 14px; color: white;
+      font-size: 15px; font-weight: 800; cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
+
+    /* ── Spinner ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      animation: spin 0.7s linear infinite; flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    .footer-note {
+      margin-top: 20px; text-align: center;
+      font-size: 12px; color: rgba(255,255,255,0.2);
+    }
+
+    /* ── Badge ── */
+    .secure-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);
+      color: #34d399; border-radius: 9999px;
+      padding: 5px 12px; font-size: 11px; font-weight: 700;
+      margin-bottom: 24px;
+    }
+    .badge-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; }
+
+    @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .card { animation: fadeIn 0.4s ease forwards; }
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="page">
+  <div class="brand">
+    <div class="brand-icon">🛡️</div>
+    <div class="brand-title">Pesa Manager</div>
+    <div class="brand-sub">Sportybet.Site Admin Panel</div>
+  </div>
+
+  <div class="card">
+    <div style="text-align:center; margin-bottom:20px;">
+      <span class="secure-badge">
+        <span class="badge-dot"></span>
+        Secure Admin Access
+      </span>
+    </div>
+
+    <div class="card-title">Welcome Back</div>
+    <div class="card-desc">Sign in with your admin credentials to continue.</div>
+
+    <div id="errBox" class="err-box">
+      <span>⚠️</span>
+      <span id="errMsg">Invalid credentials</span>
+    </div>
+
+    <div class="field">
+      <label>Email Address</label>
+      <div class="field-wrap">
+        <input type="email" id="emailInp" class="inp" placeholder="admin@sportybet.site" autocomplete="email" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <div class="field-wrap">
+        <input type="password" id="passInp" class="inp" placeholder="••••••••••" autocomplete="current-password" />
+        <button class="eye-btn" onclick="togglePass()" id="eyeBtn">👁</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">
+      <span id="loginBtnTxt">SIGN IN TO DASHBOARD</span>
+    </button>
+
+    <div class="footer-note">🔒 Admin access only — unauthorized entry is monitored</div>
+  </div>
+</div>
+
+<script type="module">
+'use strict';
+
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBfGx3mLuZ85b_JkRUJXwloLJXNT3uyn7M",
+  authDomain:        "aviator-23914.firebaseapp.com",
+  projectId:         "aviator-23914",
+  storageBucket:     "aviator-23914.firebasestorage.app",
+  messagingSenderId: "139941060687",
+  appId:             "1:139941060687:web:c20f9bafa9d8d3aacf4a3a"
+};
+
+// ── ADMIN SEED (remove after first login saves to Firestore) ──────────────
+// This creates an admin record in Firestore on first successful login.
+const SEED_ADMIN_EMAIL = "admin@sportybet.site";
+// ─────────────────────────────────────────────────────────────────────────
+
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const fbApp = initializeApp(FIREBASE_CONFIG);
+const auth  = getAuth(fbApp);
+const db    = getFirestore(fbApp);
+
+// ── Check if already logged in ────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) return;
+  const isAdmin = await checkAdmin(user.uid);
+  if (isAdmin) window.location.replace('pesa-dashboard.html');
+});
+
+async function checkAdmin(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'admins', uid));
+    return snap.exists();
+  } catch(e) { return false; }
+}
+
+window.doLogin = async function() {
+  const email = document.getElementById('emailInp').value.trim();
+  const pass  = document.getElementById('passInp').value;
+  const btn   = document.getElementById('loginBtn');
+  const errBox = document.getElementById('errBox');
+
+  errBox.classList.remove('show');
+
+  if (!email || !pass) {
+    document.getElementById('errMsg').textContent = 'Please enter email and password.';
+    errBox.classList.add('show'); return;
+  }
+
+  btn.disabled = true;
+  document.getElementById('loginBtnTxt').innerHTML = '<div class="spinner"></div> Signing in…';
+
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    const user = cred.user;
+
+    // Check Firestore admins collection
+    const adminRef  = doc(db, 'admins', user.uid);
+    const adminSnap = await getDoc(adminRef);
+
+    if (!adminSnap.exists()) {
+      // Seed admin on first login if email matches seed
+      if (email === SEED_ADMIN_EMAIL) {
+        await setDoc(adminRef, {
+          email:     user.email,
+          uid:       user.uid,
+          role:      'superadmin',
+          createdAt: serverTimestamp(),
+          lastLogin: serverTimestamp(),
+        });
+        window.location.replace('pesa-dashboard.html');
+      } else {
+        await auth.signOut();
+        throw new Error('Access denied — not an admin account.');
+      }
+    } else {
+      // Update last login
+      await setDoc(adminRef, { lastLogin: serverTimestamp() }, { merge: true });
+      window.location.replace('pesa-dashboard.html');
+    }
+
+  } catch(e) {
+    let msg = 'Sign-in failed. Check your credentials.';
+    if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'Wrong email or password.';
+    else if (e.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later.';
+    else if (e.message) msg = e.message;
+    document.getElementById('errMsg').textContent = msg;
+    errBox.classList.add('show');
+    btn.disabled = false;
+    document.getElementById('loginBtnTxt').textContent = 'SIGN IN TO DASHBOARD';
+  }
+};
+
+window.togglePass = function() {
+  const inp = document.getElementById('passInp');
+  const btn = document.getElementById('eyeBtn');
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+};
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') window.doLogin();
+});
+</script>
+</body>
+</html>
