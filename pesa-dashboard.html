@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pesa Manager • Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    *, *::before, *::after { font-family: 'Inter', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; background: #050508; color: white; }
+
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(160,32,240,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(160,32,240,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── Header ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(5,5,8,0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-icon {
+      width: 38px; height: 38px; border-radius: 12px;
+      background: linear-gradient(135deg, #a020f0, #7c3aed);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      box-shadow: 0 4px 14px rgba(160,32,240,0.4);
+    }
+    .topbar-name { font-size: 16px; font-weight: 900; }
+    .topbar-sub  { font-size: 11px; color: rgba(255,255,255,0.3); }
+    .logout-btn {
+      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
+      color: #f87171; border-radius: 10px; padding: 8px 14px;
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .logout-btn:hover { background: rgba(239,68,68,0.22); }
+
+    /* ── Page ── */
+    .page { position: relative; z-index: 1; padding: 20px 16px 40px; max-width: 520px; margin: 0 auto; }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.35);
+      letter-spacing: 1px; text-transform: uppercase; margin: 24px 0 12px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 20px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Crash Points ── */
+    .crash-display {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 6px; padding: 20px 10px;
+    }
+    .crash-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.35); letter-spacing: 1px; text-transform: uppercase; }
+    .crash-value {
+      font-size: 56px; font-weight: 900; line-height: 1;
+      background: linear-gradient(135deg, #a020f0, #f97316);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .crash-value.low  { background: linear-gradient(135deg, #ef4444, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .crash-value.high { background: linear-gradient(135deg, #10b981, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .crash-value.mega { background: linear-gradient(135deg, #f59e0b, #fcd34d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .crash-nav {
+      display: flex; gap: 10px; margin-top: 16px;
+    }
+    .nav-btn {
+      flex: 1; padding: 13px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px; color: white;
+      font-size: 13px; font-weight: 800; cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .nav-btn:active { transform: scale(0.97); }
+    .nav-btn:hover  { background: rgba(255,255,255,0.1); }
+    .nav-btn.purple { background: rgba(160,32,240,0.15); border-color: rgba(160,32,240,0.3); }
+    .nav-btn.purple:hover { background: rgba(160,32,240,0.25); }
+
+    /* ── Queue list ── */
+    .queue-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      margin-top: 4px;
+    }
+    .qpill {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 8px 6px; text-align: center;
+      font-size: 13px; font-weight: 700; transition: all 0.2s;
+    }
+    .qpill.active {
+      background: rgba(160,32,240,0.2); border-color: rgba(160,32,240,0.5);
+      color: #c084fc; box-shadow: 0 0 12px rgba(160,32,240,0.3);
+    }
+    .qpill.past { opacity: 0.35; }
+    .qpill.low  { color: #f87171; }
+    .qpill.mid  { color: #c084fc; }
+    .qpill.high { color: #34d399; }
+    .qpill.mega { color: #fbbf24; }
+
+    /* ── Round info ── */
+    .round-info {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px;
+    }
+    .rinfo {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding: 14px;
+    }
+    .rinfo-label { font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 600; margin-bottom: 4px; }
+    .rinfo-val   { font-size: 18px; font-weight: 800; }
+
+    /* ── Live link settings ── */
+    .inp {
+      width: 100%; padding: 13px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px; color: white; font-size: 14px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .inp:focus { border-color: #a020f0; }
+    .inp::placeholder { color: rgba(255,255,255,0.2); }
+    .inp-row { display: flex; gap: 8px; margin-top: 10px; }
+    .save-btn {
+      padding: 13px 18px;
+      background: linear-gradient(135deg, #a020f0, #7c3aed);
+      border: none; border-radius: 12px; color: white;
+      font-size: 13px; font-weight: 800; cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(160,32,240,0.4);
+    }
+    .save-btn:active { transform: scale(0.97); }
+    .save-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-label { font-size: 14px; font-weight: 600; }
+    .toggle-sub   { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+    /* ── Toggle switch ── */
+    .switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: rgba(255,255,255,0.12); border-radius: 9999px;
+      transition: background 0.3s;
+    }
+    .slider::before {
+      content: ''; position: absolute;
+      height: 22px; width: 22px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    input:checked + .slider { background: #a020f0; }
+    input:checked + .slider::before { transform: translateX(22px); }
+
+    /* ── Status ── */
+    .status-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 12px; padding: 10px 14px; font-size: 13px; color: #34d399;
+      font-weight: 600; margin-top: 10px;
+    }
+    .status-bar.warn { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2); color: #fbbf24; }
+    .status-bar.off  { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      border-top-color: white; animation: spin 0.7s linear infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .dot-live { width: 8px; height: 8px; background: #34d399; border-radius: 50%; animation: pulse 1.5s ease infinite; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: #a020f0; color: white; padding: 11px 20px;
+      border-radius: 9999px; font-size: 13px; font-weight: 700;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+      z-index: 9999; pointer-events: none;
+      opacity: 0; transition: opacity 0.3s; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; }
+
+    /* ── Loading ── */
+    #pageLoader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #050508; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+    }
+    #pageLoader.gone { display: none; }
+    .load-spinner {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 3px solid rgba(160,32,240,0.2); border-top-color: #a020f0;
+      animation: spin 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- Loading -->
+<div id="pageLoader">
+  <div style="font-size:28px">🛡️</div>
+  <div class="load-spinner"></div>
+  <div style="color:rgba(255,255,255,0.4);font-size:13px">Loading admin panel…</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Players Modal -->
+<div id="playersModal" style="
+  display:none; position:fixed; inset:0; z-index:10000;
+  background:#050508; flex-direction:column; overflow:hidden;
+">
+  <div style="
+    background:rgba(5,5,8,0.95); backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    padding:16px 20px; display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0;
+  ">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="
+        width:38px;height:38px;border-radius:12px;
+        background:linear-gradient(135deg,#a020f0,#7c3aed);
+        display:flex;align-items:center;justify-content:center;font-size:18px;
+        box-shadow:0 4px 14px rgba(160,32,240,0.4);
+      ">👥</div>
+      <div>
+        <div style="font-size:16px;font-weight:900;">All Players</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);" id="playerCountLabel">Loading…</div>
+      </div>
+    </div>
+    <button onclick="closePlayersModal()" style="
+      background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+      color:white;border-radius:10px;padding:8px 14px;
+      font-size:13px;font-weight:700;cursor:pointer;
+    ">✕ CLOSE</button>
+  </div>
+  <div style="padding:14px 16px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.06);">
+    <input type="text" id="playerSearch" placeholder="🔍 Search by number…"
+      oninput="filterPlayers()" style="
+        width:100%;padding:12px 16px;
+        background:rgba(255,255,255,0.06);
+        border:1.5px solid rgba(255,255,255,0.1);
+        border-radius:12px;color:white;font-size:14px;
+        outline:none;font-family:'Inter',sans-serif;
+      " />
+  </div>
+  <div id="playersList" style="
+    flex:1; overflow-y:auto; padding:12px 16px 40px;
+    -webkit-overflow-scrolling:touch;
+  ">
+    <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-size:14px;">
+      <div class="spinner" style="margin:0 auto 14px;"></div>
+      Loading players…
+    </div>
+  </div>
+</div>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-icon">🛡️</div>
+    <div>
+      <div class="topbar-name">Pesa Manager</div>
+      <div class="topbar-sub">Admin Dashboard</div>
+    </div>
+  </div>
+  <button class="logout-btn" onclick="doLogout()">LOGOUT</button>
+</div>
+
+<!-- Page -->
+<div class="page">
+
+  <!-- ── ACTIVE CRASH POINT ── -->
+  <div class="section-title">Active Round</div>
+  <div class="card">
+    <div class="crash-display">
+      <div class="crash-label">Next Crash Point</div>
+      <div class="crash-value" id="crashVal">—</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:4px;" id="roundIdBadge">#—</div>
+    </div>
+
+    <div class="round-info">
+      <div class="rinfo">
+        <div class="rinfo-label">Queue Index</div>
+        <div class="rinfo-val" id="queueIdx">—</div>
+      </div>
+      <div class="rinfo">
+        <div class="rinfo-label">Queue Size</div>
+        <div class="rinfo-val" id="queueSize">—</div>
+      </div>
+    </div>
+
+    <div class="crash-nav">
+      <button class="nav-btn" onclick="goPrev()">◀ PREV</button>
+      <button class="nav-btn purple" onclick="goNext()">NEXT ▶</button>
+    </div>
+  </div>
+
+  <!-- ── UPCOMING QUEUE ── -->
+  <div class="section-title">Upcoming Crash Points (Queue Preview)</div>
+  <div class="card">
+    <div id="queueGrid" class="queue-grid"></div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:12px;text-align:center;">
+      🟣 Active &nbsp;|&nbsp; Grey = upcoming &nbsp;|&nbsp; Faded = past
+    </div>
+  </div>
+
+  <!-- ── LIVE LINK ── -->
+  <div class="section-title">Live Join Link</div>
+  <div class="card">
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Floating Icon Visible</div>
+        <div class="toggle-sub">Show "Tap to Join Live" button on index.html</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="iconVisible" onchange="saveLiveSettings()" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Show Pulse Animation</div>
+        <div class="toggle-sub">Pulsing green dot to grab attention</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="iconPulse" onchange="saveLiveSettings()" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div style="margin-top:6px;">
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Link URL</div>
+      <div class="inp-row">
+        <input type="url" id="liveUrl" class="inp" placeholder="https://t.me/yourchannel or https://chat.whatsapp.com/..." />
+        <button class="save-btn" id="saveLinkBtn" onclick="saveLink()">SAVE</button>
+      </div>
+      <div id="linkStatus" class="status-bar warn" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ── PLAYERS ── -->
+  <div class="section-title">Players</div>
+  <div class="card" style="padding:16px 20px;">
+    <button class="save-btn" style="width:100%;padding:15px;font-size:14px;letter-spacing:0.5px;" onclick="openPlayersModal()">
+      👥 VIEW ALL PLAYERS
+    </button>
+  </div>
+
+  <!-- ── STATUS ── -->
+  <div class="section-title">Connection Status</div>
+  <div class="card" style="padding:16px 20px;">
+    <div id="fbStatus" class="status-bar off">
+      <div class="spinner"></div>
+      Connecting to Firebase…
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+'use strict';
+
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBfGx3mLuZ85b_JkRUJXwloLJXNT3uyn7M",
+  authDomain:        "aviator-23914.firebaseapp.com",
+  projectId:         "aviator-23914",
+  storageBucket:     "aviator-23914.firebasestorage.app",
+  messagingSenderId: "139941060687",
+  appId:             "1:139941060687:web:c20f9bafa9d8d3aacf4a3a"
+};
+
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const fbApp = initializeApp(FIREBASE_CONFIG);
+const auth  = getAuth(fbApp);
+const db    = getFirestore(fbApp);
+
+let currentAdminUid = null;
+let queueData       = null;   // latest gameRounds/queue doc
+let unsubQueue      = null;
+
+// ── Auth gate ──────────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.replace('pesa-managers-login.html'); return; }
+
+  const snap = await getDoc(doc(db, 'admins', user.uid));
+  if (!snap.exists()) {
+    await signOut(auth);
+    window.location.replace('pesa-managers-login.html');
+    return;
+  }
+
+  currentAdminUid = user.uid;
+  document.getElementById('pageLoader').classList.add('gone');
+  initDashboard();
+});
+
+function initDashboard() {
+  loadLiveSettings();
+  startQueueListener();
+}
+
+// ── Queue listener (only reads crashAt, index, points, roundId) ──
+function startQueueListener() {
+  if (unsubQueue) unsubQueue();
+  unsubQueue = onSnapshot(doc(db, 'gameRounds', 'queue'), snap => {
+    const fb = document.getElementById('fbStatus');
+    if (!snap.exists()) {
+      fb.className = 'status-bar warn';
+      fb.innerHTML = '⚠️ No round data found in Firebase yet.';
+      return;
+    }
+    fb.className = 'status-bar';
+    fb.innerHTML = '<div class="dot-live"></div> Connected to Firebase — live sync active';
+
+    queueData = snap.data();
+    renderQueue();
+  }, err => {
+    document.getElementById('fbStatus').className = 'status-bar off';
+    document.getElementById('fbStatus').innerHTML = '❌ Firebase error: ' + err.message;
+  });
+}
+
+function renderQueue() {
+  if (!queueData) return;
+  const points  = queueData.points  || [];
+  const index   = queueData.index   || 0;
+  const roundId = queueData.roundId || '—';
+  const crashAt = queueData.crashAt || points[index - 1] || 0;
+
+  // Active crash display
+  const valEl = document.getElementById('crashVal');
+  valEl.textContent = crashAt.toFixed(2) + 'x';
+  valEl.className = 'crash-value' + (crashAt >= 50 ? ' mega' : crashAt >= 10 ? ' high' : crashAt < 2 ? ' low' : '');
+  document.getElementById('roundIdBadge').textContent = 'Round ID: ' + roundId;
+  document.getElementById('queueIdx').textContent  = index;
+  document.getElementById('queueSize').textContent = points.length;
+
+  // Queue grid — show window around active index
+  const grid   = document.getElementById('queueGrid');
+  const start  = Math.max(0, index - 4);
+  const end    = Math.min(points.length, index + 12);
+  const slice  = points.slice(start, end);
+
+  grid.innerHTML = slice.map((p, i) => {
+    const realIdx = start + i;
+    const isActive = realIdx === index - 1;
+    const isPast   = realIdx < index - 1;
+    const cls = p >= 50 ? 'mega' : p >= 10 ? 'high' : p < 2 ? 'low' : 'mid';
+    return `<div class="qpill ${cls} ${isActive ? 'active' : ''} ${isPast ? 'past' : ''}">
+      ${p.toFixed(2)}x
+    </div>`;
+  }).join('');
+}
+
+// ── Navigation — prev/next crash index ────────────────────────
+window.goNext = async function() {
+  if (!queueData) { toast('No queue loaded yet', 'warn'); return; }
+  let { points, index } = queueData;
+  if (index >= points.length) { toast('End of queue — will regenerate on next round', 'warn'); return; }
+
+  const newCrash     = points[index];
+  const newRoundId   = currentAdminUid.slice(0, 6) + '_adm_' + Date.now();
+
+  await setDoc(doc(db, 'gameRounds', 'queue'), {
+    ...queueData,
+    index:        index + 1,
+    crashAt:      newCrash,
+    roundId:      newRoundId,
+    bettingStart: Date.now(),
+    roundStart:   0,
+  });
+  toast('▶ Advanced to next crash point: ' + newCrash.toFixed(2) + 'x');
+};
+
+window.goPrev = async function() {
+  if (!queueData) { toast('No queue loaded yet', 'warn'); return; }
+  let { points, index } = queueData;
+  if (index <= 1) { toast('Already at first round', 'warn'); return; }
+
+  const prevIdx   = index - 2;
+  const newCrash  = points[prevIdx];
+  const newRoundId = currentAdminUid.slice(0, 6) + '_adm_' + Date.now();
+
+  await setDoc(doc(db, 'gameRounds', 'queue'), {
+    ...queueData,
+    index:        prevIdx + 1,
+    crashAt:      newCrash,
+    roundId:      newRoundId,
+    bettingStart: Date.now(),
+    roundStart:   0,
+  });
+  toast('◀ Went back to crash point: ' + newCrash.toFixed(2) + 'x');
+};
+
+// ── Live settings (Firestore: siteConfig/liveIcon) ────────────
+async function loadLiveSettings() {
+  try {
+    const snap = await getDoc(doc(db, 'siteConfig', 'liveIcon'));
+    if (!snap.exists()) return;
+    const d = snap.data();
+    document.getElementById('iconVisible').checked = d.visible !== false;
+    document.getElementById('iconPulse').checked   = d.pulse !== false;
+    if (d.url) {
+      document.getElementById('liveUrl').value = d.url;
+      showLinkStatus(d.url);
+    }
+  } catch(e) { console.warn('loadLiveSettings:', e); }
+}
+
+window.saveLiveSettings = async function() {
+  await writeSettings();
+};
+
+window.saveLink = async function() {
+  const url = document.getElementById('liveUrl').value.trim();
+  if (url && !url.startsWith('http')) { toast('URL must start with https://', 'warn'); return; }
+  const btn = document.getElementById('saveLinkBtn');
+  btn.disabled = true; btn.textContent = '…';
+  await writeSettings();
+  btn.disabled = false; btn.textContent = 'SAVE';
+  if (url) showLinkStatus(url);
+  toast('✅ Live link saved!');
+};
+
+async function writeSettings() {
+  const visible = document.getElementById('iconVisible').checked;
+  const pulse   = document.getElementById('iconPulse').checked;
+  const url     = document.getElementById('liveUrl').value.trim();
+  try {
+    await setDoc(doc(db, 'siteConfig', 'liveIcon'), {
+      visible, pulse, url,
+      updatedAt: serverTimestamp(),
+      updatedBy: currentAdminUid,
+    });
+  } catch(e) { toast('Save failed: ' + e.message, 'warn'); }
+}
+
+function showLinkStatus(url) {
+  const el = document.getElementById('linkStatus');
+  el.style.display = 'flex';
+  el.innerHTML = '🔗 Current link: <span style="color:rgba(255,255,255,0.7);margin-left:4px;word-break:break-all;font-size:12px;">' + url + '</span>';
+  el.className = 'status-bar';
+}
+
+// ── Logout ────────────────────────────────────────────────────
+window.doLogout = async function() {
+  if (unsubQueue) unsubQueue();
+  await signOut(auth);
+  window.location.replace('pesa-managers-login.html');
+};
+
+// ── Players Modal ─────────────────────────────────────────────
+const PAGE_SIZE   = 50;
+let allPlayers    = [];
+let filteredPlayers = [];
+let currentPage   = 1;
+
+window.openPlayersModal = async function() {
+  const modal = document.getElementById('playersModal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('playerSearch').value = '';
+  if (!allPlayers.length) {
+    await loadPlayers();
+  } else {
+    // Already loaded — just reset view
+    filteredPlayers = allPlayers;
+    currentPage = 1;
+    renderPage();
+  }
+};
+
+window.closePlayersModal = function() {
+  document.getElementById('playersModal').style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+async function loadPlayers() {
+  const listEl  = document.getElementById('playersList');
+  const countEl = document.getElementById('playerCountLabel');
+  listEl.innerHTML = `<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-size:14px;">
+    <div class="spinner" style="margin:0 auto 14px;"></div>Loading all players…</div>`;
+  countEl.textContent = 'Loading…';
+
+  try {
+    const { collection, getDocs, query, orderBy } =
+      await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+
+    // Fetch ALL users ordered by newest first
+    const snap = await getDocs(query(collection(db, 'users'), orderBy('createdAt', 'desc')));
+
+    allPlayers = [];
+    snap.forEach(d => {
+      const data = d.data();
+      let displayName = d.id;
+      if (data.email)      displayName = data.email.replace(/@.*$/, '');
+      else if (data.phone) displayName = data.phone.replace(/@.*$/, '');
+      else                 displayName = d.id.replace(/@.*$/, '');
+
+      allPlayers.push({
+        id:        d.id,
+        display:   displayName,
+        balance:   data.balance   || 0,
+        createdAt: data.createdAt ? data.createdAt.toMillis() : 0,
+      });
+    });
+
+    filteredPlayers = allPlayers;
+    currentPage     = 1;
+    countEl.textContent = allPlayers.length + ' player' + (allPlayers.length !== 1 ? 's' : '');
+    renderPage();
+
+  } catch(e) {
+    listEl.innerHTML = `<div style="text-align:center;padding:32px;color:#f87171;font-size:13px;">❌ Failed to load: ${e.message}</div>`;
+  }
+}
+
+function renderPage() {
+  const listEl  = document.getElementById('playersList');
+  const countEl = document.getElementById('playerCountLabel');
+  const total   = filteredPlayers.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const end   = Math.min(start + PAGE_SIZE, total);
+  const slice = filteredPlayers.slice(start, end);
+
+  // Update count label
+  const q = document.getElementById('playerSearch').value.trim();
+  if (q) {
+    countEl.textContent = total + ' result' + (total !== 1 ? 's' : '') + ' found';
+  } else {
+    countEl.textContent = allPlayers.length + ' player' + (allPlayers.length !== 1 ? 's' : '');
+  }
+
+  if (!total) {
+    listEl.innerHTML = `<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.25);font-size:14px;">No players found</div>`;
+    return;
+  }
+
+  // Player rows
+  const rows = slice.map((p, i) => {
+    const globalIdx = start + i + 1;
+    return `
+    <div style="
+      display:flex;align-items:center;gap:12px;
+      padding:14px 16px;margin-bottom:8px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:14px;
+    ">
+      <div style="
+        width:36px;height:36px;border-radius:50%;flex-shrink:0;
+        background:linear-gradient(135deg,#a020f0,#7c3aed);
+        display:flex;align-items:center;justify-content:center;
+        font-size:13px;font-weight:800;color:white;
+      ">${globalIdx}</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;letter-spacing:0.3px;">${p.display}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;">
+          Balance: <span style="color:#c084fc;font-weight:700;">KES ${p.balance.toLocaleString()}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Pagination bar
+  const pagination = buildPagination(currentPage, totalPages);
+
+  listEl.innerHTML = rows + pagination;
+  listEl.scrollTop = 0;
+}
+
+function buildPagination(page, totalPages) {
+  if (totalPages <= 1) return '';
+
+  // Build page numbers to show: always show first, last, current ±2, with ellipsis
+  const pages = new Set([1, totalPages, page]);
+  for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) pages.add(i);
+  const sorted = [...pages].sort((a, b) => a - b);
+
+  let btns = '';
+  let prev = 0;
+  for (const p of sorted) {
+    if (prev && p - prev > 1) {
+      btns += `<span style="color:rgba(255,255,255,0.25);padding:0 4px;">…</span>`;
+    }
+    const isActive = p === page;
+    btns += `<button onclick="window.goToPage(${p})" style="
+      min-width:36px;height:36px;border-radius:10px;
+      background:${isActive ? 'linear-gradient(135deg,#a020f0,#7c3aed)' : 'rgba(255,255,255,0.06)'};
+      border:1px solid ${isActive ? 'transparent' : 'rgba(255,255,255,0.1)'};
+      color:white;font-size:13px;font-weight:${isActive ? '800' : '600'};
+      cursor:pointer;padding:0 6px;
+      box-shadow:${isActive ? '0 2px 10px rgba(160,32,240,0.4)' : 'none'};
+      transition:background 0.2s;
+    ">${p}</button>`;
+    prev = p;
+  }
+
+  return `
+  <div style="
+    display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+    gap:6px;padding:20px 0 8px;
+  ">
+    <button onclick="window.goToPage(${page - 1})" ${page === 1 ? 'disabled' : ''} style="
+      height:36px;padding:0 12px;border-radius:10px;
+      background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+      color:white;font-size:13px;font-weight:700;cursor:pointer;opacity:${page === 1 ? '0.3' : '1'};
+    ">‹ Prev</button>
+    ${btns}
+    <button onclick="window.goToPage(${page + 1})" ${page === totalPages ? 'disabled' : ''} style="
+      height:36px;padding:0 12px;border-radius:10px;
+      background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+      color:white;font-size:13px;font-weight:700;cursor:pointer;opacity:${page === totalPages ? '0.3' : '1'};
+    ">Next ›</button>
+  </div>
+  <div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.25);padding-bottom:12px;">
+    Page ${page} of ${totalPages} &nbsp;·&nbsp; ${filteredPlayers.length} total users
+  </div>`;
+}
+
+window.goToPage = function(p) {
+  const totalPages = Math.ceil(filteredPlayers.length / PAGE_SIZE);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderPage();
+};
+
+window.filterPlayers = function() {
+  const q = document.getElementById('playerSearch').value.toLowerCase().trim();
+  filteredPlayers = q ? allPlayers.filter(p => p.display.toLowerCase().includes(q)) : allPlayers;
+  currentPage = 1;
+  renderPage();
+};
+
+// Close modal on back button / escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') window.closePlayersModal();
+});
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = type === 'warn' ? '#f59e0b' : '#a020f0';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+window.toast = toast;
+</script>
+</body>
+</html>
