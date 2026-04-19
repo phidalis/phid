@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Pure Counter • Crash Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+      padding: 20px;
+    }
+
+    .counter-screen {
+      text-align: center;
+      width: 100%;
+    }
+
+    .big-number {
+      font-size: min(28vw, 180px);
+      font-weight: 800;
+      font-family: 'Inter', 'Segoe UI', monospace;
+      letter-spacing: -0.02em;
+      color: #111111;
+      line-height: 1.1;
+      transition: color 0.1s ease;
+    }
+
+    /* Red only when crashed */
+    .big-number.crashed {
+      color: #ef4444;
+    }
+
+    .conn-dot {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      opacity: 0.7;
+      transition: background 0.2s;
+    }
+  </style>
+</head>
+<body>
+
+<div class="counter-screen">
+  <div class="big-number" id="counterNumber">7</div>
+</div>
+<div class="conn-dot" id="connDot"></div>
+
+<script type="module">
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyBfGx3mLuZ85b_JkRUJXwloLJXNT3uyn7M",
+    authDomain:        "aviator-23914.firebaseapp.com",
+    projectId:         "aviator-23914",
+    storageBucket:     "aviator-23914.firebasestorage.app",
+    messagingSenderId: "139941060687",
+    appId:             "1:139941060687:web:c20f9bafa9d8d3aacf4a3a",
+    measurementId:     "G-031VMZEKHE"
+  };
+
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+  const app = initializeApp(FIREBASE_CONFIG);
+  const db  = getFirestore(app);
+
+  const counterNumberEl = document.getElementById('counterNumber');
+  const connDot         = document.getElementById('connDot');
+
+  // ── CONSTANTS — identical to aviator.html ─────────────────────
+  const RATE        = 0.085;   // same as aviator RATE
+  const BETTING_MS  = 7000;    // 7-second betting window
+  const CRASH_HOLD  = 2200;    // show red crash value for 2.2s (matches aviator's wait)
+
+  // ── STATE ─────────────────────────────────────────────────────
+  let activeRoundId  = '';
+  let isPlaying      = false;
+  let hasCrashed     = false;
+  let crashAt        = 2.0;
+  let roundStart     = 0;
+  let rafId          = null;
+  let bettingTimer   = null;
+  let crashTimer     = null;
+  let cdInterval     = null;
+
+  // ── HELPERS ───────────────────────────────────────────────────
+  function cancelAll() {
+    if (rafId)        { cancelAnimationFrame(rafId); rafId = null; }
+    if (bettingTimer) { clearTimeout(bettingTimer);  bettingTimer = null; }
+    if (crashTimer)   { clearTimeout(crashTimer);    crashTimer = null; }
+    if (cdInterval)   { clearInterval(cdInterval);   cdInterval = null; }
+  }
+
+  function setNormal()  { counterNumberEl.classList.remove('crashed'); }
+  function setCrashed() { counterNumberEl.classList.add('crashed'); }
+
+  // ── BETTING COUNTDOWN — shows 7 → 6 → 5 ... → 1 (integers) ──
+  // Mirrors aviator.html's startCountdown(cdSecs) exactly in timing
+  function startBettingCountdown(bettingStartMs, remainingMs) {
+    if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
+    setNormal();
+
+    function tick() {
+      const elapsed   = Date.now() - bettingStartMs;
+      const remaining = Math.ceil((BETTING_MS - elapsed) / 1000);
+      const display   = Math.min(7, Math.max(1, remaining));
+      counterNumberEl.innerText = String(display);
+    }
+
+    tick();
+    cdInterval = setInterval(tick, 250);
+
+    // Stop interval once betting window ends (bettingTimer handles the round start)
+    setTimeout(() => {
+      if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
+    }, remainingMs + 100);
+  }
+
+  // ── ROUND ANIMATION — mirrors aviator.html drawFrame() mult calc ─
+  // aviator: curMult = Math.exp(RATE * elapsed)
+  // crash condition: elapsed >= totalMs => curMult >= crashAt
+  function startRoundLocally(crash, serverStart) {
+    if (isPlaying) return;
+    cancelAll(); // clear betting countdown
+
+    // Clamp serverStart exactly like aviator.html's _rs
+    const _rs = (serverStart > 0 && serverStart <= Date.now()) ? serverStart : Date.now();
+
+    crashAt    = crash;
+    roundStart = _rs;
+    isPlaying  = true;
+    hasCrashed = false;
+
+    setNormal();
+    counterNumberEl.innerText = '1.00';
+
+    // Schedule crash — same formula as aviator.html startRoundLocally
+    const elapsed   = Date.now() - _rs;
+    const totalMs   = (Math.log(Math.max(1.01, crashAt)) / RATE) * 1000;
+    const remaining = Math.max(0, totalMs - elapsed);
+
+    crashTimer = setTimeout(() => {
+      if (isPlaying) endRoundLocally(crashAt);
+    }, remaining);
+
+    // Animation loop — same mult formula as aviator.html drawFrame
+    function frame() {
+      if (!isPlaying || hasCrashed) return;
+      const elapsedSec = (Date.now() - roundStart) / 1000;
+      let mult = Math.exp(RATE * elapsedSec);
+
+      // Hard cap — never visually exceed crashAt
+      if (mult >= crashAt) mult = crashAt;
+
+      counterNumberEl.innerText = mult.toFixed(2);
+      rafId = requestAnimationFrame(frame);
+    }
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  // ── END ROUND — mirrors aviator.html endRoundLocally ─────────
+  function endRoundLocally(crash) {
+    if (!isPlaying) return;
+    isPlaying  = false;
+    hasCrashed = true;
+
+    if (rafId)      { cancelAnimationFrame(rafId); rafId = null; }
+    if (crashTimer) { clearTimeout(crashTimer);    crashTimer = null; }
+
+    // Show crash value in RED (no "x" suffix — this is the counter display only)
+    setCrashed();
+    counterNumberEl.innerText = crash.toFixed(2);
+
+    // After CRASH_HOLD ms, reset to "7" for next betting window
+    // (aviator waits 2.2s then publishes next round — we just reset display here)
+    setTimeout(() => {
+      setNormal();
+      counterNumberEl.innerText = '7';
+    }, CRASH_HOLD);
+  }
+
+  // ── FIRESTORE QUEUE LISTENER — mirrors aviator.html startQueueListener ─
+  let unsubQueue = null;
+
+  function startQueueListener() {
+    if (unsubQueue) unsubQueue();
+
+    unsubQueue = onSnapshot(doc(db, 'gameRounds', 'queue'), snap => {
+      if (!snap.exists) {
+        // No document yet — just show idle
+        connDot.style.backgroundColor = '#eab308';
+        connDot.style.opacity = '0.6';
+        counterNumberEl.innerText = '7';
+        return;
+      }
+
+      const d       = snap.data();
+      const rid     = d.roundId     || '';
+      const crashVal= d.crashAt     || 2.0;
+      const bettingMs = d.bettingStart || Date.now();
+      const roundMs = d.roundStart  || 0;
+
+      // ── NEW ROUND — mirrors aviator.html "if (rid !== activeRoundId)" ──
+      if (rid !== activeRoundId) {
+        activeRoundId = rid;
+
+        cancelAll();
+        isPlaying  = false;
+        hasCrashed = false;
+
+        // Reset display
+        setNormal();
+        counterNumberEl.innerText = '7';
+
+        // How much of the 7s betting window is left? — exact same calc as aviator.html
+        const _now     = Date.now();
+        const elapsed  = (bettingMs > 0 && bettingMs < _now) ? (_now - bettingMs) : 0;
+        const remaining = Math.min(7000, Math.max(500, BETTING_MS - elapsed));
+
+        // Show integer countdown during betting window
+        startBettingCountdown(bettingMs, remaining);
+
+        // After betting window → start round (all devices do this, same as aviator)
+        bettingTimer = setTimeout(() => {
+          startRoundLocally(crashVal, Date.now());
+        }, remaining);
+      }
+
+      // ── ROUND ALREADY STARTED (roundStart set) — mirrors aviator.html sync ──
+      if (roundMs > 0 && rid === activeRoundId && !isPlaying && !hasCrashed) {
+        clearTimeout(bettingTimer); bettingTimer = null;
+        if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
+        startRoundLocally(crashVal, roundMs);
+      }
+
+      connDot.style.backgroundColor = '#22c55e';
+      connDot.style.opacity = '0.9';
+    },
+    error => {
+      console.warn('Firestore error:', error);
+      connDot.style.backgroundColor = '#ef4444';
+      connDot.style.opacity = '0.7';
+    });
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────
+  counterNumberEl.innerText = '7';
+  startQueueListener();
+
+  // Re-attach animation if tab was hidden
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && isPlaying && !hasCrashed && !rafId) {
+      function restartFrame() {
+        if (!isPlaying || hasCrashed) return;
+        const elapsedSec = (Date.now() - roundStart) / 1000;
+        let mult = Math.exp(RATE * elapsedSec);
+        if (mult >= crashAt) mult = crashAt;
+        counterNumberEl.innerText = mult.toFixed(2);
+        rafId = requestAnimationFrame(restartFrame);
+      }
+      rafId = requestAnimationFrame(restartFrame);
+    }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (unsubQueue) unsubQueue();
+    cancelAll();
+  });
+</script>
+</body>
+</html>
