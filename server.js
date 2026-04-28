@@ -1,0 +1,276 @@
+const express = require('express');
+const cors    = require('cors');
+const axios   = require('axios');
+const path    = require('path');
+const admin   = require('firebase-admin');
+
+const app  = express();
+const PORT = process.env.PORT || 10000;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(__dirname));
+
+// Firebase Admin SDK
+let db = null;
+try {
+  let serviceAccount;
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    serviceAccount = require('./serviceAccountKey.json');
+  }
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  db = admin.firestore();
+  console.log('[Firebase] Admin SDK initialized');
+} catch (e) {
+  console.warn('[Firebase] NOT initialized:', e.message);
+  console.warn('[Firebase] Set FIREBASE_SERVICE_ACCOUNT env var on Render');
+}
+
+// PayHero Config
+const PAYHERO_AUTH_TOKEN = process.env.PAYHERO_AUTH_TOKEN;
+const PAYHERO_CHANNEL    = process.env.PAYHERO_CHANNEL_ID || '6341';
+const PAYHERO_BASE_URL   = 'https://backend.payhero.co.ke/api/v2';
+
+function getAuthHeader() {
+  return 'Basic ' + PAYHERO_AUTH_TOKEN;
+}
+
+console.log('[PayHero] Channel ID:', PAYHERO_CHANNEL);
+console.log('[PayHero] Auth Token set:', PAYHERO_AUTH_TOKEN ? 'YES' : 'NO');
+
+// In-memory payment store — keyed by reference or external_reference
+// Stores: { status, amount, userId }
+const paymentStore = {};
+
+// POST /api/deposit — Initiate STK Push
+app.post('/api/deposit', async (req, res) => {
+  const { amount, phone, userId, externalRef } = req.body;
+
+  if (!amount || !phone) {
+    return res.status(400).json({ error: 'Amount and phone are required' });
+  }
+
+  // Normalize phone to 254XXXXXXXXX
+  let p = String(phone).replace(/\D/g, '');
+  if (p.startsWith('254') && p.length === 12) {
+    // already correct
+  } else if (p.startsWith('0') && p.length === 10) {
+    p = '254' + p.slice(1);
+  } else if (!p.startsWith('254')) {
+    p = '254' + p;
+  }
+
+  const usedExtRef = externalRef || ('DEP_' + (userId || 'user') + '_' + Date.now());
+  console.log('[Deposit] KES', amount, 'to', p, 'userId:', userId, 'extRef:', usedExtRef);
+
+  try {
+    const response = await axios.post(
+      PAYHERO_BASE_URL + '/payments',
+      {
+        amount:             Number(amount),
+        phone_number:       p,
+        channel_id:         Number(PAYHERO_CHANNEL),
+        provider:           process.env.PAYHERO_PROVIDER || 'm-pesa',
+        external_reference: usedExtRef,
+        callback_url:       process.env.CALLBACK_URL || 'https://sportybet-1vl1.onrender.com/api/callback',
+      },
+      {
+        headers: {
+          'Authorization': getAuthHeader(),
+          'Content-Type':  'application/json',
+        },
+      }
+    );
+
+    console.log('[Deposit] STK sent:', response.data);
+
+    const reference = response.data.reference
+                   || response.data.CheckoutRequestID
+                   || response.data.id
+                   || response.data.transaction_id;
+
+    // Store PENDING entry — userId is critical for the callback Firebase write
+    const entry = { status: 'PENDING', amount: Number(amount), userId: userId || null };
+    if (reference)  paymentStore[reference]  = Object.assign({}, entry);
+    paymentStore[usedExtRef] = Object.assign({}, entry, { payheroRef: reference });
+
+    return res.json({ success: true, reference: reference, message: 'STK push sent. Check your phone.' });
+
+  } catch (err) {
+    const errData = err.response ? err.response.data : err.message;
+    console.error('[Deposit] Error:', errData);
+    return res.status(500).json({ error: (errData && (errData.error_message || errData.message)) || 'Payment failed' });
+  }
+});
+
+// GET /api/deposit/status
+// Primary: check in-memory store (callback writes here within seconds)
+// Cross-check: scan by payheroRef in case PayHero ref was queried instead of extRef
+// Fallback: query PayHero API directly using the correct endpoint
+app.get('/api/deposit/status', async (req, res) => {
+  const { reference } = req.query;
+  if (!reference) return res.status(400).json({ error: 'reference is required' });
+
+  // ── 1. Direct in-memory lookup ──
+  let payment = paymentStore[reference];
+
+  // ── 2. Cross-ref scan: callback stores under extRef (DEP_...) but frontend
+  //       may also query the PayHero ref (b424-...). Find it via payheroRef link.
+  if (!payment || payment.status === 'PENDING') {
+    for (const key of Object.keys(paymentStore)) {
+      const e = paymentStore[key];
+      if (e.payheroRef === reference && (e.status === 'SUCCESS' || e.status === 'FAILED')) {
+        payment = e;
+        console.log('[Status] cross-found:', key, '->', e.status);
+        break;
+      }
+    }
+  }
+
+  // ── 3. Return immediately if we already know the result ──
+  if (payment && (payment.status === 'SUCCESS' || payment.status === 'FAILED')) {
+    console.log('[Status]', reference, '->', payment.status, '(store)');
+    return res.json({ status: payment.status, amount: payment.amount });
+  }
+
+  // ── 4. Still PENDING — query PayHero API directly ──
+  //    Correct PayHero endpoint: GET /api/v2/transaction-status?reference=<ref>
+  if (PAYHERO_AUTH_TOKEN) {
+    try {
+      const phRes = await axios.get(
+        `${PAYHERO_BASE_URL}/transaction-status`,
+        {
+          params: { reference },
+          headers: { 'Authorization': getAuthHeader(), 'Content-Type': 'application/json' },
+          timeout: 10000,
+        }
+      );
+
+      const phData   = phRes.data || {};
+      const phStatus = String(phData.status || phData.transaction_status || phData.Status || '').toUpperCase();
+      const phAmount = Number(phData.amount || phData.Amount || (payment && payment.amount) || 0);
+      const mpesaRef = phData.MPESA_Reference || phData.mpesa_reference || phData.MpesaReceiptNumber || '';
+
+      console.log('[Status] PayHero direct:', reference, '->', phStatus, '| mpesa:', mpesaRef, '| raw:', JSON.stringify(phData));
+
+      let resolvedStatus = 'PENDING';
+      if (phStatus === 'SUCCESS' || phStatus === 'COMPLETE' || phStatus === 'COMPLETED' || mpesaRef) {
+        resolvedStatus = 'SUCCESS';
+      } else if (phStatus === 'FAILED' || phStatus === 'CANCELLED' || phStatus === 'FAIL' || phStatus === 'TIMEOUT' || phStatus === 'EXPIRED') {
+        resolvedStatus = 'FAILED';
+      }
+
+      // Cache the result if resolved
+      if (resolvedStatus !== 'PENDING') {
+        const uid = (payment && payment.userId) || null;
+        paymentStore[reference] = { status: resolvedStatus, amount: phAmount, userId: uid };
+        // Also write to Firebase if not already done (server callback may have missed)
+        if (resolvedStatus === 'SUCCESS' && db && uid && phAmount > 0) {
+          writeBalanceToFirestore(uid, phAmount, mpesaRef || reference).catch(e =>
+            console.warn('[Status] Firebase write failed:', e.message)
+          );
+        }
+      }
+
+      return res.json({ status: resolvedStatus, amount: phAmount });
+
+    } catch (phErr) {
+      console.warn('[Status] PayHero query error:', phErr.message);
+    }
+  }
+
+  // ── 5. No result anywhere — still pending ──
+  console.log('[Status]', reference, '-> PENDING (no result)');
+  return res.json({ status: 'PENDING', amount: 0 });
+});
+
+// ── Shared Firestore write helper (called by callback AND status endpoint) ──
+async function writeBalanceToFirestore(userId, amount, note) {
+  if (!db || !userId || !amount) return;
+  const userDocRef = db.collection('users').doc(userId);
+  const now        = new Date();
+  const timeStr    = now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
+                   + ' ' + now.toLocaleDateString('en-KE', { day: '2-digit', month: 'short' });
+  const txEntry = {
+    type: 'deposit', amount, method: 'M-Pesa', status: 'success',
+    note: 'PayHero STK - ' + note, time: timeStr, uid: userId,
+  };
+  const snap = await userDocRef.get();
+  if (snap.exists === true || (typeof snap.exists === 'function' && snap.exists())) {
+    await userDocRef.update({
+      balance:           admin.firestore.FieldValue.increment(amount),
+      'stats.deposited': admin.firestore.FieldValue.increment(amount),
+      transactions:      admin.firestore.FieldValue.arrayUnion(txEntry),
+    });
+  } else {
+    await userDocRef.set({
+      balance: amount, stats: { deposited: amount, withdrawn: 0, won: 0, rounds: 0 },
+      transactions: [txEntry], createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+  console.log('[Firebase] Balance +KES', amount, 'for', userId);
+}
+
+// POST /api/callback — PayHero webhook
+app.post('/api/callback', async (req, res) => {
+  console.log('[Callback] Received:', JSON.stringify(req.body));
+
+  try {
+    const body       = req.body;
+    const response   = body.response || body;
+    const userRef    = response.User_Reference || response.external_reference || '';
+    const amount     = Number(response.Amount || response.amount || 0);
+    const mpesaRef   = response.MPESA_Reference || response.mpesa_reference || '';
+    const wooStatus  = response.woocommerce_payment_status || '';
+    const success    = wooStatus === 'complete' || body.status === true || mpesaRef !== '';
+    const checkoutId = response.CheckoutRequestID || response.checkout_request_id || '';
+    // ResultCode 0 = M-Pesa success (Safaricom STK standard); also catch body.status===true
+    const ResultCode = String(response.ResultCode || response.result_code || body.ResultCode || body.result_code || '');
+    const successByCode = ResultCode === '0';
+    const finalSuccess = success || successByCode;
+    const finalStatus  = finalSuccess ? 'SUCCESS' : 'FAILED';
+
+    console.log('[Callback] ref:', userRef, 'amount:', amount, 'finalStatus:', finalStatus,
+      '| wooStatus:', wooStatus, '| mpesaRef:', mpesaRef, '| ResultCode:', ResultCode);
+
+    // Update in-memory store — PRESERVE userId from the original deposit entry
+    const existingByRef      = paymentStore[userRef]      || {};
+    const existingByCheckout = paymentStore[checkoutId]   || {};
+    if (userRef)    paymentStore[userRef]    = { status: finalStatus, amount, userId: existingByRef.userId      || null, payheroRef: existingByRef.payheroRef      || checkoutId || null };
+    if (checkoutId) paymentStore[checkoutId] = { status: finalStatus, amount, userId: existingByCheckout.userId || null, payheroRef: existingByCheckout.payheroRef || checkoutId || null };
+
+    // Write to Firebase if payment succeeded
+    if (finalSuccess && db) {
+      // Extract userId: from DEP_<uid>_<timestamp> pattern, or from paymentStore
+      let userId = null;
+      const match = userRef.match(/^DEP_(.+)_(\d{13,})$/);
+      if (match) userId = match[1];
+      if (!userId && paymentStore[userRef])    userId = paymentStore[userRef].userId;
+      if (!userId && paymentStore[checkoutId]) userId = paymentStore[checkoutId].userId;
+
+      if (userId && amount > 0) {
+        writeBalanceToFirestore(userId, amount, 'MPESA: ' + (mpesaRef || userRef))
+          .catch(e => console.error('[Firebase] Write failed:', e.message));
+      } else {
+        console.warn('[Callback] Could not identify userId — Firebase NOT updated. userRef:', userRef);
+      }
+    }
+
+  } catch (e) {
+    console.error('[Callback] Parse error:', e.message);
+  }
+
+  res.json({ received: true });
+});
+
+// Serve game files
+app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'aviator.html')));
+app.get('/',     (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+app.listen(PORT, () => {
+  console.log('[Server] Running on port', PORT);
+  console.log('[Server] PayHero:', PAYHERO_AUTH_TOKEN ? 'Configured' : 'MISSING AUTH TOKEN');
+  console.log('[Server] Firebase:', db ? 'Connected' : 'NOT connected');
+});
