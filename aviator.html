@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sportybet.Site</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    *, *::before, *::after { font-family: 'Inter', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow-x: hidden; }
+    body { background: #0a0a0a; color: white; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .canvas-wrap { background: linear-gradient(180deg,#1a0033 0%,#0f001f 100%); border-radius: 20px; overflow: hidden; box-shadow: 0 0 28px rgba(160,32,240,0.25); border: 1px solid rgba(160,32,240,0.25); }
+    .btn-bet { background: linear-gradient(90deg,#a020f0,#c040ff); box-shadow: 0 6px 18px rgba(160,32,240,0.4); border: none; color: white; cursor: pointer; border-radius: 9999px; font-weight: 800; transition: transform 0.15s, opacity 0.15s; width: 100%; }
+    .btn-bet:active { transform: scale(0.97); }
+    .btn-bet:disabled { opacity: 0.4; pointer-events: none; }
+    .btn-cash { background: linear-gradient(90deg,#059669,#34d399); box-shadow: 0 6px 18px rgba(16,185,129,0.4); border: none; color: #022c22; cursor: pointer; border-radius: 9999px; font-weight: 900; transition: transform 0.15s; white-space: nowrap; }
+    .btn-cash:active { transform: scale(0.97); }
+    .btn-cash:disabled { opacity: 0.45; pointer-events: none; }
+    .btn-orange { background: linear-gradient(135deg,#f97316,#ea580c); box-shadow: 0 6px 18px rgba(249,115,22,0.4); border: none; color: white; cursor: pointer; border-radius: 9999px; font-weight: 800; transition: transform 0.15s; }
+    .btn-orange:active { transform: scale(0.97); }
+    .btn-orange:disabled { opacity: 0.5; pointer-events: none; }
+    .btn-red { background: linear-gradient(135deg,#e53e3e,#c53030); border: none; color: white; cursor: pointer; border-radius: 9999px; font-weight: 800; transition: transform 0.15s; }
+    .btn-red:active { transform: scale(0.97); }
+    .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.7); cursor: pointer; border-radius: 9999px; font-weight: 700; transition: border-color 0.2s, transform 0.15s; }
+    .btn-ghost:active { transform: scale(0.97); }
+    .mpill { background: rgba(160,32,240,0.15); border: 1.5px solid #a020f0; color: #c084fc; border-radius: 9999px; padding: 3px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+    .mpill.hi { color: #fb923c; border-color: #fb923c; background: rgba(251,146,60,0.15); }
+    .chip { background: #111; border: 1px solid rgba(160,32,240,0.25); color: #c084fc; border-radius: 9999px; font-weight: 700; font-size: 13px; padding: 9px 0; text-align: center; cursor: pointer; transition: background 0.15s; }
+    .chip:active { background: rgba(160,32,240,0.2); }
+    .adj-btn { background: #111; border: 1px solid rgba(255,255,255,0.1); color: white; font-weight: 800; font-size: 18px; cursor: pointer; border-radius: 14px; padding: 10px 0; text-align: center; transition: background 0.15s; }
+    .adj-btn:active { background: #222; }
+    .tab-on  { background: #a020f0; color: white; border-radius: 9999px; }
+    .tab-off { color: rgba(255,255,255,0.45); }
+    .ltab-on  { border-bottom: 3px solid #c084fc; color: white; }
+    .ltab-off { border-bottom: 3px solid transparent; color: rgba(255,255,255,0.4); }
+    .inp { background: #111; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px 15px; color: white; font-size: 16px; width: 100%; outline: none; transition: border-color 0.2s; }
+    .inp:focus { border-color: #a020f0; }
+    .inp::placeholder { color: rgba(255,255,255,0.28); }
+    .inp:disabled { opacity: 0.5; }
+    @keyframes crashGlow { 0%,100%{text-shadow:0 0 18px rgba(255,255,255,0.3)} 50%{text-shadow:0 0 40px rgba(255,60,60,1)} }
+    @keyframes fadeSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideUp   { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideLeft { from{transform:translateX(-100%)} to{transform:translateX(0)} }
+    @keyframes dotPulse  { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    @keyframes spin      { to { transform: rotate(360deg); } }
+    @keyframes scaleIn   { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+    @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .crash-glow { animation: crashGlow 0.55s ease infinite; }
+    .fade-slide { animation: fadeSlide 0.3s ease forwards; }
+    .slide-up   { animation: slideUp 0.3s ease forwards; }
+    .dot-pulse  { animation: dotPulse 1.5s ease infinite; }
+    .pulse-dot  { animation: pulse 1.2s ease infinite; }
+    .spinner    { animation: spin 0.7s linear infinite; border: 3px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-block; flex-shrink: 0; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: #a020f0; border-radius: 4px; }
+    #bottomNav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
+    body { padding-bottom: 72px; }
+    .overlay-screen { position: fixed; inset: 0; z-index: 200; background: #0a0a0a; overflow-y: auto; display: none; flex-direction: column; }
+    .overlay-screen.open { display: flex; }
+    .method-card { background: #111; border: 2px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 16px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; gap: 14px; }
+    .method-card.selected { border-color: #a020f0; background: rgba(160,32,240,0.1); }
+    .method-card:active { transform: scale(0.98); }
+    .status-pending  { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+    .status-success  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .status-failed   { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .stat-card { background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; padding: 16px 18px; }
+    #appLoader { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    #appLoader.gone { display: none; }
+    /* SIDEBAR */
+    #sidebar { position: fixed; inset: 0; z-index: 9000; display: none; }
+    #sidebar.open { display: block; }
+    #sidebarBackdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.72); }
+    #sidebarPanel { position: absolute; left: 0; top: 0; bottom: 0; width: 280px; background: #0d0d0d; border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; animation: slideLeft 0.3s ease; overflow-y: auto; }
+    .sidebar-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; color: rgba(255,255,255,0.7); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; font-weight: 600; font-size: 15px; }
+    .sidebar-item:active, .sidebar-item:hover { background: rgba(255,255,255,0.05); color: white; }
+    .sidebar-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    /* BOTTOM NAV */
+    .bnav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; color: rgba(255,255,255,0.45); cursor: pointer; font-size: 10px; font-weight: 700; padding: 6px 4px; border-radius: 12px; transition: color 0.15s; border: none; background: transparent; min-width: 0; flex: 1; }
+    .bnav-btn.active { color: #f97316; }
+    .bnav-btn svg { width: 22px; height: 22px; }
+    /* SPORTS */
+    .sport-cat-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 9999px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .sport-cat-btn.active { background: #a020f0; border-color: #a020f0; color: white; }
+    .game-card { background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.15s, border-color 0.15s; margin-bottom: 12px; }
+    .game-card:active { transform: scale(0.99); }
+    .odds-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 8px 4px; text-align: center; cursor: pointer; transition: all 0.15s; flex: 1; }
+    .odds-btn:active { transform: scale(0.96); }
+    .odds-btn.selected { background: rgba(234,179,8,0.2); border-color: #eab308; color: #eab308; }
+    /* BETSLIP BADGE */
+    #betslipBadge { position: absolute; top: -5px; right: -6px; background: #e53e3e; color: white; border-radius: 9999px; font-size: 9px; font-weight: 900; min-width: 16px; height: 16px; display: none; align-items: center; justify-content: center; line-height: 1; }
+    /* GAME DETAIL */
+    #gameDetailModal { position: fixed; inset: 0; z-index: 8000; background: rgba(0,0,0,0.85); display: none; align-items: flex-end; justify-content: center; }
+    #gameDetailModal.open { display: flex; }
+    #gameDetailSheet { background: #111; border-radius: 24px 24px 0 0; width: 100%; max-height: 88vh; overflow-y: auto; padding: 20px 16px 40px; animation: slideUp 0.35s ease; }
+    .detail-odd-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 6px; text-align: center; cursor: pointer; transition: all 0.15s; }
+    .detail-odd-btn:active { transform: scale(0.96); }
+    .detail-odd-btn.selected { background: rgba(160,32,240,0.25); border-color: #a020f0; }
+    /* PROFILE */
+    .profile-menu-item { display: flex; align-items: center; gap: 14px; padding: 16px; background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; cursor: pointer; transition: background 0.15s; }
+    .profile-menu-item:active { background: #1a1a1a; }
+    /* MY BETS */
+    .bet-card { background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 14px; margin-bottom: 10px; }
+    .bet-status-won     { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3);  border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
+    .bet-status-lost    { background: rgba(239,68,68,0.15);   color: #f87171; border: 1px solid rgba(239,68,68,0.3);   border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
+    .bet-status-pending { background: rgba(251,191,36,0.15);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3);  border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
+    footer { background: #0d0d0d; border-top: 1px solid rgba(255,255,255,0.07); padding: 24px 16px 16px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+<!-- APP LOADER -->
+<div id="appLoader">
+  <div class="text-orange-500 font-black text-2xl tracking-tighter">Sportybet<span class="text-white/30 font-light">.Site</span></div>
+  <div class="spinner" style="width:28px;height:28px;border-width:4px;"></div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div id="sidebarBackdrop" onclick="closeSidebar()"></div>
+  <div id="sidebarPanel">
+    <div class="px-5 py-5 border-b border-white/8">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 bg-orange-500 rounded-2xl flex items-center justify-center font-black text-xl">N</div>
+        <div>
+          <div class="font-black text-base text-orange-500 tracking-tighter">Sportybet<span class="text-white/30 font-light">.Site</span></div>
+          <div id="sidebarUserName" class="text-white/45 text-xs mt-0.5">Loading...</div>
+        </div>
+      </div>
+    </div>
+    <div onclick="navTo('sports');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-green-500/15 text-green-400">⚽</div><span>Sports</span></div>
+    <div onclick="navTo('aviator');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-purple-500/15 text-purple-400">✈️</div><span>Aviator</span></div>
+    <div onclick="navTo('live');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-red-500/15 text-red-400">🔴</div><span>Live Games</span><span class="ml-auto bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full" id="sidebarLiveCount" style="display:none;"></span></div>
+    <div onclick="navTo('jackpot');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-yellow-500/15 text-yellow-400">🏆</div><span>Jackpot</span></div>
+    <div onclick="navTo('mybets');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-blue-500/15 text-blue-400">📋</div><span>My Bets</span></div>
+    <div onclick="navTo('profile');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-orange-500/15 text-orange-400">👤</div><span>Account</span></div>
+    <div style="flex:1;min-height:20px;"></div>
+    <div onclick="doLogout()" class="sidebar-item" style="color:#f87171;"><div class="sidebar-icon bg-red-500/15" style="color:#f87171;">🚪</div><span>Sign Out</span></div>
+    <div class="px-5 py-4 text-white/20 text-xs border-t border-white/06">© 2025 Sportybet.Site · All rights reserved<br>Gambling can be addictive. Play responsibly.</div>
+  </div>
+</div>
+
+<!-- GAME DETAIL MODAL -->
+<div id="gameDetailModal">
+  <div id="gameDetailSheet" style="max-height:92vh;display:flex;flex-direction:column;">
+    <!-- Header -->
+    <div style="flex-shrink:0;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:700;text-transform:uppercase;letter-spacing:1px;" id="detailSport">⚽ Soccer</div>
+          <div style="font-size:18px;font-weight:900;margin-top:2px;" id="detailTitle">Match</div>
+        </div>
+        <button onclick="closeGameDetail()" style="width:36px;height:36px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;font-size:16px;cursor:pointer;flex-shrink:0;">✕</button>
+      </div>
+      <!-- Score row -->
+      <div id="detailScoreRow" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:10px;display:flex;align-items:center;justify-content:center;gap:12px;"></div>
+    </div>
+    <!-- Scrollable markets -->
+    <div style="overflow-y:auto;flex:1;padding-top:12px;" id="detailMarkets"></div>
+    <!-- Footer -->
+    <div style="flex-shrink:0;padding-top:12px;border-top:1px solid rgba(255,255,255,0.07);">
+      <div style="display:flex;gap:8px;">
+        <button onclick="closeGameDetail()" style="flex:1;padding:13px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:white;font-size:13px;font-weight:700;cursor:pointer;">✕ Close</button>
+        <button onclick="addSelectionsToBetslip()" style="flex:2;padding:13px;background:linear-gradient(135deg,#a020f0,#7c3aed);border:none;border-radius:12px;color:white;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(160,32,240,0.4);">➕ Add to Betslip &amp; Continue</button>
+      </div>
+      <div style="text-align:center;margin-top:8px;font-size:10px;color:rgba(255,255,255,0.2);">Tap an odds button to select it for your betslip</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp">
+
+  <!-- HEADER -->
+  <div class="bg-[#111] px-3 py-3 flex items-center gap-2 border-b border-gray-800 sticky top-0 z-40">
+    <button onclick="openSidebar()" class="w-8 h-8 bg-[#1a1a1a] rounded-xl flex items-center justify-center flex-shrink-0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-5 h-5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="text-orange-500 font-black text-base tracking-tighter flex-shrink-0">Sportybet<span class="text-white/30 font-light">.Site</span></span>
+    <div class="flex items-center gap-1.5 bg-black rounded-3xl px-3 py-1.5 ml-auto">
+      <span class="text-orange-400 font-black text-xs">KES</span>
+      <span id="balDisplay" class="font-black text-base text-white font-mono">0</span>
+      <button onclick="openDeposit()" class="bg-orange-500 text-white font-bold px-3 py-1 rounded-3xl text-xs ml-1">+ DEPOSIT</button>
+    </div>
+    <div class="flex items-center text-xs bg-[#1a1a1a] rounded-3xl px-2.5 py-1 flex-shrink-0">
+      <span class="text-emerald-400 dot-pulse">●</span>
+      <span id="onlineCount" class="ml-1 font-mono text-xs">84</span>
+    </div>
+  </div>
+
+  <!-- SPORTS SCREEN -->
+  <div id="sportsScreen" class="screen active">
+    <div class="px-3 py-3 border-b border-white/8 overflow-x-auto">
+      <div class="flex gap-2 min-w-max">
+        <button class="sport-cat-btn active" onclick="filterSport('all',this)">🌍 All</button>
+        <button class="sport-cat-btn" onclick="filterSport('soccer',this)">⚽ Soccer</button>
+        <button class="sport-cat-btn" onclick="filterSport('basketball',this)">🏀 Basketball</button>
+        <button class="sport-cat-btn" onclick="filterSport('rugby',this)">🏉 Rugby</button>
+        <button class="sport-cat-btn" onclick="filterSport('tennis',this)">🎾 Tennis</button>
+        <button class="sport-cat-btn" onclick="filterSport('cricket',this)">🏏 Cricket</button>
+      </div>
+    </div>
+    <div class="flex border-b border-white/8 px-3">
+      <button id="hlTab0" onclick="switchHL(0)" class="flex-1 py-3 text-sm font-black ltab-on">🏆 Highlights</button>
+      <button id="hlTab1" onclick="switchHL(1)" class="flex-1 py-3 text-sm font-black ltab-off">🕐 Upcoming</button>
+      <button id="hlTab2" onclick="switchHL(2)" class="flex-1 py-3 text-sm font-black ltab-off">🌍 Countries</button>
+    </div>
+    <div id="gamesList" class="px-3 pt-3 pb-4"></div>
+    <footer>
+      <div class="flex items-center gap-2 mb-4"><span class="text-orange-500 font-black text-lg tracking-tighter">Sportybet<span class="text-white/30 font-light">.Site</span></span></div>
+      <div class="grid grid-cols-2 gap-3 mb-4 text-xs text-white/40">
+        <div><div class="font-bold text-white/60 mb-2">Games</div><div onclick="navTo('sports')" class="cursor-pointer py-0.5">Sports Betting</div><div onclick="navTo('aviator')" class="cursor-pointer py-0.5">Aviator</div><div onclick="navTo('live')" class="cursor-pointer py-0.5">Live Betting</div><div onclick="navTo('jackpot')" class="cursor-pointer py-0.5">Jackpot</div></div>
+        <div><div class="font-bold text-white/60 mb-2">Account</div><div onclick="navTo('mybets')" class="cursor-pointer py-0.5">My Bets</div><div onclick="navTo('profile')" class="cursor-pointer py-0.5">Profile</div><div onclick="openDeposit()" class="cursor-pointer py-0.5">Deposit</div><div onclick="openWithdraw()" class="cursor-pointer py-0.5">Withdraw</div></div>
+      </div>
+      <div class="text-white/20 text-xs text-center pt-3 border-t border-white/6">© 2025 Sportybet.Site · All rights reserved<br><span class="text-yellow-500/60">⚠️ Gambling can be addictive. Please play responsibly. 18+</span></div>
+    </footer>
+  </div>
+
+  <!-- AVIATOR SCREEN -->
+  <div id="aviatorScreen" class="screen">
+    <div class="px-3 py-2.5 bg-[#0d0d0d] border-b border-white/8 overflow-x-auto">
+      <div class="flex items-center gap-2">
+        <div id="historyBar" class="flex gap-2 min-w-max py-0.5 flex-1"></div>
+        <button id="soundBtn" onclick="toggleSound()" class="w-7 h-7 bg-[#1a1a1a] rounded-xl flex items-center justify-center text-sm flex-shrink-0">🔊</button>
+      </div>
+    </div>
+    <div class="px-3 pt-3">
+      <div class="canvas-wrap relative h-72">
+        <canvas id="gameCanvas" class="w-full h-full"></canvas>
+        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+          <div id="multDisplay" style="display:flex" class="flex-col items-center">
+            <span id="multValue" class="text-7xl font-black tracking-tighter text-white drop-shadow-2xl">1.00x</span>
+            <span class="text-white/40 text-sm mt-0.5">multiplier</span>
+          </div>
+          <div id="crashDisplay" style="display:none" class="flex-col items-center gap-1">
+            <span id="crashValue" class="text-6xl font-black text-red-400 crash-glow"></span>
+            <span class="text-2xl font-bold text-red-300">FLEW AWAY!</span>
+          </div>
+        </div>
+        <div class="absolute top-3 left-3 bg-black/70 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 bg-green-400 rounded-full dot-pulse"></span>
+          ROUND <span id="roundBadge" class="font-mono">#4821</span>
+        </div>
+        <div id="idleOverlay" class="absolute inset-0 bg-black/75 rounded-[20px] flex flex-col items-center justify-center">
+          <div class="text-white/55 text-base mb-1">Next round in</div>
+          <div id="cdValue" class="text-8xl font-black font-mono text-orange-400">5</div>
+        </div>
+      </div>
+    </div>
+    <div class="px-3 mt-3">
+      <div class="bg-[#111] rounded-3xl p-1 flex border border-purple-500/18 mb-3">
+        <button id="tabBtn0" onclick="switchTab(0)" class="flex-1 py-2.5 text-sm font-bold rounded-3xl transition tab-on">STAKE SELECTOR</button>
+        <button id="tabBtn1" onclick="switchTab(1)" class="flex-1 py-2.5 text-sm font-bold rounded-3xl transition tab-off">AI BET</button>
+      </div>
+      <div id="stakePanel">
+        <div class="bg-[#120022] rounded-3xl p-4 border border-purple-500/25 mb-3">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-black text-purple-400 bg-purple-500/15 px-3 py-1 rounded-full">BET 1</span>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-1.5 cursor-pointer select-none"><input id="auto1" type="checkbox" class="w-4 h-4 accent-purple-500" checked onchange="syncAuto(1)"><span class="text-white/50 text-xs font-semibold">AUTO</span></label>
+              <div class="flex items-center bg-black rounded-xl px-2 py-1 gap-1"><input id="autoVal1" type="number" min="1.01" step="0.1" value="1.20" class="bg-transparent w-14 text-center outline-none text-sm font-black text-white" onchange="syncAuto(1)"><span class="text-purple-400 text-xs font-bold">x</span></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 mb-2">
+            <button onclick="adjBet(1,'half')" class="adj-btn text-sm">½</button>
+            <button onclick="adjBet(1,'minus')" class="adj-btn">−</button>
+            <div id="betAmt1" class="bg-black rounded-2xl flex items-center justify-center font-black text-lg font-mono text-white">100</div>
+            <button onclick="adjBet(1,'double')" class="adj-btn text-sm">×2</button>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 mb-4">
+            <button onclick="setBet(1,100)" class="chip">100</button><button onclick="setBet(1,200)" class="chip">200</button><button onclick="setBet(1,500)" class="chip">500</button><button onclick="setBet(1,1000)" class="chip">1000</button>
+          </div>
+          <button id="betBtn1" onclick="placeBet(1)" class="btn-bet py-4 text-xl">BET <span id="betLbl1" class="font-mono">KES 100</span></button>
+          <div id="activeBet1" style="display:none" class="mt-3 bg-black/50 rounded-2xl p-3 flex items-center justify-between slide-up">
+            <div><div class="text-xs text-white/40 mb-0.5">YOUR BET</div><div id="activeBetAmt1" class="font-black text-xl font-mono">KES 100</div></div>
+            <button onclick="cashOut(1)" class="btn-cash px-5 py-3 text-sm">CASH OUT <span id="cashVal1" class="font-mono ml-1">KES 120</span></button>
+          </div>
+        </div>
+        <div class="bg-[#120022] rounded-3xl p-4 border border-purple-500/25">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-black text-purple-400 bg-purple-500/15 px-3 py-1 rounded-full">BET 2</span>
+            <div class="flex items-center gap-2">
+              <label class="flex items-center gap-1.5 cursor-pointer select-none"><input id="auto2" type="checkbox" class="w-4 h-4 accent-purple-500" onchange="syncAuto(2)"><span class="text-white/50 text-xs font-semibold">AUTO</span></label>
+              <div class="flex items-center bg-black rounded-xl px-2 py-1 gap-1"><input id="autoVal2" type="number" min="1.01" step="0.1" value="2.00" class="bg-transparent w-14 text-center outline-none text-sm font-black text-white" onchange="syncAuto(2)"><span class="text-purple-400 text-xs font-bold">x</span></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 mb-2">
+            <button onclick="adjBet(2,'half')" class="adj-btn text-sm">½</button>
+            <button onclick="adjBet(2,'minus')" class="adj-btn">−</button>
+            <div id="betAmt2" class="bg-black rounded-2xl flex items-center justify-center font-black text-lg font-mono text-white">200</div>
+            <button onclick="adjBet(2,'double')" class="adj-btn text-sm">×2</button>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 mb-4">
+            <button onclick="setBet(2,100)" class="chip">100</button><button onclick="setBet(2,200)" class="chip">200</button><button onclick="setBet(2,500)" class="chip">500</button><button onclick="setBet(2,1000)" class="chip">1000</button>
+          </div>
+          <button id="betBtn2" onclick="placeBet(2)" class="btn-bet py-4 text-xl">BET <span id="betLbl2" class="font-mono">KES 200</span></button>
+          <div id="activeBet2" style="display:none" class="mt-3 bg-black/50 rounded-2xl p-3 flex items-center justify-between slide-up">
+            <div><div class="text-xs text-white/40 mb-0.5">YOUR BET</div><div id="activeBetAmt2" class="font-black text-xl font-mono">KES 200</div></div>
+            <button onclick="cashOut(2)" class="btn-cash px-5 py-3 text-sm">CASH OUT <span id="cashVal2" class="font-mono ml-1">KES 400</span></button>
+          </div>
+        </div>
+      </div>
+      <div id="aiPanel" style="display:none" class="bg-[#120022] rounded-3xl p-6 border border-purple-500/25 text-center">
+        <div class="text-4xl mb-3">🤖</div>
+        <div class="text-lg font-black mb-2">AI Bet Advisor</div>
+        <div id="aiMsg" class="text-white/50 text-sm mb-5 leading-relaxed">Tap below to get a smart suggestion based on recent crash history.</div>
+        <button onclick="runAI()" class="btn-bet py-3 text-base">GET SUGGESTION</button>
+      </div>
+    </div>
+    <div id="liveSection" class="px-3 mt-6">
+      <div class="flex border-b border-white/8">
+        <button id="ltab0" onclick="switchLiveTab(0)" class="flex-1 py-3.5 text-xs font-black ltab-on transition">LIVE BETS</button>
+        <button id="ltab1" onclick="switchLiveTab(1)" class="flex-1 py-3.5 text-xs font-black ltab-off transition">WITHDRAWALS</button>
+        <button id="ltab2" onclick="switchLiveTab(2)" class="flex-1 py-3.5 text-xs font-black ltab-off transition">CHAT</button>
+      </div>
+      <div id="liveBetsPanel">
+        <div class="flex justify-between items-center bg-purple-700/45 px-4 py-2 rounded-t-2xl mt-3 text-xs font-bold"><span>ONLINE: <span id="onlinePlayers" class="text-white">60</span></span><span class="text-emerald-400">● PLAYING: <span id="playingPlayers">24</span></span></div>
+        <div class="bg-[#0f001f] grid grid-cols-3 text-center py-3 rounded-b-2xl mb-2 text-xs">
+          <div><div class="text-white/35">BETS</div><div id="statBets" class="font-black text-base mt-0.5">23</div></div>
+          <div><div class="text-white/35">STAKED</div><div id="statStaked" class="font-black text-base mt-0.5">149,426</div></div>
+          <div><div class="text-white/35">WON</div><div id="statWon" class="font-black text-base mt-0.5 text-emerald-400">99,762</div></div>
+        </div>
+        <div id="liveBetsTable" class="bg-[#0d0d0d] rounded-2xl px-2 py-1 text-sm max-h-80 overflow-y-auto"></div>
+      </div>
+      <div id="withdrawPanel" style="display:none" class="mt-3">
+        <div class="bg-[#120022] rounded-2xl p-4 border border-purple-500/25 mb-3">
+          <div class="flex items-center justify-between mb-3">
+            <div><div class="text-xs text-white/40 font-bold uppercase tracking-wider">Available Balance</div><div class="text-2xl font-black font-mono text-white mt-0.5">KES <span id="wdBalDisplay">0</span></div></div>
+            <button onclick="openWithdraw()" class="btn-cash px-5 py-3 text-sm font-black rounded-2xl">WITHDRAW</button>
+          </div>
+          <div class="text-xs text-white/30">Minimum: <span id="minWdInlineNote" class="text-yellow-400 font-bold">KES 200</span></div>
+        </div>
+        <div class="bg-[#0d0d0d] rounded-2xl overflow-hidden">
+          <div class="px-4 py-2.5 bg-purple-700/30 flex items-center justify-between text-xs font-black"><span>RECENT WITHDRAWALS</span><span class="text-emerald-400">● LIVE</span></div>
+          <div id="withdrawList" class="divide-y divide-white/5 text-sm"></div>
+        </div>
+      </div>
+      <div id="chatPanel" style="display:none" class="mt-3 bg-[#0d0d0d] rounded-2xl p-4">
+        <div class="flex justify-between text-xs font-bold text-white/35 mb-3"><span>💬 LIVE CHAT</span><span class="text-emerald-400">SECURE</span></div>
+        <div id="chatBox" class="space-y-3 text-sm max-h-56 overflow-y-auto mb-3"></div>
+        <div class="flex gap-2">
+          <input id="chatInput" type="text" placeholder="Type a message…" class="inp flex-1 py-2.5 text-sm rounded-2xl" onkeydown="if(event.key==='Enter')sendChat()">
+          <button onclick="sendChat()" class="btn-bet py-2.5 px-5 text-sm" style="width:auto">SEND</button>
+        </div>
+      </div>
+    </div>
+    <div class="h-4"></div>
+    <footer><div class="text-white/20 text-xs text-center">© 2025 Sportybet.Site<br><span class="text-yellow-500/60">⚠️ Gambling is addictive. Play responsibly. 18+</span></div></footer>
+  </div>
+
+  <!-- LIVE SCREEN -->
+  <div id="liveScreen" class="screen">
+    <div class="px-3 py-4">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-2.5 h-2.5 rounded-full bg-red-500 dot-pulse"></div>
+        <span class="font-black text-lg">Live Games</span>
+        <span class="bg-red-500/20 text-red-400 text-xs font-bold px-2 py-0.5 rounded-full" id="liveCount" style="display:none;"></span>
+      </div>
+      <div id="liveGamesList"></div>
+    </div>
+  </div>
+
+  <!-- JACKPOT SCREEN -->
+  <div id="jackpotScreen" class="screen">
+    <div class="px-3 py-6 text-center">
+      <div class="text-6xl mb-3">🏆</div>
+      <div class="font-black text-2xl mb-1 text-yellow-400">MEGA JACKPOT</div>
+      <div class="text-white/50 text-sm mb-5">Pick 13 correct outcomes to win</div>
+      <div class="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-3xl p-6 mb-4">
+        <div class="text-xs text-white/40 mb-1 font-bold uppercase tracking-wider">Current Pot</div>
+        <div class="text-5xl font-black text-yellow-400 font-mono">KES 50M</div>
+        <div class="text-white/30 text-xs mt-1">Rollover jackpot</div>
+      </div>
+      <div class="text-white/30 text-sm">Jackpot games coming soon...</div>
+    </div>
+  </div>
+
+  <!-- MY BETS SCREEN -->
+  <div id="mybetsScreen" class="screen">
+    <div class="px-3 pt-4 pb-6">
+      <h2 class="font-black text-xl mb-4">My Bets</h2>
+      <div class="flex gap-2 mb-4">
+        <button id="mybetTab0" onclick="switchMyBetTab(0)" class="flex-1 py-2.5 text-sm font-bold rounded-3xl tab-on">Pending</button>
+        <button id="mybetTab1" onclick="switchMyBetTab(1)" class="flex-1 py-2.5 text-sm font-bold rounded-3xl tab-off">Won</button>
+        <button id="mybetTab2" onclick="switchMyBetTab(2)" class="flex-1 py-2.5 text-sm font-bold rounded-3xl tab-off">Lost</button>
+      </div>
+      <div id="mybetsList"></div>
+      <div id="mybetsEmpty" class="text-center py-10 hidden"><div class="text-4xl mb-3">📋</div><div class="text-white/40 text-sm">No bets in this category</div></div>
+    </div>
+  </div>
+
+  <!-- BETSLIP SCREEN -->
+  <div id="betslipScreen" class="screen">
+    <div class="px-3 pt-4 pb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-black text-xl">Betslip</h2>
+        <button onclick="clearBetslip()" class="text-xs text-red-400 font-bold bg-red-500/10 px-3 py-1.5 rounded-full">Clear All</button>
+      </div>
+      <div class="bg-[#120022] border border-purple-500/25 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
+        <div class="text-xs text-white/40 font-bold">AVAILABLE BALANCE</div>
+        <div class="font-black font-mono text-orange-400">KES <span id="slipBalDisplay">0</span></div>
+      </div>
+      <div id="betslipSelections" class="space-y-2 mb-4"></div>
+      <div id="betslipEmpty" class="text-center py-10 hidden"><div class="text-4xl mb-3">🎯</div><div class="text-white/40 text-sm">No selections yet<br>Go to Sports to add games</div></div>
+      <div id="betslipStakeArea" class="hidden">
+        <div class="bg-[#111] border border-white/8 rounded-2xl px-4 py-3 mb-3">
+          <div class="text-xs text-white/40 font-bold mb-2 uppercase tracking-wider">Stake Amount (KES)</div>
+          <input id="slipStake" type="number" min="50" placeholder="Min. KES 50" class="inp text-center text-2xl font-mono" oninput="updateSlipSummary()">
+          <div class="grid grid-cols-4 gap-2 mt-3">
+            <button onclick="setSlipStake(50)" class="chip text-xs py-2">50</button>
+            <button onclick="setSlipStake(100)" class="chip text-xs py-2">100</button>
+            <button onclick="setSlipStake(500)" class="chip text-xs py-2">500</button>
+            <button onclick="setSlipStake(1000)" class="chip text-xs py-2">1K</button>
+          </div>
+        </div>
+        <div id="slipSummary" class="bg-[#0d0d0d] border border-white/5 rounded-2xl px-4 py-3 mb-4 space-y-2 text-sm hidden">
+          <div class="flex justify-between"><span class="text-white/40">Selections</span><span id="slipCount" class="font-bold">0</span></div>
+          <div class="flex justify-between"><span class="text-white/40">Total Odds</span><span id="slipOdds" class="font-bold text-purple-400">0.00</span></div>
+          <div class="flex justify-between"><span class="text-white/40">Potential Win</span><span id="slipWin" class="font-black text-emerald-400">KES 0</span></div>
+        </div>
+        <button onclick="placeSportsBet()" class="btn-bet py-4 text-lg w-full">PLACE BET</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE SCREEN -->
+  <div id="profileScreen" class="screen">
+    <div class="px-3 pt-4 pb-8">
+      <div class="bg-gradient-to-br from-purple-900/60 to-black border border-purple-500/30 rounded-3xl p-5 mb-5">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center font-black text-2xl" id="profileAvatar">P</div>
+          <div>
+            <div class="font-black text-xl" id="profileName">Player</div>
+            <div class="text-white/40 text-sm" id="profilePhone">—</div>
+            <div class="text-white/40 text-xs" id="profileEmail">—</div>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="openDeposit()" class="btn-orange flex-1 py-3 text-sm font-black rounded-2xl">+ DEPOSIT</button>
+          <button onclick="openWithdraw()" class="btn-cash flex-1 py-3 text-sm font-black rounded-2xl">WITHDRAW</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Balance</div><div class="text-xl font-black font-mono text-orange-400">KES <span id="profileBal">0</span></div></div>
+        <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Deposited</div><div class="text-xl font-black font-mono text-white">KES <span id="profileDeposited">0</span></div></div>
+        <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Won</div><div class="text-xl font-black font-mono text-emerald-400">KES <span id="profileWon">0</span></div></div>
+        <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Withdrawn</div><div class="text-xl font-black font-mono text-purple-400">KES <span id="profileWithdrawn">0</span></div></div>
+      </div>
+      <div class="space-y-3 mb-5">
+        <div class="profile-menu-item" onclick="openWallet()"><div class="w-10 h-10 bg-orange-500/15 rounded-2xl flex items-center justify-center text-xl">💼</div><div class="flex-1"><div class="font-bold">My Wallet</div><div class="text-white/40 text-xs">Transactions &amp; history</div></div><span class="text-white/30">›</span></div>
+        <div class="profile-menu-item" onclick="navTo('mybets')"><div class="w-10 h-10 bg-blue-500/15 rounded-2xl flex items-center justify-center text-xl">📋</div><div class="flex-1"><div class="font-bold">My Bets</div><div class="text-white/40 text-xs">Bet history &amp; results</div></div><span class="text-white/30">›</span></div>
+        <div class="profile-menu-item" onclick="openDeposit()"><div class="w-10 h-10 bg-green-500/15 rounded-2xl flex items-center justify-center text-xl">📱</div><div class="flex-1"><div class="font-bold">Deposit via M-Pesa</div><div class="text-white/40 text-xs">Instant · Min KES 100</div></div><span class="text-white/30">›</span></div>
+        <div class="profile-menu-item" onclick="openWithdraw()"><div class="w-10 h-10 bg-purple-500/15 rounded-2xl flex items-center justify-center text-xl">⬇️</div><div class="flex-1"><div class="font-bold">Withdraw Funds</div><div class="text-white/40 text-xs">M-Pesa, Airtel, Bank</div></div><span class="text-white/30">›</span></div>
+      </div>
+      <button onclick="doLogout()" class="btn-red w-full py-4 text-base font-black rounded-2xl">🚪 Sign Out</button>
+    </div>
+  </div>
+
+</div><!-- end mainApp -->
+
+<!-- DEPOSIT SCREEN -->
+<div id="depositScreen" class="overlay-screen">
+  <div class="flex items-center gap-3 px-4 py-4 border-b border-white/8 bg-[#0d0d0d] flex-shrink-0">
+    <button onclick="closeDeposit()" class="w-9 h-9 bg-white/8 rounded-2xl flex items-center justify-center text-xl">‹</button>
+    <span class="font-black text-lg">Deposit via M-Pesa</span>
+  </div>
+  <div id="depStep1" class="flex-1 px-5 pt-6 pb-10 max-w-sm mx-auto w-full">
+    <div class="text-center mb-6"><div class="text-4xl mb-2">📱</div><p class="text-white/50 text-sm">Enter amount and your M-Pesa number.<br>You'll get an STK push to confirm.</p></div>
+    <div id="depErr" class="mb-4 bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl px-4 py-3 text-sm font-semibold hidden"></div>
+    <div class="grid grid-cols-3 gap-3 mb-5">
+      <button onclick="setDepAmt(100)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm">KES<br>100</button>
+      <button onclick="setDepAmt(500)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm">KES<br>500</button>
+      <button onclick="setDepAmt(1000)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm">KES<br>1,000</button>
+      <button onclick="setDepAmt(2000)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm">KES<br>2,000</button>
+      <button onclick="setDepAmt(5000)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm">KES<br>5,000</button>
+      <button onclick="setDepAmt(10000)" class="bg-[#111] border border-white/10 py-4 rounded-2xl font-black text-sm">KES<br>10,000</button>
+    </div>
+    <div class="text-white/30 text-xs text-center mb-3">— or enter custom amount —</div>
+    <input id="depInput" type="number" min="100" placeholder="Amount (KES min. 100)" class="inp text-center text-xl font-mono mb-4">
+    <div class="mb-5">
+      <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-2">M-Pesa Number</label>
+      <div class="inp flex items-center justify-between" style="cursor:default;"><span id="depPhoneDisplay" class="text-white font-bold text-lg font-mono">—</span><span class="text-xs text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full">✔ VERIFIED</span></div>
+    </div>
+    <button id="depBtn" onclick="initiateDeposit()" class="btn-orange w-full py-5 text-xl flex items-center justify-center gap-3"><span id="depBtnTxt">PAY WITH M-PESA</span></button>
+    <p class="text-center text-white/20 text-xs mt-4" id="minDepNote">Minimum deposit: KES 100 · Powered by PayHero</p>
+  </div>
+  <div id="depStep2" style="display:none" class="flex-1 px-5 pt-8 pb-10 max-w-sm mx-auto w-full flex flex-col items-center justify-center text-center">
+    <div id="depPending" class="flex-col items-center justify-center gap-4 w-full" style="display:none">
+      <div class="w-20 h-20 rounded-full bg-orange-500/15 border-2 border-orange-500/40 flex items-center justify-center mb-2"><div class="spinner" style="width:36px;height:36px;border-width:4px;border-top-color:#f97316;border-color:rgba(249,115,22,0.2);"></div></div>
+      <h3 class="text-2xl font-black">Waiting for Payment</h3>
+      <p class="text-white/50 text-sm">An STK push was sent to<br><span id="depPhoneDisplayPending" class="text-orange-400 font-bold"></span></p>
+      <div class="bg-[#111] border border-white/8 rounded-2xl px-5 py-4 w-full text-left space-y-2 text-sm mt-2">
+        <div class="flex justify-between"><span class="text-white/45">Amount</span><span class="font-black font-mono" id="depAmtDisplay">—</span></div>
+        <div class="flex justify-between"><span class="text-white/45">Reference</span><span class="font-mono text-purple-400 text-xs" id="depRefDisplay">—</span></div>
+        <div class="flex justify-between items-center"><span class="text-white/45">Status</span><span class="flex items-center gap-1.5 text-orange-400 font-bold text-xs"><span class="w-2 h-2 rounded-full bg-orange-400 pulse-dot"></span>CHECKING…</span></div>
+      </div>
+      <div class="w-full bg-[#111] border border-white/8 rounded-xl px-4 py-3 text-center">
+        <p class="text-white/40 text-xs" id="depPollMsg">Waiting for M-Pesa confirmation…</p>
+        <div class="w-full bg-white/8 rounded-full h-1 mt-2"><div id="depPollBar" class="bg-orange-500 h-1 rounded-full transition-all duration-500" style="width:0%"></div></div>
+      </div>
+      <button onclick="cancelPoll()" class="btn-ghost px-6 py-3 text-sm w-full mt-2">Cancel</button>
+    </div>
+    <div id="depSuccess" style="display:none" class="flex-col items-center justify-center gap-4 w-full">
+      <div class="text-6xl mb-2">✅</div>
+      <h3 class="text-2xl font-black text-emerald-400">Payment Received!</h3>
+      <p class="text-white/50 text-sm" id="depSuccessMsg"></p>
+      <p class="text-3xl font-black font-mono text-white" id="depSuccessAmt"></p>
+      <button onclick="closeDeposit()" class="btn-orange w-full py-4 text-lg mt-2">🎮 PLAY NOW</button>
+    </div>
+    <div id="depFailed" style="display:none" class="flex-col items-center justify-center gap-4 w-full">
+      <div class="text-6xl mb-2">❌</div>
+      <h3 class="text-2xl font-black text-red-400">Payment Failed</h3>
+      <p class="text-white/50 text-sm" id="depFailedMsg">The payment was not completed.</p>
+      <button onclick="retryDeposit()" class="btn-orange w-full py-4 text-lg mt-2">TRY AGAIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- WITHDRAW SCREEN -->
+<div id="withdrawScreen" class="overlay-screen">
+  <div class="flex items-center gap-3 px-4 py-4 border-b border-white/8 bg-[#0d0d0d] flex-shrink-0">
+    <button onclick="closeWithdraw()" class="w-9 h-9 bg-white/8 rounded-2xl flex items-center justify-center text-xl">‹</button>
+    <span class="font-black text-lg">Withdraw Funds</span>
+  </div>
+  <div class="flex-1 px-5 pt-6 pb-10 max-w-sm mx-auto w-full">
+    <div class="bg-[#120022] border border-purple-500/25 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
+      <div><div class="text-xs text-white/40 font-bold uppercase tracking-wider mb-1">Available to Withdraw</div><div class="text-3xl font-black font-mono">KES <span id="wdScreenBal">0</span></div></div>
+      <div class="text-4xl">💰</div>
+    </div>
+    <div id="wdErr" class="mb-4 bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl px-4 py-3 text-sm font-semibold hidden"></div>
+    <div class="mb-5">
+      <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-2">Amount (KES)</label>
+      <input id="wdAmount" type="number" min="200" placeholder="Min. KES 200" class="inp text-center text-2xl font-mono" oninput="wdAmtChanged()">
+      <div class="grid grid-cols-4 gap-2 mt-3">
+        <button onclick="setWdAmt(200)" class="chip text-xs py-2">200</button>
+        <button onclick="setWdAmt(500)" class="chip text-xs py-2">500</button>
+        <button onclick="setWdAmt(1000)" class="chip text-xs py-2">1,000</button>
+        <button onclick="setWdAmtAll()" class="chip text-xs py-2 text-orange-400">MAX</button>
+      </div>
+    </div>
+    <div class="mb-5">
+      <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-3">Withdrawal Method</label>
+      <div class="space-y-3">
+        <div class="method-card selected" id="method-mpesa" onclick="selectMethod('mpesa')"><div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">📱</div><div class="flex-1"><div class="font-black text-sm">M-Pesa</div><div class="text-white/40 text-xs mt-0.5">Instant · No fees</div></div><div id="dot-mpesa" class="w-5 h-5 rounded-full border-2 border-purple-500 flex items-center justify-center flex-shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div></div></div>
+        <div class="method-card" id="method-airtel" onclick="selectMethod('airtel')"><div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">📲</div><div class="flex-1"><div class="font-black text-sm">Airtel Money</div><div class="text-white/40 text-xs mt-0.5">Instant · No fees</div></div><div id="dot-airtel" class="w-5 h-5 rounded-full border-2 border-white/20 flex items-center justify-center flex-shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-transparent"></div></div></div>
+        <div class="method-card" id="method-bank" onclick="selectMethod('bank')"><div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏦</div><div class="flex-1"><div class="font-black text-sm">Bank Transfer</div><div class="text-white/40 text-xs mt-0.5">1-2 hours · No fees</div></div><div id="dot-bank" class="w-5 h-5 rounded-full border-2 border-white/20 flex items-center justify-center flex-shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-transparent"></div></div></div>
+      </div>
+    </div>
+    <div class="mb-6">
+      <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-2" id="phoneLabel">M-Pesa Number</label>
+      <input id="wdPhone" type="tel" placeholder="07XX XXX XXX" class="inp">
+    </div>
+    <div id="wdSummary" class="hidden bg-[#111] border border-white/8 rounded-2xl px-4 py-3 mb-5 space-y-2 text-sm">
+      <div class="flex justify-between"><span class="text-white/45">Amount</span><span class="font-mono font-bold" id="sumAmt">—</span></div>
+      <div class="flex justify-between"><span class="text-white/45">Fee</span><span class="font-mono text-emerald-400">FREE</span></div>
+      <div class="h-px bg-white/8"></div>
+      <div class="flex justify-between font-black"><span>You receive</span><span class="text-emerald-400 font-mono" id="sumReceive">—</span></div>
+    </div>
+    <button id="wdConfirmBtn" onclick="confirmWithdraw()" class="btn-cash w-full py-5 text-xl font-black rounded-2xl flex items-center justify-center gap-3"><span id="wdBtnTxt">CONFIRM WITHDRAWAL</span></button>
+    <p class="text-center text-white/20 text-xs mt-4" id="minWdNote">Minimum withdrawal: KES 200</p>
+  </div>
+</div>
+
+<!-- WALLET SCREEN -->
+<div id="walletScreen" class="overlay-screen">
+  <div class="flex items-center gap-3 px-4 py-4 border-b border-white/8 bg-[#0d0d0d] flex-shrink-0 sticky top-0 z-10">
+    <button onclick="closeWallet()" class="w-9 h-9 bg-white/8 rounded-2xl flex items-center justify-center text-xl">‹</button>
+    <span class="font-black text-lg">My Wallet</span>
+  </div>
+  <div class="flex-1 px-4 pt-5 pb-10 max-w-sm mx-auto w-full">
+    <div class="bg-gradient-to-br from-purple-900/60 to-black border border-purple-500/30 rounded-3xl p-5 mb-4">
+      <div class="text-xs text-white/40 font-bold uppercase tracking-wider mb-2">Total Balance</div>
+      <div class="text-4xl font-black font-mono text-white mb-4">KES <span id="walletBal">0</span></div>
+      <div class="flex gap-3">
+        <button onclick="closeWallet();openDeposit()" class="btn-orange flex-1 py-3 text-sm font-black rounded-2xl">+ DEPOSIT</button>
+        <button onclick="closeWallet();openWithdraw()" class="btn-cash flex-1 py-3 text-sm font-black rounded-2xl">WITHDRAW</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Deposited</div><div class="text-xl font-black font-mono text-orange-400">KES <span id="statDeposited">0</span></div></div>
+      <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Withdrawn</div><div class="text-xl font-black font-mono text-emerald-400">KES <span id="statWithdrawn">0</span></div></div>
+      <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Won</div><div class="text-xl font-black font-mono text-purple-400">KES <span id="statWonTotal">0</span></div></div>
+      <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Rounds Played</div><div class="text-xl font-black font-mono text-white"><span id="statRounds">0</span></div></div>
+    </div>
+    <div class="mb-2 flex items-center justify-between">
+      <div class="font-black text-sm">Transaction History</div>
+      <div class="text-xs text-white/30"><span id="txCount">0</span> transactions</div>
+    </div>
+    <div id="txList" class="space-y-2"></div>
+    <div id="txEmpty" class="bg-[#111] rounded-2xl p-8 text-center hidden"><div class="text-3xl mb-2">📭</div><div class="text-white/40 text-sm">No transactions yet</div></div>
+  </div>
+</div>
+
+<!-- WITHDRAWAL POPUP -->
+<div id="wdPopupOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
+  <div id="wdPopupBox" style="background:#111;border-radius:28px;padding:32px 24px;max-width:300px;width:100%;text-align:center;position:relative;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+    <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.08);border-radius:0 0 28px 28px;overflow:hidden;"><div id="wdPopupBar" style="height:100%;width:100%;transition:width linear;border-radius:0 0 28px 28px;"></div></div>
+    <div id="wdPopupIcon" style="font-size:52px;margin-bottom:12px;line-height:1;"></div>
+    <div id="wdPopupTitle" style="font-size:20px;font-weight:900;margin-bottom:8px;"></div>
+    <div id="wdPopupMsg" style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:20px;"></div>
+    <button onclick="closeWdPopup()" id="wdPopupBtn" style="width:100%;padding:13px;border:none;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;"></button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div id="bottomNav" class="bg-[#0d0d0d] border-t border-white/8 flex items-stretch px-1 py-1">
+  <button id="bnav-home" onclick="navTo('sports')" class="bnav-btn active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
+  </button>
+  <button id="bnav-live" onclick="navTo('live')" class="bnav-btn">
+    <span class="relative inline-flex items-center justify-center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+      <span id="liveNavBadge" class="absolute -top-2 -right-3 bg-red-500 text-white text-[8px] font-black px-1 rounded-full leading-4" style="display:none;"></span>
+    </span>Live
+  </button>
+  <button id="bnav-betslip" onclick="navTo('betslip')" class="bnav-btn">
+    <span class="relative inline-flex items-center justify-center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      <span id="betslipBadge">0</span>
+    </span>Betslip
+  </button>
+  <button id="bnav-mybets" onclick="navTo('mybets')" class="bnav-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>My Bets
+  </button>
+  <button id="bnav-profile" onclick="navTo('profile')" class="bnav-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
+  </button>
+</div>
+
+<script type="module">
+'use strict';
+const FIREBASE_CONFIG={apiKey:"AIzaSyBfGx3mLuZ85b_JkRUJXwloLJXNT3uyn7M",authDomain:"aviator-23914.firebaseapp.com",projectId:"aviator-23914",storageBucket:"aviator-23914.firebasestorage.app",messagingSenderId:"139941060687",appId:"1:139941060687:web:c20f9bafa9d8d3aacf4a3a",measurementId:"G-031VMZEKHE"};
+const BACKEND_URL="https://sportybet-jjiu.onrender.com";
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import{getAuth,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import{getFirestore,doc,getDoc,setDoc,updateDoc,arrayUnion,increment,serverTimestamp,onSnapshot,collection,addDoc,getDocs,query,orderBy}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const app=initializeApp(FIREBASE_CONFIG);const auth=getAuth(app);const db=getFirestore(app);
+let USER=null,userData=null,balance=0,crashHist=[2.30,2.28,1.74,2.29,28.70,1.05,4.10,93.31],unsubUser=null;
+let storeConfig={depositsEnabled:true,minDeposit:100,maxDeposit:100000,withdrawalsEnabled:true,minWithdrawal:200,maxWithdrawal:50000,withdrawLockAmount:500,minBet:50};
+let unsubStore=null;
+
+// ── SPORTS DATA ──
+// All games come from Firestore — no hardcoded games
+
+let betslipSelections=[],sportsBets=[];
+
+// ── REAL FOOTBALL GAMES FROM FIRESTORE ──────────────────────────────────
+let fbFootballGames=[]; let fbFootListener=null; let fbMyFootBets=[];
+
+function startFootballGamesListener(){
+  if(fbFootListener)return;
+  fbFootListener=onSnapshot(collection(db,'footballGames'),snap=>{
+    fbFootballGames=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Update sports and live screens when games change
+    if(document.getElementById('sportsScreen').classList.contains('active')) renderGames();
+    if(document.getElementById('liveScreen').classList.contains('active')) renderLiveGames();
+  });
+}
+
+function startMyFootBetsListener(){
+  if(!USER)return;
+  onSnapshot(query(collection(db,'footballBets')),snap=>{
+    fbMyFootBets=snap.docs.map(d=>({id:d.id,...d.data()})).filter(b=>b.playerId===USER.uid);
+    if(document.getElementById('mybetsScreen').classList.contains('active')) renderMyBets(myBetTabIndex);
+  });
+}
+
+function buildFbGameCard(game){
+  const isLive=game.status==='live';
+  const isHT=isLive&&game.halfTime===true;
+  const half=game.half||1;
+  const o=game.odds||{};
+  const oh=parseFloat(o['1']||1.85).toFixed(2),oX=parseFloat(o['X']||3.40).toFixed(2),o2=parseFloat(o['2']||4.20).toFixed(2);
+  const gid='fb_'+game.id.replace(/'/g,"\\'");
+  const hn=game.home.replace(/'/g,"\\'"),an=game.away.replace(/'/g,"\\'");
+  const gameName=hn+' vs '+an;
+  const selH=isBetSelected('fb_'+game.id,'1x2','h')?'selected':'';
+  const selD=isBetSelected('fb_'+game.id,'1x2','d')?'selected':'';
+  const selA=isBetSelected('fb_'+game.id,'1x2','a')?'selected':'';
+  // ── badge: LIVE/HT indicator or kickoff time ──
+  const minLabel=isHT?'⏸ HT':(half===2?'2H ':'1H ')+(game.minute||0)+"'";
+  const badge=isLive
+    ?(isHT
+      ?`<span style="font-size:9px;font-weight:900;color:#fbbf24;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:4px;padding:2px 7px;">⏸ HALF TIME</span>`
+      :`<span style="font-size:9px;font-weight:900;color:#f87171;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:2px 7px;animation:pulse 1.4s ease infinite;">● ${minLabel}</span>`)
+    :`<span style="font-size:10px;font-weight:700;opacity:0.4;">${game.kickoffTime||'TBD'}</span>`;
+  // ── scoreRow: live score or VS ──
+  const scoreRow=isLive
+    ?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-weight:800;font-size:13px;">${game.home}</span><span style="font-weight:900;font-size:20px;color:#FFD700;">${game.homeScore||0} – ${game.awayScore||0}</span><span style="font-weight:800;font-size:13px;opacity:0.65;">${game.away}</span></div>`
+    :`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><span style="font-weight:800;font-size:13px;">${game.home}</span><span style="opacity:0.3;font-size:11px;font-weight:700;">VS</span><span style="font-weight:800;font-size:13px;opacity:0.65;">${game.away}</span></div>`;
+  // ── goals: recent goal scorers ──
+  const goals=(game.goals||[]).slice(-2).map(g=>`⚽ ${g.scorer} ${g.min}'`).join('  ');
+  return `<div class="game-card" onclick="openFbGameMarkets('${game.id}')" style="cursor:pointer;">
+  <div style="padding:12px 12px 4px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span style="font-size:10px;opacity:0.4;">⚽ ${game.league||'Match'}</span>
+      ${badge}
+    </div>
+    ${isHT?`<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:5px 8px;text-align:center;font-size:11px;font-weight:800;color:#fbbf24;margin-bottom:6px;">⏸ Half Time — 2nd Half coming soon</div>`:''}
+    ${scoreRow}
+    ${goals?`<div style="font-size:10px;opacity:0.35;margin-bottom:4px;">${goals}</div>`:''}
+  </div>
+  <div style="display:flex;gap:6px;padding:0 12px 6px;" onclick="event.stopPropagation()">
+    <div class="odds-btn ${selH}" onclick="toggleOdds('${gid}','1x2','h',${oh},'${gameName}','${hn} (1)')"><div style="font-size:9px;opacity:0.5;font-weight:700;">1</div><div style="font-weight:900;font-size:15px;">${oh}</div></div>
+    <div class="odds-btn ${selD}" onclick="toggleOdds('${gid}','1x2','d',${oX},'${gameName}','Draw (X)')"><div style="font-size:9px;opacity:0.5;font-weight:700;">X</div><div style="font-weight:900;font-size:15px;">${oX}</div></div>
+    <div class="odds-btn ${selA}" onclick="toggleOdds('${gid}','1x2','a',${o2},'${gameName}','${an} (2)')"><div style="font-size:9px;opacity:0.5;font-weight:700;">2</div><div style="font-weight:900;font-size:15px;">${o2}</div></div>
+  </div>
+  <div style="padding:4px 12px 10px;display:flex;align-items:center;justify-content:space-between;" onclick="event.stopPropagation()">
+    <span style="font-size:10px;color:#a78bfa;font-weight:700;" onclick="openFbGameMarkets('${game.id}')">📊 More Markets (O/U) ›</span>
+    <span style="font-size:9px;opacity:0.3;">${isLive?(isHT?'Half Time':(half===2?'2nd Half':'1st Half')):'Upcoming'}</span>
+  </div>
+</div>`;
+}
+
+// ── NAVIGATION ──
+const SCREENS={sports:'sportsScreen',aviator:'aviatorScreen',live:'liveScreen',jackpot:'jackpotScreen',mybets:'mybetsScreen',betslip:'betslipScreen',profile:'profileScreen'};
+window.navTo=function(key){
+  Object.values(SCREENS).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('active');});
+  const t=document.getElementById(SCREENS[key]);if(t)t.classList.add('active');
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  const nm={sports:'bnav-home',live:'bnav-live',betslip:'bnav-betslip',mybets:'bnav-mybets',profile:'bnav-profile'};
+  if(nm[key])document.getElementById(nm[key])?.classList.add('active');
+  if(key==='aviator')resizeCvs();
+  if(key==='profile')renderProfileScreen();
+  if(key==='mybets')renderMyBets(0);
+  if(key==='betslip')renderBetslip();
+  if(key==='live')renderLiveGames();
+};
+window.openSidebar=function(){document.getElementById('sidebar').classList.add('open');};
+window.closeSidebar=function(){document.getElementById('sidebar').classList.remove('open');};
+
+// ── SPORTS RENDERING ──
+function renderGames(){
+  const list=document.getElementById('gamesList');
+  // Only Firebase games — upcoming sorted by kickoffTs asc, then live
+  const upcoming=fbFootballGames.filter(g=>g.status==='upcoming').sort((a,b)=>(a.kickoffTs||0)-(b.kickoffTs||0));
+  const live=fbFootballGames.filter(g=>g.status==='live');
+  const toShow=[...upcoming,...live];
+  if(!toShow.length){list.innerHTML='<div class="text-center py-10 text-white/30 text-sm">No games scheduled. Check back soon.</div>';return;}
+  list.innerHTML=toShow.map(g=>buildFbGameCard(g)).join('');
+}
+function renderLiveGames(){
+  const list=document.getElementById('liveGamesList');
+  const live=fbFootballGames.filter(g=>g.status==='live');
+  if(!live.length){list.innerHTML='<div class="text-center py-10 text-white/30 text-sm">No live games right now</div>';return;}
+  list.innerHTML=live.map(g=>buildFbGameCard(g)).join('');
+  const total=live.length;
+  const lc=document.getElementById('liveCount');if(lc){if(total>0){lc.textContent=total+' LIVE';lc.style.display='';}else lc.style.display='none';}
+  const lb=document.getElementById('liveNavBadge');if(lb){if(total>0){lb.textContent=total;lb.style.display='';}else lb.style.display='none';}
+  const sl=document.getElementById('sidebarLiveCount');if(sl){if(total>0){sl.textContent=total;sl.style.display='';}else sl.style.display='none';}
+}
+function isBetSelected(gameId,market,pick){return betslipSelections.some(s=>s.gameId===gameId&&s.market===market&&s.pick===pick);}
+window.toggleOdds=function(gameId,market,pick,odds,gameName,label){
+  const idx=betslipSelections.findIndex(s=>s.gameId===gameId&&s.market===market&&s.pick===pick);
+  if(idx>-1){betslipSelections.splice(idx,1);}
+  else{const ei=betslipSelections.findIndex(s=>s.gameId===gameId&&s.market===market);if(ei>-1)betslipSelections.splice(ei,1);betslipSelections.push({gameId,market,pick,odds,gameName,label});}
+  updateBetslipBadge();renderGames();renderLiveGames();
+};
+function updateBetslipBadge(){const b=document.getElementById('betslipBadge');if(!b)return;if(betslipSelections.length>0){b.textContent=betslipSelections.length;b.style.display='flex';}else b.style.display='none';}
+
+// Sport filter buttons — now filter Firebase games by sport tag
+window.filterSport=function(sport,btn){
+  document.querySelectorAll('.sport-cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const list=document.getElementById('gamesList');
+  let toShow=fbFootballGames.filter(g=>g.status!=='finished');
+  if(sport!=='all') toShow=toShow.filter(g=>(g.sport||'soccer')===sport);
+  toShow=toShow.sort((a,b)=>(a.kickoffTs||0)-(b.kickoffTs||0));
+  if(!toShow.length){list.innerHTML='<div class="text-center py-10 text-white/30 text-sm">No games found</div>';return;}
+  list.innerHTML=toShow.map(g=>buildFbGameCard(g)).join('');
+};
+window.switchHL=function(n){
+  ['hlTab0','hlTab1','hlTab2'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.className='flex-1 py-3 text-sm font-black '+(i===n?'ltab-on':'ltab-off');});
+  renderGames();
+};
+window.closeGameDetail=function(){document.getElementById('gameDetailModal').classList.remove('open');};
+window.addSelectionsToBetslip=function(){closeGameDetail();navTo('betslip');};
+
+window.openFbGameMarkets=function(gameId){
+  const game=fbFootballGames.find(g=>g.id===gameId);
+  if(!game)return;
+  const o=game.odds||{};
+  const isLive=game.status==='live';
+  const isHT=isLive&&game.halfTime===true;
+  const half=game.half||1;
+  const gid='fb_'+game.id.replace(/'/g,"\\'");
+  const hn=game.home.replace(/'/g,"\\'"),an=game.away.replace(/'/g,"\\'");
+  const gameName=hn+' vs '+an;
+
+  document.getElementById('detailSport').textContent='⚽ '+(game.league||'Match');
+  document.getElementById('detailTitle').textContent=game.home+' vs '+game.away;
+
+  // Score row
+  const minLabel=isHT?'⏸ HALF TIME':(half===2?'🔴 2H ':'🔴 1H ')+(game.minute||0)+"'";
+  const scoreRowEl=document.getElementById('detailScoreRow');
+  if(isLive){
+    scoreRowEl.innerHTML=`<span style="font-size:30px;font-weight:900;color:#FFD700;font-family:monospace;">${game.homeScore||0} – ${game.awayScore||0}</span><span style="font-size:11px;font-weight:800;color:${isHT?'#fbbf24':'#f87171'};background:${isHT?'rgba(245,158,11,0.15)':'rgba(239,68,68,0.15)'};border:1px solid ${isHT?'rgba(245,158,11,0.3)':'rgba(239,68,68,0.3)'};border-radius:99px;padding:4px 10px;">${minLabel}</span>`;
+  }else{
+    scoreRowEl.innerHTML=`<span style="font-size:16px;font-weight:800;opacity:0.5;">${game.home} <span style="opacity:0.4;">vs</span> ${game.away}</span>`;
+  }
+
+  // Helper: odds button for betslip
+  const mkOddsBtn=(market,pick,label,oddsVal,sub)=>{
+    const sel=isBetSelected('fb_'+game.id,market,pick)?'selected':'';
+    return `<div class="odds-btn ${sel}" style="flex:1;text-align:center;" onclick="toggleOdds('${gid}','${market}','${pick}',${oddsVal},'${gameName}','${label}');renderDetailMarkets('${gameId}')">
+      <div style="font-size:9px;opacity:0.45;font-weight:700;margin-bottom:2px;">${sub}</div>
+      <div style="font-weight:900;font-size:16px;">${parseFloat(oddsVal).toFixed(2)}</div>
+    </div>`;
+  };
+
+  // Build markets HTML
+  const oh=parseFloat(o['1']||1.85),oX=parseFloat(o['X']||3.40),o2=parseFloat(o['2']||4.20);
+  const ouLines=[
+    {line:'1.5',ov:o['over15'],un:o['under15']},
+    {line:'2.5',ov:o['over25']||1.75,un:o['under25']||2.10},
+    {line:'3.5',ov:o['over35'],un:o['under35']},
+    {line:'4.5',ov:o['over45'],un:o['under45']},
+    {line:'5.5',ov:o['over55'],un:o['under55']},
+  ].filter(m=>m.ov||m.un);
+
+  const mkts=`
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Match Result</div>
+    <div style="display:flex;gap:6px;margin-bottom:16px;">
+      ${mkOddsBtn('1x2','h',hn+' (1)',oh,'1')}
+      ${mkOddsBtn('1x2','d','Draw (X)',oX,'X')}
+      ${mkOddsBtn('1x2','a',an+' (2)',o2,'2')}
+    </div>
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Over / Under Goals</div>
+    ${ouLines.map(m=>`
+    <div style="display:grid;grid-template-columns:64px 1fr 1fr;gap:6px;align-items:center;margin-bottom:6px;">
+      <div style="font-size:13px;font-weight:800;opacity:0.5;">Goals ${m.line}</div>
+      ${m.ov?mkOddsBtn('over'+m.line.replace('.',''),'over','Over '+m.line+' Goals',m.ov,'OVER '+m.line):'<div style="flex:1;opacity:0.2;text-align:center;font-size:12px;">–</div>'}
+      ${m.un?mkOddsBtn('under'+m.line.replace('.',''),'under','Under '+m.line+' Goals',m.un,'UNDER '+m.line):'<div style="flex:1;opacity:0.2;text-align:center;font-size:12px;">–</div>'}
+    </div>`).join('')}
+  `;
+  document.getElementById('detailMarkets').innerHTML=mkts;
+  document.getElementById('gameDetailModal').classList.add('open');
+};
+
+window.renderDetailMarkets=function(gameId){
+  // Re-render markets in open modal to refresh selected state
+  openFbGameMarkets(gameId);
+};
+
+// ── BETSLIP ──
+function renderBetslip(){
+  const sb=document.getElementById('slipBalDisplay');if(sb)sb.textContent=balance.toLocaleString();
+  const c=document.getElementById('betslipSelections'),e=document.getElementById('betslipEmpty'),sa=document.getElementById('betslipStakeArea');
+  if(!betslipSelections.length){c.innerHTML='';e.classList.remove('hidden');sa.classList.add('hidden');return;}
+  e.classList.add('hidden');sa.classList.remove('hidden');
+  c.innerHTML=betslipSelections.map((s,i)=>`<div class="bg-[#111] border border-white/8 rounded-2xl p-3 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="text-xs text-white/40 truncate">${s.gameName}</div><div class="font-bold text-sm">${s.label}</div></div><div class="font-black text-purple-400 text-lg">${s.odds.toFixed(2)}</div><button onclick="removeBetslipItem(${i})" class="w-7 h-7 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 text-sm flex-shrink-0">✕</button></div>`).join('');
+  updateSlipSummary();
+}
+window.removeBetslipItem=function(i){betslipSelections.splice(i,1);updateBetslipBadge();renderBetslip();};
+window.clearBetslip=function(){betslipSelections=[];updateBetslipBadge();renderBetslip();renderGames();};
+window.setSlipStake=function(v){document.getElementById('slipStake').value=v;updateSlipSummary();};
+window.updateSlipSummary=function(){
+  const stake=parseFloat(document.getElementById('slipStake').value)||0;
+  const totalOdds=betslipSelections.reduce((a,s)=>a*s.odds,1);
+  const potWin=Math.floor(stake*totalOdds);
+  const sum=document.getElementById('slipSummary');
+  if(stake>=50){sum.classList.remove('hidden');document.getElementById('slipCount').textContent=betslipSelections.length;document.getElementById('slipOdds').textContent=totalOdds.toFixed(2);document.getElementById('slipWin').textContent='KES '+potWin.toLocaleString();}
+  else sum.classList.add('hidden');
+};
+window.placeSportsBet=async function(){
+  if(!betslipSelections.length){showToast('Add selections first!','red');return;}
+  const stake=parseFloat(document.getElementById('slipStake').value)||0;
+  if(stake<50){showToast('Minimum stake is KES 50','red');return;}
+  if(stake>balance){showToast('Insufficient balance!','red');return;}
+  const totalOdds=betslipSelections.reduce((a,s)=>a*s.odds,1);
+  const potWin=Math.floor(stake*totalOdds);
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'numeric'})+' '+now.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
+  const betId='SB'+Date.now();
+  // Check if any selection is from a real Firebase game (id starts with 'fb_')
+  const fbSelections=betslipSelections.filter(s=>s.gameId&&s.gameId.startsWith('fb_'));
+  const hasRealGame=fbSelections.length>0;
+  if(hasRealGame){
+    // Save to Firestore footballBets
+    const realGameId=fbSelections[0].gameId.replace('fb_','');
+    try{
+      await addDoc(collection(db,'footballBets'),{
+        playerId:USER.uid,
+        playerName:userData.name||userData.displayName||userData.phone||USER.uid,
+        gameId:realGameId,
+        picks:betslipSelections.map(s=>({
+          market:s.market,pick:s.pick,label:s.label,odds:s.odds,
+          gameName:s.gameName
+        })),
+        stake,totalOdds:parseFloat(totalOdds.toFixed(2)),potential:potWin,
+        status:'pending',placedAt:Date.now(),createdAt:serverTimestamp()
+      });
+      await updateDoc(doc(db,'users',USER.uid),{balance:balance-stake,'stats.sports_staked':increment(stake)});
+    }catch(e){showToast('Error saving bet: '+e.message,'red');return;}
+  }
+  // Local tracking + balance deduct
+  sportsBets.unshift({id:betId,selections:[...betslipSelections],stake,totalOdds:parseFloat(totalOdds.toFixed(2)),potWin,status:'pending',date:dateStr,isFb:hasRealGame});
+  balance-=stake;updateBalDisplay();
+  if(!hasRealGame){
+    // For static games, deduct balance in Firestore too
+    try{await updateDoc(doc(db,'users',USER.uid),{balance:balance,'stats.sports_staked':increment(stake)});}catch(e){}
+  }
+  betslipSelections=[];updateBetslipBadge();renderBetslip();renderGames();
+  showToast('Bet placed! KES '+stake+' · Pot win KES '+potWin.toLocaleString(),'emerald');
+  navTo('mybets');
+};
+
+// ── MY BETS ──
+let myBetTabIndex=0;
+window.switchMyBetTab=function(n){
+  myBetTabIndex=n;
+  ['mybetTab0','mybetTab1','mybetTab2'].forEach((id,i)=>{document.getElementById(id).className='flex-1 py-2.5 text-sm font-bold rounded-3xl '+(i===n?'tab-on':'tab-off');});
+  renderMyBets(n);
+};
+function renderMyBets(tab){
+  const statuses=['pending','won','lost'];const filter=statuses[tab];
+  // Combine local + Firestore football bets
+  const allLocal=sportsBets.filter(b=>b.status===filter);
+  const allFb=fbMyFootBets.filter(b=>b.status===filter&&!sportsBets.some(lb=>lb.isFb&&lb.picks===b.picks));
+  const list=document.getElementById('mybetsList'),empty=document.getElementById('mybetsEmpty');
+  if(!allLocal.length&&!allFb.length){list.innerHTML='';empty.classList.remove('hidden');return;}
+  empty.classList.add('hidden');
+  // Render local bets
+  const localHTML=allLocal.map(b=>`<div class="bet-card"><div class="flex items-center justify-between mb-2"><div class="text-xs text-white/40 font-mono">${b.id}</div><span class="bet-status-${b.status}">${b.status.toUpperCase()}</span></div><div class="space-y-1 mb-3">${b.selections.map(s=>`<div class="flex items-center justify-between text-sm"><div class="flex-1 min-w-0"><div class="text-white/50 text-xs truncate">${s.gameName}</div><div class="font-bold truncate">${s.label}</div></div><div class="font-black text-purple-400 ml-2">${s.odds.toFixed(2)}</div></div>`).join('')}</div><div class="border-t border-white/6 pt-2 flex items-center justify-between text-sm"><div class="text-white/40 text-xs">${b.date}</div><div class="text-right"><div class="text-white/40 text-xs">Stake: <span class="text-white font-bold">KES ${b.stake.toLocaleString()}</span></div><div class="text-xs mt-0.5">${b.status==='pending'?`<span class="text-yellow-400 font-bold">Pot Win: KES ${b.potWin.toLocaleString()}</span>`:b.status==='won'?`<span class="text-emerald-400 font-bold">+KES ${b.potWin.toLocaleString()}</span>`:`<span class="text-red-400 font-bold">-KES ${b.stake.toLocaleString()}</span>`}</div></div></div></div>`).join('');
+  // Render Firebase football bets
+  const fbHTML=allFb.map(b=>{
+    const game=fbFootballGames.find(g=>g.id===b.gameId);
+    const gl=game?game.home+' vs '+game.away:'Match';
+    const picks=(b.picks||[]).map(p=>`<div class="flex items-center justify-between text-sm"><div class="flex-1 min-w-0"><div class="text-white/50 text-xs truncate">${gl}</div><div class="font-bold truncate">${p.label}</div></div><div class="font-black text-purple-400 ml-2">${(p.odds||1).toFixed(2)}</div></div>`).join('');
+    const payoutText=b.status==='pending'?`<span class="text-yellow-400 font-bold">Pot Win: KES ${(b.potential||0).toLocaleString()}</span>`:b.status==='won'?`<span class="text-emerald-400 font-bold">+KES ${(b.payout||b.potential||0).toLocaleString()}</span>`:`<span class="text-red-400 font-bold">-KES ${(b.stake||0).toLocaleString()}</span>`;
+    return `<div class="bet-card" style="border-color:rgba(160,32,240,0.25);"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="text-xs bg-purple-500/15 text-purple-400 px-2 py-0.5 rounded-full font-bold">⚽ FOOTBALL</span></div><span class="bet-status-${b.status}">${b.status.toUpperCase()}</span></div><div class="space-y-1 mb-3">${picks}</div><div class="border-t border-white/6 pt-2 flex items-center justify-between text-sm"><div class="text-white/40 text-xs">${new Date(b.placedAt||Date.now()).toLocaleTimeString('en-KE')}</div><div class="text-right"><div class="text-white/40 text-xs">Stake: <span class="text-white font-bold">KES ${(b.stake||0).toLocaleString()}</span></div><div class="text-xs mt-0.5">${payoutText}</div></div></div></div>`;
+  }).join('');
+  list.innerHTML=fbHTML+localHTML;
+}
+
+// ── PROFILE ──
+function renderProfileScreen(){
+  const name=userData?(userData.name||userData.displayName||userData.username||'Player').split(' ')[0]:'Player';
+  const s=(userData&&userData.stats)||{};
+  const av=document.getElementById('profileAvatar');if(av)av.textContent=name[0].toUpperCase();
+  const pn=document.getElementById('profileName');if(pn)pn.textContent=name;
+  const pp=document.getElementById('profilePhone');if(pp)pp.textContent=userData?.phone||'—';
+  const pe=document.getElementById('profileEmail');if(pe)pe.textContent=userData?.email||USER?.email||'—';
+  const pb=document.getElementById('profileBal');if(pb)pb.textContent=balance.toLocaleString();
+  const pd=document.getElementById('profileDeposited');if(pd)pd.textContent=(s.deposited||0).toLocaleString();
+  const pw=document.getElementById('profileWon');if(pw)pw.textContent=(s.won||0).toLocaleString();
+  const pwt=document.getElementById('profileWithdrawn');if(pwt)pwt.textContent=(s.withdrawn||0).toLocaleString();
+}
+
+// ── STORE CONFIG ──
+async function loadStoreConfig(){
+  try{if(unsubStore)unsubStore();unsubStore=onSnapshot(doc(db,'siteConfig','storeSettings'),snap=>{if(!snap.exists())return;const d=snap.data();storeConfig={depositsEnabled:d.depositsEnabled!==false,minDeposit:d.minDeposit??100,maxDeposit:d.maxDeposit??100000,withdrawalsEnabled:d.withdrawalsEnabled!==false,minWithdrawal:d.minWithdrawal??200,maxWithdrawal:d.maxWithdrawal??50000,withdrawLockAmount:d.withdrawLockAmount??500,minBet:d.minBet??50};_applyStoreConfigToUI();});}catch(e){console.warn(e.message);}
+}
+function _applyStoreConfigToUI(){
+  const mwn=document.getElementById('minWdNote');if(mwn)mwn.textContent='Minimum withdrawal: KES '+storeConfig.minWithdrawal.toLocaleString();
+  const mwi=document.getElementById('minWdInlineNote');if(mwi)mwi.textContent='KES '+storeConfig.minWithdrawal.toLocaleString();
+  const di=document.getElementById('depInput');if(di){di.min=storeConfig.minDeposit;di.placeholder=`Amount (KES min. ${storeConfig.minDeposit.toLocaleString()})`;}
+  const mdn=document.getElementById('minDepNote');if(mdn)mdn.textContent=`Minimum deposit: KES ${storeConfig.minDeposit.toLocaleString()} · Powered by PayHero`;
+  const wa=document.getElementById('wdAmount');if(wa){wa.min=storeConfig.minWithdrawal;wa.placeholder=`Min. KES ${storeConfig.minWithdrawal.toLocaleString()}`;}
+  // Apply minBet — clamp each slot's bet amount up to the new minimum
+  const mb=MIN_BET();
+  for(let s=1;s<=2;s++){
+    if(bets&&bets[s]&&bets[s].amount<mb){
+      bets[s].amount=mb;
+      const al=document.getElementById('betAmt'+s);if(al)al.textContent=mb.toLocaleString();
+      const bl=document.getElementById('betLbl'+s);if(bl)bl.textContent='KES '+mb.toLocaleString();
+    }
+  }
+  wdAmtChangedInternal();
+}
+
+// ── CRASH QUEUE ──
+let crashQueue=[],crashIndex=0,unsubQueue=null,activeRoundId='';
+const QUEUE_SIZE=100;
+function genOneCrash(){const r=Math.random();if(r<0.40)return parseFloat((1+Math.random()*1.5).toFixed(2));if(r<0.70)return parseFloat((2+Math.random()*4).toFixed(2));if(r<0.88)return parseFloat((6+Math.random()*14).toFixed(2));return parseFloat((20+Math.random()*110).toFixed(2));}
+function genQueue(){return Array.from({length:QUEUE_SIZE},genOneCrash);}
+async function publishNextRound(points,index){if(index>=points.length){points=genQueue();index=0;}const nri=USER.uid.slice(0,6)+'_'+Date.now();const cv=points[index];try{await setDoc(doc(db,'gameRounds','queue'),{points,index:index+1,roundId:nri,crashAt:cv,bettingStart:Date.now(),roundStart:0});}catch(e){console.warn(e);}}
+let bettingTimer=null,crashTimer=null;
+
+onAuthStateChanged(auth,async user=>{
+  if(!user){window.location.replace('index.html');return;}
+  USER=user;await loadUserData();await loadStoreConfig();
+  document.getElementById('appLoader').classList.add('gone');
+  initApp();startQueueListener();
+  startFootballGamesListener();
+  startMyFootBetsListener();
+});
+
+async function loadUserData(){
+  const ref=doc(db,'users',USER.uid);const snap=await getDoc(ref);
+  if(snap.exists()){userData=snap.data();balance=userData.balance||0;crashHist=userData.crashHistory||crashHist;}
+  else{const p=sessionStorage.getItem('pendingProfile');if(p){try{const d=JSON.parse(p);if(d.uid===USER.uid){await USER.getIdToken(true);await setDoc(ref,{name:d.name||'',email:d.email||USER.email||'',phone:d.phone||'',uid:USER.uid,balance:0,createdAt:serverTimestamp(),stats:{deposited:0,withdrawn:0,won:0,rounds:0},transactions:[],crashHistory:crashHist});sessionStorage.removeItem('pendingProfile');const fs=await getDoc(ref);if(fs.exists()){userData=fs.data();balance=userData.balance||0;crashHist=userData.crashHistory||crashHist;}}}catch(e){console.error(e.message);}}else{try{await USER.getIdToken(true);const el=(USER.email||'').split('@')[0];await setDoc(ref,{name:USER.displayName||el,email:USER.email||'',phone:el,uid:USER.uid,balance:0,createdAt:serverTimestamp(),stats:{deposited:0,withdrawn:0,won:0,rounds:0},transactions:[],crashHistory:crashHist});}catch(e){console.error(e.message);}}}
+  if(unsubUser)unsubUser();
+  unsubUser=onSnapshot(ref,snap=>{if(!snap.exists())return;const d=snap.data();userData=d;balance=d.balance||0;updateBalDisplay();});
+}
+async function saveUserField(f){await updateDoc(doc(db,'users',USER.uid),f);}
+
+// ── WD POPUP ──
+let _wdPopupTimer=null;
+function showWdPopup(type,title,message){
+  if(_wdPopupTimer){clearTimeout(_wdPopupTimer);_wdPopupTimer=null;}
+  const ov=document.getElementById('wdPopupOverlay'),box=document.getElementById('wdPopupBox'),isSuc=type==='success';
+  box.style.border=isSuc?'1.5px solid rgba(16,185,129,0.4)':'1.5px solid rgba(239,68,68,0.4)';
+  document.getElementById('wdPopupIcon').textContent=isSuc?'✅':'❌';
+  const ttl=document.getElementById('wdPopupTitle');ttl.textContent=title;ttl.style.color=isSuc?'#34d399':'#f87171';
+  document.getElementById('wdPopupMsg').innerHTML=message;
+  const bar=document.getElementById('wdPopupBar');bar.style.background=isSuc?'#059669':'#ef4444';
+  const btn=document.getElementById('wdPopupBtn');btn.style.background=isSuc?'linear-gradient(135deg,#059669,#047857)':'linear-gradient(135deg,#ef4444,#dc2626)';btn.style.color='white';btn.textContent=isSuc?'BACK TO GAME':'CLOSE';
+  ov.style.display='flex';bar.style.transition='none';bar.style.width='100%';
+  requestAnimationFrame(()=>{bar.style.transition='width 5s linear';bar.style.width='0%';});
+  _wdPopupTimer=setTimeout(()=>closeWdPopup(),5000);
+}
+function closeWdPopup(){if(_wdPopupTimer){clearTimeout(_wdPopupTimer);_wdPopupTimer=null;}document.getElementById('wdPopupOverlay').style.display='none';}
+window.closeWdPopup=closeWdPopup;
+
+function updateBalDisplay(){
+  const fmt=balance.toLocaleString();
+  ['balDisplay','wdBalDisplay','wdScreenBal','walletBal','slipBalDisplay'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=fmt;});
+  const pb=document.getElementById('profileBal');if(pb)pb.textContent=fmt;
+}
+
+// ── CRASH QUEUE LISTENER ──
+function startQueueListener(){
+  if(unsubQueue)unsubQueue();
+  unsubQueue=onSnapshot(doc(db,'gameRounds','queue'),async snap=>{
+    if(!snap.exists()){await publishNextRound(genQueue(),0);return;}
+    const d=snap.data(),rid=d.roundId||'',cv=d.crashAt||2.0,bms=d.bettingStart||Date.now(),rms=d.roundStart||0;
+    if(rid!==activeRoundId){
+      activeRoundId=rid;clearTimeout(bettingTimer);clearTimeout(crashTimer);cancelAnimationFrame(rafId);isPlaying=false;hasCrashed=false;
+      const io=document.getElementById('idleOverlay');if(io)io.style.display='flex';
+      const md=document.getElementById('multDisplay');if(md)md.style.display='flex';
+      const cd=document.getElementById('crashDisplay');if(cd)cd.style.display='none';
+      const mv=document.getElementById('multValue');if(mv)mv.textContent='1.00x';
+      roundNum++;const rb=document.getElementById('roundBadge');if(rb)rb.textContent='#'+roundNum;
+      crashQueue=d.points||[];crashIndex=d.index||0;
+      const _now=Date.now(),elapsed=(bms>0&&bms<_now)?(_now-bms):0;
+      const remaining=Math.min(7000,Math.max(500,7000-elapsed));
+      startCountdown(Math.min(7,Math.max(1,Math.ceil(remaining/1000))),()=>{});
+      bettingTimer=setTimeout(()=>startRoundLocally(cv,Date.now()),remaining);
+    }
+    if(rms>0&&rid===activeRoundId&&!isPlaying){clearTimeout(bettingTimer);startRoundLocally(cv,rms);}
+  });
+}
+function startRoundLocally(crash,serverStart){
+  if(isPlaying)return;clearTimeout(bettingTimer);
+  crashAt=crash;roundStart=serverStart;isPlaying=true;hasCrashed=false;curMult=1.00;
+  const io=document.getElementById('idleOverlay');if(io)io.style.display='none';
+  const md=document.getElementById('multDisplay');if(md)md.style.display='flex';
+  const cd=document.getElementById('crashDisplay');if(cd)cd.style.display='none';
+  const mv=document.getElementById('multValue');if(mv)mv.textContent='1.00x';
+  for(let s=1;s<=2;s++){if(bets[s].queued){bets[s].active=true;bets[s].cashed=false;bets[s].queued=false;const bb=document.getElementById('betBtn'+s);if(bb)bb.disabled=false;}}
+  buildLiveBets();renderLiveBets();refreshBetUI();seedOscillator();cancelAnimationFrame(rafId);if(cvs)drawFrame();
+  const _rs=(roundStart>0&&roundStart<=Date.now())?roundStart:Date.now();
+  const el=Date.now()-_rs,totalMs=(Math.log(Math.max(1.01,crashAt))/RATE)*1000,remaining=Math.max(0,totalMs-el);
+  crashTimer=setTimeout(()=>{if(isPlaying)endRoundLocally(crashAt);},remaining);
+  if(!roundStart||roundStart===Date.now())updateDoc(doc(db,'gameRounds','queue'),{roundStart:serverStart}).catch(()=>{});
+}
+async function endRoundLocally(crash){
+  if(!isPlaying)return;isPlaying=false;hasCrashed=true;curMult=crash;crashAt=crash;cancelAnimationFrame(rafId);
+  crashHist.unshift(parseFloat(crash.toFixed(2)));if(crashHist.length>20)crashHist.pop();
+  saveUserField({'stats.rounds':increment(1)}).catch(()=>{});renderHistory();
+  const md=document.getElementById('multDisplay');if(md)md.style.display='none';
+  const crd=document.getElementById('crashDisplay');if(crd)crd.style.display='flex';
+  const cv=document.getElementById('crashValue');if(cv)cv.textContent=crash.toFixed(2)+'x';
+  for(let s=1;s<=2;s++){if(bets[s].active&&!bets[s].cashed){bets[s].active=false;showToast(`BET ${s} crashed @ ${crash.toFixed(2)}x — Lost KES ${bets[s].amount}`,'red');}}
+  refreshBetUI();finalizeLiveBets();renderLiveBets();updateWithdrawals();renderWithdrawals();if(cvs)drawFrame();
+  await new Promise(r=>setTimeout(r,2200));
+  const io=document.getElementById('idleOverlay');if(io)io.style.display='flex';
+  await publishNextRound(crashQueue,crashIndex);
+}
+async function addTransaction(tx){
+  const now=new Date();tx.time=now.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'})+' '+now.toLocaleDateString('en-KE',{day:'2-digit',month:'short'});tx.uid=USER.uid;
+  await updateDoc(doc(db,'users',USER.uid),{transactions:arrayUnion(tx)});
+}
+window.doLogout=async function(){if(unsubUser)unsubUser();if(unsubStore)unsubStore();await signOut(auth);window.location.replace('index.html');};
+
+// ── DEPOSIT ──
+let depPollTimer=null,depRef=null,depExtRef=null,depAmount=0;
+window.setDepAmt=function(v){document.getElementById('depInput').value=v;};
+window.depAmtChanged=function(){};
+window.openDeposit=function(){
+  document.getElementById('depositScreen').classList.add('open');
+  document.getElementById('depStep1').style.display='block';document.getElementById('depStep2').style.display='none';
+  document.getElementById('depPending').style.display='none';document.getElementById('depSuccess').style.display='none';document.getElementById('depFailed').style.display='none';
+  document.getElementById('depErr').classList.add('hidden');document.getElementById('depInput').value='';
+  document.getElementById('depBtnTxt').textContent='PAY WITH M-PESA';document.getElementById('depBtn').disabled=false;
+  const phone=(userData&&userData.phone)?userData.phone:(USER&&USER.email?USER.email.split('@')[0]:'—');
+  document.getElementById('depPhoneDisplay').textContent=phone;
+};
+window.closeDeposit=function(){window.cancelPoll&&window.cancelPoll();document.getElementById('depositScreen').classList.remove('open');};
+window.initiateDeposit=async function(){
+  const amt=parseInt(document.getElementById('depInput').value)||0;
+  const phone=userData?.phone||(USER?.email?.split('@')[0]||'');
+  if(!storeConfig.depositsEnabled){showToast('Deposits temporarily disabled.','red');return;}
+  if(amt<storeConfig.minDeposit){showToast(`Minimum deposit is KES ${storeConfig.minDeposit.toLocaleString()}`,'red');return;}
+  if(amt>storeConfig.maxDeposit){showToast(`Maximum deposit is KES ${storeConfig.maxDeposit.toLocaleString()}`,'red');return;}
+  document.getElementById('depBtn').disabled=true;document.getElementById('depBtn').innerHTML=`<div class="spinner"></div>`;
+  try{
+    const extRef=`DEP_${USER.uid}_${Date.now()}`;
+    const response=await fetch(`${BACKEND_URL}/api/deposit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt,phone,userId:USER.uid,externalRef:extRef})});
+    const data=await response.json();if(!response.ok)throw new Error(data.error);
+    document.getElementById('depStep1').style.display='none';document.getElementById('depStep2').style.display='flex';
+    document.getElementById('depSuccess').style.display='none';document.getElementById('depFailed').style.display='none';document.getElementById('depPending').style.display='flex';
+    document.getElementById('depPhoneDisplayPending').textContent=phone;document.getElementById('depAmtDisplay').textContent='KES '+amt.toLocaleString();document.getElementById('depRefDisplay').textContent=data.reference;
+    depRef=data.reference;depExtRef=extRef;depAmount=amt;startDepPoll();
+  }catch(error){showToast(error.message,'red');document.getElementById('depBtn').disabled=false;document.getElementById('depBtn').innerHTML=`<span id="depBtnTxt">PAY WITH M-PESA</span>`;}
+};
+function startDepPoll(){
+  let attempts=0;const MAX=24;
+  async function poll(){
+    attempts++;if(attempts>MAX){showDepFailed('Payment timed out.');showToast('Payment timed out ❌','red');return;}
+    try{
+      const refs=[depExtRef,depRef].filter(Boolean);let data={status:'PENDING'};
+      for(const ref of refs){const res=await fetch(`${BACKEND_URL}/api/deposit/status?reference=${encodeURIComponent(ref)}`);if(!res.ok)continue;const d=await res.json();if(d.status==='SUCCESS'||d.status==='FAILED'){data=d;break;}}
+      if(data.status==='SUCCESS'){
+        clearTimeout(depPollTimer);if(window._depBarInterval){clearInterval(window._depBarInterval);window._depBarInterval=null;}
+        const paid=data.amount||depAmount;balance+=paid;updateBalDisplay();showDepSuccess(paid);showToast(`+KES ${paid.toLocaleString()} deposited ✅`,'emerald');
+        try{const now=new Date();const ts=now.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'})+' '+now.toLocaleDateString('en-KE',{day:'2-digit',month:'short'});await updateDoc(doc(db,'users',USER.uid),{balance:increment(paid),'stats.deposited':increment(paid),transactions:arrayUnion({type:'deposit',amount:paid,method:'M-Pesa',status:'success',note:'M-Pesa deposit',time:ts,uid:USER.uid})});}catch(e){console.error(e.message);}
+      }else if(data.status==='FAILED'){showDepFailed('Payment failed or M-Pesa PIN was wrong.');showToast('Payment failed ❌','red');}
+      else depPollTimer=setTimeout(poll,5000);
+    }catch(e){depPollTimer=setTimeout(poll,5000);}
+  }
+  depPollTimer=setTimeout(poll,8000);
+  const maxMs=120000,st=Date.now();
+  const bi=setInterval(()=>{const pct=Math.min(98,((Date.now()-st)/maxMs)*100);const bar=document.getElementById('depPollBar');const msg=document.getElementById('depPollMsg');if(bar)bar.style.width=pct+'%';if(msg)msg.textContent=pct<20?'Waiting for M-Pesa confirmation…':pct<50?'Checking payment status…':'Still waiting…';},1000);
+  window._depBarInterval=bi;
+}
+function showDepSuccess(amt){clearTimeout(depPollTimer);if(window._depBarInterval){clearInterval(window._depBarInterval);window._depBarInterval=null;}document.getElementById('depPending').style.display='none';document.getElementById('depSuccess').style.display='flex';document.getElementById('depSuccessMsg').textContent='Your account has been credited';document.getElementById('depSuccessAmt').textContent='+KES '+amt.toLocaleString();}
+function showDepFailed(msg){clearTimeout(depPollTimer);if(window._depBarInterval){clearInterval(window._depBarInterval);window._depBarInterval=null;}document.getElementById('depPending').style.display='none';document.getElementById('depFailed').style.display='flex';document.getElementById('depFailedMsg').textContent=msg;}
+window.cancelPoll=function(){clearTimeout(depPollTimer);if(window._depBarInterval){clearInterval(window._depBarInterval);window._depBarInterval=null;}document.getElementById('depositScreen').classList.remove('open');};
+window.retryDeposit=function(){clearTimeout(depPollTimer);if(window._depBarInterval){clearInterval(window._depBarInterval);window._depBarInterval=null;}document.getElementById('depStep2').style.display='none';['depPending','depFailed','depSuccess'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('depStep1').style.display='block';document.getElementById('depBtn').disabled=false;document.getElementById('depBtn').innerHTML=`<span id="depBtnTxt">PAY WITH M-PESA</span>`;};
+
+// ── WITHDRAW ──
+let selectedMethod='mpesa';
+window.openWithdraw=function(){document.getElementById('withdrawScreen').classList.add('open');document.getElementById('wdScreenBal').textContent=balance.toLocaleString();document.getElementById('wdAmount').value='';document.getElementById('wdPhone').value='';document.getElementById('wdErr').classList.add('hidden');document.getElementById('wdSummary').classList.add('hidden');document.getElementById('wdBtnTxt').textContent='CONFIRM WITHDRAWAL';document.getElementById('wdConfirmBtn').disabled=false;selectMethod('mpesa');};
+window.closeWithdraw=function(){document.getElementById('withdrawScreen').classList.remove('open');};
+window.selectMethod=function(m){selectedMethod=m;['mpesa','airtel','bank'].forEach(id=>{const card=document.getElementById('method-'+id),dot=document.getElementById('dot-'+id);if(id===m){card.classList.add('selected');dot.innerHTML='<div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div>';if(dot.classList.contains('border-white/20'))dot.classList.replace('border-white/20','border-purple-500');}else{card.classList.remove('selected');dot.innerHTML='<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';if(dot.classList.contains('border-purple-500'))dot.classList.replace('border-purple-500','border-white/20');}});const labels={mpesa:'M-Pesa Number',airtel:'Airtel Money Number',bank:'Bank Account Number'};const phs={mpesa:'07XX XXX XXX',airtel:'07XX XXX XXX',bank:'Account number'};document.getElementById('phoneLabel').textContent=labels[m];document.getElementById('wdPhone').placeholder=phs[m];};
+window.setWdAmt=function(v){document.getElementById('wdAmount').value=v;wdAmtChanged();};
+window.setWdAmtAll=function(){document.getElementById('wdAmount').value=Math.floor(balance);wdAmtChanged();};
+function wdAmtChangedInternal(){const val=parseInt(document.getElementById('wdAmount').value)||0,MIN=storeConfig.minWithdrawal,sum=document.getElementById('wdSummary');if(val>=MIN){sum.classList.remove('hidden');document.getElementById('sumAmt').textContent='KES '+val.toLocaleString();document.getElementById('sumReceive').textContent='KES '+val.toLocaleString();}else sum.classList.add('hidden');}
+window.wdAmtChanged=wdAmtChangedInternal;
+window.confirmWithdraw=async function(){
+  const val=parseInt(document.getElementById('wdAmount').value)||0;const phone=document.getElementById('wdPhone').value.trim();
+  const td=(userData?.stats?.deposited)||0,LT=storeConfig.withdrawLockAmount,MIN=storeConfig.minWithdrawal,MAX=storeConfig.maxWithdrawal;
+  if(!storeConfig.withdrawalsEnabled){showWdPopup('error','🚫 Unavailable','Withdrawals temporarily disabled.');return;}
+  if(td===0){showWdPopup('error','🔒 Not Activated',`Deposit at least KES ${storeConfig.minDeposit.toLocaleString()} to activate.`);return;}
+  if(LT>0&&td<LT){showWdPopup('error','🔒 Locked',`Deposit KES ${(LT-td).toLocaleString()} more to unlock.`);return;}
+  if(balance<MIN){showWdPopup('error','❌ Low Balance',`Balance KES ${balance.toLocaleString()} is below minimum.`);return;}
+  if(val<MIN){showWdPopup('error','❌ Too Low',`Min withdrawal is KES ${MIN.toLocaleString()}.`);return;}
+  if(MAX>0&&val>MAX){showWdPopup('error','❌ Too High',`Max withdrawal is KES ${MAX.toLocaleString()}.`);return;}
+  if(val>balance){showWdPopup('error','❌ Insufficient',`You only have KES ${balance.toLocaleString()}.`);return;}
+  if(!phone){showWdPopup('error','❌ Phone Required',`Enter your ${document.getElementById('phoneLabel').textContent}.`);return;}
+  document.getElementById('wdConfirmBtn').disabled=true;document.getElementById('wdConfirmBtn').innerHTML=`<div class="spinner"></div>`;
+  try{
+    balance-=val;const mn={mpesa:'M-Pesa',airtel:'Airtel Money',bank:'Bank Transfer'};
+    await saveUserField({balance:increment(-val),'stats.withdrawn':increment(val)});
+    const wid=`${USER.uid}_${Date.now()}`;const now=new Date();const ts=now.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'})+' '+now.toLocaleDateString('en-KE',{day:'2-digit',month:'short'});
+    await setDoc(doc(db,'pendingWithdrawals',wid),{uid:USER.uid,email:USER.email||'',name:(userData&&(userData.name||userData.displayName||userData.username))||'',amount:val,method:mn[selectedMethod],phone,status:'pending',createdAt:serverTimestamp(),time:ts});
+    await addTransaction({type:'withdraw',amount:val,method:mn[selectedMethod],status:'pending',note:'To '+phone});
+    window.closeWithdraw();showWdPopup('success','Withdrawal Queued! ⏳',`<strong>KES ${val.toLocaleString()}</strong> queued to <strong>${phone}</strong>.`);
+    updateBalDisplay();renderWithdrawals();
+  }catch(e){balance+=val;document.getElementById('wdConfirmBtn').disabled=false;document.getElementById('wdConfirmBtn').innerHTML=`<span id="wdBtnTxt">CONFIRM WITHDRAWAL</span>`;showWdPopup('error','❌ Failed',e.message||'Try again.');}
+};
+
+// ── WALLET ──
+window.openWallet=async function(){
+  document.getElementById('walletScreen').classList.add('open');document.getElementById('walletBal').textContent=balance.toLocaleString();
+  const snap=await getDoc(doc(db,'users',USER.uid));if(!snap.exists())return;
+  const d=snap.data(),s=d.stats||{};
+  document.getElementById('statDeposited').textContent=(s.deposited||0).toLocaleString();document.getElementById('statWithdrawn').textContent=(s.withdrawn||0).toLocaleString();document.getElementById('statWonTotal').textContent=Math.max(0,s.won||0).toLocaleString();document.getElementById('statRounds').textContent=(s.rounds||0).toLocaleString();
+  renderTxList(d.transactions||[]);
+};
+window.closeWallet=function(){document.getElementById('walletScreen').classList.remove('open');};
+function renderTxList(txs){
+  const list=document.getElementById('txList'),empty=document.getElementById('txEmpty');document.getElementById('txCount').textContent=txs.length;
+  if(!txs.length){list.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');
+  const icons={deposit:'⬆️',withdraw:'⬇️',win:'🏆',loss:'💔'};const colors={deposit:'text-orange-400',withdraw:'text-emerald-400',win:'text-purple-400',loss:'text-red-400'};
+  list.innerHTML=[...txs].reverse().slice(0,30).map(tx=>`<div class="flex items-center gap-3 bg-[#111] rounded-2xl px-4 py-3 border border-white/5"><div class="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center text-base flex-shrink-0">${icons[tx.type]||'💳'}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm capitalize">${tx.type}</div><div class="text-white/35 text-xs truncate">${tx.note||tx.method||''} · ${tx.time||''}</div></div><div class="text-right flex-shrink-0"><div class="font-black font-mono text-sm ${colors[tx.type]||'text-white'}">${tx.type==='withdraw'||tx.type==='loss'?'-':'+'}KES ${Number(tx.amount).toLocaleString()}</div><div class="text-xs mt-0.5"><span class="px-2 py-0.5 rounded-full font-bold ${tx.status==='success'?'status-success':'status-pending'}">${(tx.status||'pending').toUpperCase()}</span></div></div></div>`).join('');
+}
+
+// ── GAME ENGINE ──
+const RATE=0.085;
+function MIN_BET(){return storeConfig.minBet??50;}
+const BASE_PLAYERS=[{user:'Lucy Kimani',bet:595},{user:'Michael O.',bet:2856},{user:'Emily Wekesa',bet:579},{user:'Mulee',bet:515},{user:'Njugush 256',bet:1302},{user:'Beatrice M.',bet:1074},{user:'Brian J.',bet:2228},{user:'Kevoh707',bet:13236},{user:'Zawadi',bet:800},{user:'Kamau K.',bet:450}];
+const GUEST_NAMES=['Phidalis','JumaK','Wanjiku99','Steve254','Akinyi','Bosco','Njeri','Wafula'];
+const CHAT_SEED=[{user:'Emily',msg:'93x last round!!! 🔥'},{user:'BrianJ',msg:'Cashed at 2.8x, safe play 😎'},{user:'Njugu256',msg:'Anyone going all-in next round?'},{user:'Mulee',msg:'AI bet said 1.8x — hit it 💰'},{user:'Kevoh707',msg:"13k stake let's goooo"}];
+const WITHDRAW_SEED=[{user:'Lucy Kimani',amount:4055},{user:'Michael O.',amount:3319},{user:'Kevoh707',amount:14956},{user:'Emily Wekesa',amount:2188},{user:'Beatrice M.',amount:1943}];
+let roundNum=4821,isPlaying=false,hasCrashed=false,curMult=1.00,crashAt=0,roundStart=0,rafId=null,cdTimer=null,soundOn=true;
+let bets={1:{amount:100,active:false,cashed:false,queued:false,autoOn:true,autoAt:1.20},2:{amount:200,active:false,cashed:false,queued:false,autoOn:false,autoAt:2.00}};
+let liveBetsData=[],withdrawData=[...WITHDRAW_SEED];const chatLog=[...CHAT_SEED];
+const cvs=document.getElementById('gameCanvas'),ctx=cvs?cvs.getContext('2d'):null;
+let cvW=0,cvH=0;
+function resizeCvs(){if(!cvs)return;const r=cvs.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cvs.width=r.width*dpr;cvs.height=r.height*dpr;cvW=r.width;cvH=r.height;ctx.setTransform(dpr,0,0,dpr,0,0);}
+let oscYOffset=0,idleStartTime=0,idleActive=false;
+function seedOscillator(){oscYOffset=0;idleActive=false;idleStartTime=0;}
+function drawFrame(){
+  if(!ctx)return;ctx.clearRect(0,0,cvW*3,cvH*3);
+  const P=26,W=cvW,H=cvH;ctx.strokeStyle='rgba(160,32,240,0.10)';ctx.lineWidth=0.5;
+  for(let x=P;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,P);ctx.lineTo(x,H-P);ctx.stroke();}
+  for(let y=P;y<H;y+=42){ctx.beginPath();ctx.moveTo(P,y);ctx.lineTo(W-P,y);ctx.stroke();}
+  if(!isPlaying&&!hasCrashed)return;
+  const now=Date.now(),elapsed=(now-roundStart)/1000;curMult=hasCrashed?crashAt:Math.exp(RATE*elapsed);
+  const areaX=W-P*2,areaY=H-P*2,DISPLAY_CAP=0.68,RISE_CAP=0.60,vizSpeed=0.020;
+  const rawVizProg=hasCrashed?DISPLAY_CAP:Math.min(DISPLAY_CAP,elapsed*vizSpeed);
+  const baseX=vp=>P+areaX*vp;const baseY=vp=>Math.max(P+10,(H-P)-areaY*RISE_CAP*Math.pow(vp/DISPLAY_CAP,1.55));
+  const atCap=!hasCrashed&&(elapsed*vizSpeed>=DISPLAY_CAP);
+  if(isPlaying&&atCap){if(!idleActive){idleActive=true;idleStartTime=now;}oscYOffset=28*Math.sin((2*Math.PI*(now-idleStartTime))/3200);}else if(!atCap){idleActive=false;oscYOffset=0;}
+  const STEPS=90,points=[];
+  for(let i=0;i<=STEPS;i++){const vp=(i/STEPS)*rawVizProg,blend=atCap?Math.pow((i/STEPS),3.0):0;points.push({x:baseX(vp),y:baseY(vp)+oscYOffset*blend});}
+  const tip=points[points.length-1];
+  ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);for(let i=1;i<points.length;i++)ctx.lineTo(points[i].x,points[i].y);ctx.lineTo(tip.x,H-P);ctx.lineTo(points[0].x,H-P);ctx.closePath();ctx.fillStyle=hasCrashed?'rgba(255,30,90,0.15)':'rgba(0,210,255,0.10)';ctx.fill();
+  ctx.beginPath();ctx.lineWidth=3.5;ctx.strokeStyle=hasCrashed?'#ff3366':'#00ddff';ctx.shadowBlur=18;ctx.shadowColor=hasCrashed?'#ff3366':'#00ddff';ctx.moveTo(points[0].x,points[0].y);for(let i=1;i<points.length;i++)ctx.lineTo(points[i].x,points[i].y);
+  if(hasCrashed){const p1=points[Math.max(0,points.length-8)],p2=points[points.length-1],dx=p2.x-p1.x,dy=p2.y-p1.y,len=Math.sqrt(dx*dx+dy*dy)||1,ux=dx/len,uy=dy/len,stretch=areaX*0.30,cp1x=tip.x+ux*stretch,cp1y=tip.y+uy*stretch,endX=W-P,endY=P;ctx.bezierCurveTo(cp1x,cp1y,cp1x+(endX-cp1x)*0.55,cp1y+(endY-cp1y)*0.65,endX,endY);}
+  ctx.stroke();ctx.shadowBlur=0;
+  if(!hasCrashed){const prev=points[Math.max(0,points.length-4)],angle=Math.atan2(tip.y-prev.y,tip.x-prev.x);ctx.save();ctx.translate(tip.x,tip.y);ctx.rotate(angle);ctx.font='34px Arial';ctx.fillText('✈️',-14,11);ctx.restore();ctx.beginPath();ctx.arc(tip.x,tip.y,4,0,Math.PI*2);ctx.fillStyle='rgba(0,220,255,0.6)';ctx.fill();}
+  if(isPlaying){const mv=document.getElementById('multValue');if(mv)mv.textContent=curMult.toFixed(2)+'x';refreshCashoutVals();checkAutosCashout();}
+  if(isPlaying||hasCrashed)rafId=requestAnimationFrame(drawFrame);
+}
+function startCountdown(secs,cb){clearInterval(cdTimer);const el=document.getElementById('cdValue'),s=Math.min(7,Math.max(1,Math.round(secs)));if(el)el.textContent=s;let n=s;cdTimer=setInterval(()=>{n--;if(el)el.textContent=Math.max(0,n);if(n<=0){clearInterval(cdTimer);cb();}},1000);}
+window.placeBet=function(slot){const b=bets[slot];if(b.active||b.queued){showToast(`BET ${slot} already placed!`,'purple');return;}if(b.amount<MIN_BET()){showToast(`Minimum bet is KES ${MIN_BET().toLocaleString()}`,'red');return;}if(b.amount>balance){showToast('Insufficient balance!','red');return;}balance-=b.amount;saveUserField({balance:increment(-b.amount)}).catch(()=>{});if(isPlaying){b.queued=true;document.getElementById('betBtn'+slot).disabled=true;showToast(`BET ${slot} queued — KES ${b.amount}`,'purple');}else{b.active=true;b.cashed=false;showToast(`BET ${slot} placed — KES ${b.amount}`,'purple');}refreshBetUI();};
+window.cashOut=async function(slot){if(!isPlaying||hasCrashed)return;const b=bets[slot];if(!b.active||b.cashed)return;const win=Math.floor(b.amount*curMult),net=win-b.amount;balance+=win;b.active=false;b.cashed=true;await saveUserField({balance:increment(net),'stats.won':increment(net>0?net:0)});showToast(`CASHED OUT @ ${curMult.toFixed(2)}x — +KES ${win}`,'emerald');refreshBetUI();};
+function checkAutosCashout(){for(let s=1;s<=2;s++){const b=bets[s];if(b.active&&!b.cashed&&b.autoOn&&curMult>=b.autoAt){const win=Math.floor(b.amount*curMult),net=win-b.amount;balance+=win;b.active=false;b.cashed=true;saveUserField({balance:increment(net),'stats.won':increment(net>0?net:0)});showToast(`AUTO CASH OUT BET ${s} @ ${curMult.toFixed(2)}x — +KES ${win}`,'emerald');refreshBetUI();}}}
+function refreshCashoutVals(){for(let s=1;s<=2;s++){if(bets[s].active){const el=document.getElementById('cashVal'+s);if(el)el.textContent='KES '+Math.floor(bets[s].amount*curMult).toLocaleString();}}}
+function refreshBetUI(){updateBalDisplay();for(let s=1;s<=2;s++){const b=bets[s],ab=document.getElementById('activeBet'+s),bb=document.getElementById('betBtn'+s);if(!ab||!bb)continue;if(b.active){bb.style.display='none';ab.style.display='flex';document.getElementById('activeBetAmt'+s).textContent='KES '+b.amount.toLocaleString();document.getElementById('cashVal'+s).textContent='KES '+Math.floor(b.amount*curMult).toLocaleString();}else{ab.style.display='none';bb.style.display='block';if(!b.queued)bb.disabled=false;}}}
+window.adjBet=function(slot,op){let a=bets[slot].amount;const mb=MIN_BET();if(op==='half')a=Math.max(mb,Math.floor(a/2));else if(op==='minus')a=Math.max(mb,a-50);else a=a*2;bets[slot].amount=a;document.getElementById('betAmt'+slot).textContent=a.toLocaleString();document.getElementById('betLbl'+slot).textContent='KES '+a.toLocaleString();};
+window.setBet=function(slot,v){bets[slot].amount=v;document.getElementById('betAmt'+slot).textContent=v.toLocaleString();document.getElementById('betLbl'+slot).textContent='KES '+v.toLocaleString();};
+window.syncAuto=function(slot){bets[slot].autoOn=document.getElementById('auto'+slot).checked;bets[slot].autoAt=parseFloat(document.getElementById('autoVal'+slot).value)||1.5;};
+function renderHistory(){const hb=document.getElementById('historyBar');if(hb)hb.innerHTML=crashHist.slice(0,16).map(m=>`<div class="mpill${m>=10?' hi':''}">${m.toFixed(2)}x</div>`).join('');}
+function buildLiveBets(){liveBetsData=BASE_PLAYERS.map(p=>({...p,multiplier:null,payout:null}));if(Math.random()>0.4){const n=GUEST_NAMES[Math.floor(Math.random()*GUEST_NAMES.length)];liveBetsData.unshift({user:n,bet:Math.floor(300+Math.random()*1500),multiplier:null,payout:null});}liveBetsData.sort(()=>Math.random()-0.5);}
+function finalizeLiveBets(){liveBetsData.forEach(e=>{if(!e.payout&&crashAt>1.05&&Math.random()>0.3){e.multiplier=parseFloat((1.01+Math.random()*(crashAt-1.01)).toFixed(2));e.payout=Math.floor(e.bet*e.multiplier);}});const total=liveBetsData.reduce((s,e)=>s+e.bet,0),won=liveBetsData.filter(e=>e.payout).reduce((s,e)=>s+e.payout,0);const sb=document.getElementById('statBets');if(sb)sb.textContent=liveBetsData.length;const ss=document.getElementById('statStaked');if(ss)ss.textContent=total.toLocaleString();const sw=document.getElementById('statWon');if(sw)sw.textContent=won.toLocaleString();}
+function renderLiveBets(){const box=document.getElementById('liveBetsTable');if(!box)return;box.innerHTML=`<div class="grid grid-cols-12 text-xs text-white/30 font-bold px-3 py-2 border-b border-white/8"><div class="col-span-5">USER</div><div class="col-span-3 text-right">STAKE</div><div class="col-span-4 text-right">PAYOUT</div></div>`+liveBetsData.map(e=>`<div class="grid grid-cols-12 items-center py-2.5 px-3 border-b border-white/5 last:border-none text-sm"><div class="col-span-5 font-semibold truncate">${e.user}</div><div class="col-span-3 text-right font-mono text-white/55">${e.bet.toLocaleString()}</div>${e.payout?`<div class="col-span-4 text-right font-black text-emerald-400">${e.payout.toLocaleString()}<span class="text-white/30 font-normal text-xs ml-1">${e.multiplier}x</span></div>`:`<div class="col-span-4 text-right text-white/20">—</div>`}</div>`).join('');const op=document.getElementById('onlinePlayers');if(op)op.textContent=Math.floor(55+Math.random()*20);const pp=document.getElementById('playingPlayers');if(pp)pp.textContent=liveBetsData.length;const oc=document.getElementById('onlineCount');if(oc)oc.textContent=Math.floor(72+Math.random()*20);}
+setInterval(()=>{if(!isPlaying)return;const p=liveBetsData.filter(e=>!e.payout);if(!p.length)return;if(Math.random()>0.5){const e=p[Math.floor(Math.random()*p.length)];const m=parseFloat((1.01+Math.random()*(curMult-1.01)).toFixed(2));e.multiplier=m;e.payout=Math.floor(e.bet*m);renderLiveBets();}},1900);
+function updateWithdrawals(){const fresh=liveBetsData.filter(e=>e.payout&&e.payout>1000).slice(0,3).map(e=>({user:e.user,amount:e.payout}));withdrawData=[...fresh,...WITHDRAW_SEED].slice(0,8);}
+function renderWithdrawals(){const wb=document.getElementById('wdBalDisplay');if(wb)wb.textContent=balance.toLocaleString();const wl=document.getElementById('withdrawList');if(!wl)return;const methods=['M-Pesa','M-Pesa','Airtel','M-Pesa','Bank','M-Pesa','Airtel','M-Pesa'];wl.innerHTML=withdrawData.map((w,i)=>`<div class="flex items-center px-4 py-3 gap-3"><div class="w-9 h-9 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-base flex-shrink-0">⬇️</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${w.user}</div><div class="text-white/35 text-xs">${methods[i%methods.length]} · just now</div></div><div class="text-right flex-shrink-0"><div class="font-black font-mono text-emerald-400 text-sm">KES ${Number(w.amount).toLocaleString()}</div><div class="text-xs mt-0.5"><span class="status-success px-2 py-0.5 rounded-full text-xs font-bold">SUCCESS</span></div></div></div>`).join('');}
+function renderChat(){const box=document.getElementById('chatBox');if(!box)return;const myName=userData?(userData.name||userData.displayName||userData.username||userData.email||'You').split(' ')[0]:'You';box.innerHTML=chatLog.map(m=>`<div class="flex gap-2"><span class="${m.user===myName||m.user==='You'?'text-orange-400':'text-purple-400'} font-bold flex-shrink-0">${m.user}:</span><span class="text-white/75">${m.msg}</span></div>`).join('');box.scrollTop=box.scrollHeight;}
+window.sendChat=function(){const inp=document.getElementById('chatInput');const text=inp.value.trim();if(!text)return;const myName=userData?(userData.name||userData.displayName||userData.username||userData.email||'You').split(' ')[0]:'You';chatLog.push({user:myName,msg:text});inp.value='';renderChat();setTimeout(()=>{const replies=["Nice one! 🔥","Let's go!","Same here 🤞","Risky play lol","Hope it hits!"];const users=['Emily','BrianJ','Mulee','Wanjiku99','Njugu256'];chatLog.push({user:users[Math.floor(Math.random()*users.length)],msg:replies[Math.floor(Math.random()*replies.length)]});renderChat();},1000+Math.random()*1500);};
+setInterval(()=>{const msgs=["🔥 On fire!","Anyone else cashing early?","2x feels safe rn","let it ride!!","omg that crash 😭"];const users=['Emily','BrianJ','Mulee','Wanjiku99','Njugu256','Steve254','Akinyi'];if(Math.random()>0.7){chatLog.push({user:users[Math.floor(Math.random()*users.length)],msg:msgs[Math.floor(Math.random()*msgs.length)]});if(chatLog.length>40)chatLog.shift();const cp=document.getElementById('chatPanel');if(cp&&cp.style.display!=='none')renderChat();}},5000);
+window.switchTab=function(n){document.getElementById('stakePanel').style.display=n===0?'block':'none';document.getElementById('aiPanel').style.display=n===1?'block':'none';document.getElementById('tabBtn0').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===0?'tab-on':'tab-off');document.getElementById('tabBtn1').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===1?'tab-on':'tab-off');if(n===1)runAI();};
+window.switchLiveTab=function(n){document.getElementById('liveBetsPanel').style.display=n===0?'block':'none';document.getElementById('withdrawPanel').style.display=n===1?'block':'none';document.getElementById('chatPanel').style.display=n===2?'block':'none';['ltab0','ltab1','ltab2'].forEach((id,i)=>{document.getElementById(id).className='flex-1 py-3.5 text-xs font-black transition '+(i===n?'ltab-on':'ltab-off');});if(n===1)renderWithdrawals();if(n===2)renderChat();const ls=document.getElementById('liveSection');if(ls)ls.scrollIntoView({behavior:'smooth',block:'start'});};
+window.runAI=function(){const el=document.getElementById('aiMsg');el.textContent='Analysing last '+crashHist.length+' rounds…';setTimeout(()=>{const avg=crashHist.reduce((s,v)=>s+v,0)/crashHist.length;const sugAt=Math.max(1.3,Math.min(3.5,avg*0.65)).toFixed(2);const sugBet=Math.round(balance*0.03/50)*50||100;el.innerHTML=`<strong>Based on ${crashHist.length} rounds</strong> (avg ${avg.toFixed(2)}x):<br><br>💡 Bet <strong>KES ${sugBet}</strong> with auto cash-out at <strong>${sugAt}x</strong><br><span class="text-xs text-white/35 mt-2 block">Conservative strategy — 65% of average crash point</span>`;},1000);};
+window.toggleSound=function(){soundOn=!soundOn;document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇';showToast(soundOn?'Sound ON 🔊':'Sound OFF 🔇','purple');};
+function showToast(text,color){const cols={emerald:'#059669',red:'#ef4444',purple:'#a020f0'};const t=document.createElement('div');t.style.cssText=`position:fixed;bottom:82px;left:50%;transform:translateX(-50%);background:${cols[color]||cols.purple};color:white;padding:11px 20px;border-radius:9999px;box-shadow:0 6px 20px rgba(0,0,0,0.4);white-space:nowrap;z-index:9999;font-size:13px;font-weight:700;pointer-events:none;transition:opacity 0.3s;`;t.textContent=text;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);}
+window.showToast=showToast;
+
+function initApp(){
+  resizeCvs();updateBalDisplay();renderHistory();renderChat();buildLiveBets();renderLiveBets();renderWithdrawals();refreshBetUI();switchLiveTab(0);renderGames();renderLiveGames();updateBetslipBadge();
+  const name=userData?(userData.name||userData.displayName||userData.username||userData.email||'Player').split(' ')[0]:'Player';
+  const sn=document.getElementById('sidebarUserName');if(sn)sn.textContent=name+' · Player';
+  showToast(`Welcome back, ${name}! 👋`,'purple');
+  if(balance===0)setTimeout(()=>showToast('Balance is KES 0 — tap + DEPOSIT to play!','red'),1800);
+  const io=document.getElementById('idleOverlay');if(io)io.style.display='flex';
+}
+window.addEventListener('resize',resizeCvs);
+</script>
+</body>
+</html>
