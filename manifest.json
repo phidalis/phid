@@ -1,0 +1,13 @@
+{
+  "background_color": "#080b10",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "sportycash",
+  "orientation": "portrait",
+  "scope": "/",
+  "short_name": "sportycash",
+  "start_url": "/index.html",
+  "theme_color": "#080b10",
+  "description": "Kenya's #1 Betting Platform",
+  "lang": "en"
+}
