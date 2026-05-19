@@ -1859,7 +1859,7 @@ window.doSignup = async function() {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await setDoc(doc(db,'users',cred.user.uid), {
       name, phone, email,
-      balance: 500, // welcome bonus
+      balance: 0, // welcome bonus
       createdAt: serverTimestamp(),
     });
     window.location.href = 'aviator.html';
