@@ -1,14 +1,14 @@
-const CACHE_NAME = 'sportycash-cache-v3';
+const CACHE_NAME = 'sportycash-cache-v4';
 
 const URLS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/aviator.html',
-  '/cash.html',
-  '/pesa-managers-login.html',
-  '/pesa-dashboard.html',
-  '/manifest.json',
-  '/sw.js'
+  './',
+  './index.html',
+  './aviator.html',
+  './cash.html',
+  './pesa-managers-login.html',
+  './pesa-dashboard.html',
+  './manifest.json',
+  './sw.js'
 ];
 
 // Inline offline page — no separate file needed
@@ -64,7 +64,11 @@ self.addEventListener('fetch', event => {
         .then(response => {
           // Cache a fresh copy
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          event.waitUntil(
+            caches.open(CACHE_NAME).then(cache => {
+              return cache.put(event.request, clone);
+            })
+          );
           return response;
         })
         .catch(() => {
@@ -80,9 +84,11 @@ self.addEventListener('fetch', event => {
         if (cached) return cached;
         return fetch(event.request).then(response => {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            try { cache.put(event.request, clone); } catch(e) { /* quota exceeded */ }
-          });
+          event.waitUntil(
+            caches.open(CACHE_NAME).then(cache => {
+              try { return cache.put(event.request, clone); } catch(e) { /* quota exceeded */ }
+            })
+          );
           return response;
         }).catch(() => new Response(OFFLINE_HTML, {headers:{'Content-Type':'text/html'}}));
       })
