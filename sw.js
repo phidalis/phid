@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sportycash-cache-v4';
+const CACHE_NAME = 'sportycash-cache-v5';
 
 const URLS_TO_CACHE = [
   './',
@@ -8,7 +8,9 @@ const URLS_TO_CACHE = [
   './pesa-managers-login.html',
   './pesa-dashboard.html',
   './manifest.json',
-  './sw.js'
+  './sw.js',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // Inline offline page — no separate file needed
