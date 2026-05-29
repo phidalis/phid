@@ -4,7 +4,7 @@ const ASSETS = [
   '/index.html',
   '/aviator.html',
   '/manifest.json',
-  '/icons/icon-192.png'
+  '/icon-192.png'
 ];
 
 self.addEventListener('install', (event) => {
