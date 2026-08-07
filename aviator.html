@@ -54,6 +54,8 @@
     @keyframes dotPulse  { 0%,100%{opacity:1} 50%{opacity:0.35} }
     @keyframes spin      { to { transform: rotate(360deg); } }
     @keyframes scaleIn   { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+@keyframes spinWinnersLoopX { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@keyframes liveDotPulse  { 0%,100%{opacity:1} 50%{opacity:0.25} }
     @keyframes pulse     { 0%,100%{opacity:1} 50%{opacity:0.4} }
     .crash-glow { animation: crashGlow 0.55s ease infinite; }
     .fade-slide { animation: fadeSlide 0.3s ease forwards; }
@@ -306,7 +308,7 @@
     <div class="px-3 py-2.5 bg-[#1a2b3d] border-b border-white/8 overflow-x-auto">
       <div class="flex items-center gap-2">
         <div id="historyBar" class="flex gap-2 min-w-max py-0.5 flex-1"></div>
-        <button id="soundBtn" onclick="toggleSound()" class="w-7 h-7 bg-[#1a2b3d] rounded-xl flex items-center justify-center text-sm flex-shrink-0">🔊</button>
+        <button id="soundBtn" class="sound-toggle" onclick="toggleSound()" class="w-7 h-7 bg-[#1a2b3d] rounded-xl flex items-center justify-center text-sm flex-shrink-0">🔊</button>
       </div>
     </div>
     <div class="px-3 pt-3">
@@ -596,9 +598,22 @@
           <div class="font-black text-xl tracking-tight">🎰 Lucky Spin</div>
           <div class="text-white/40 text-xs mt-0.5">Pick a stake and spin the wheel of luck!</div>
         </div>
-        <div style="display:flex;align-items:center;gap:5px;background:black;border-radius:999px;padding:7px 12px;flex-shrink:0;">
-          <span class="text-orange-400 font-black" style="font-size:11px;">KES</span>
-          <span id="spinBalDisplay" class="font-black text-white font-mono" style="font-size:14px;">0</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="sound-toggle" onclick="toggleSound()" style="width:34px;height:34px;border-radius:12px;background:#1a2b3d;border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">🔊</button>
+          <div style="display:flex;align-items:center;gap:5px;background:black;border-radius:999px;padding:7px 12px;flex-shrink:0;">
+            <span class="text-orange-400 font-black" style="font-size:11px;">KES</span>
+            <span id="spinBalDisplay" class="font-black text-white font-mono" style="font-size:14px;">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero live winners ticker -->
+      <div style="display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#12202e,#1a2b3d);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:8px 10px;margin-bottom:14px;overflow:hidden;">
+        <span style="flex-shrink:0;font-size:10px;font-weight:900;color:#34d399;display:flex;align-items:center;gap:5px;background:rgba(16,185,129,0.1);padding:5px 9px;border-radius:999px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block;animation:liveDotPulse 1.2s infinite;"></span>LIVE
+        </span>
+        <div style="flex:1;overflow:hidden;white-space:nowrap;position:relative;min-width:0;">
+          <div id="spinWinnersTicker" style="display:inline-block;white-space:nowrap;animation:spinWinnersLoopX 110s linear infinite;will-change:transform;"></div>
         </div>
       </div>
 
@@ -3196,7 +3211,7 @@ setInterval(()=>{const msgs=["🔥 On fire!","Anyone else cashing early?","2x fe
 window.switchTab=function(n){document.getElementById('stakePanel').style.display=n===0?'block':'none';document.getElementById('aiPanel').style.display=n===1?'block':'none';document.getElementById('tabBtn0').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===0?'tab-on':'tab-off');document.getElementById('tabBtn1').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===1?'tab-on':'tab-off');if(n===1)runAI();};
 window.switchLiveTab=function(n){document.getElementById('liveBetsPanel').style.display=n===0?'block':'none';document.getElementById('withdrawPanel').style.display=n===1?'block':'none';document.getElementById('chatPanel').style.display=n===2?'block':'none';['ltab0','ltab1','ltab2'].forEach((id,i)=>{document.getElementById(id).className='flex-1 py-3.5 text-xs font-black transition '+(i===n?'ltab-on':'ltab-off');});if(n===1)renderWithdrawals();if(n===2)renderChat();const ls=document.getElementById('liveSection');if(ls)ls.scrollIntoView({behavior:'smooth',block:'start'});};
 window.runAI=function(){const el=document.getElementById('aiMsg');el.textContent='Analysing last '+crashHist.length+' rounds…';setTimeout(()=>{const avg=crashHist.reduce((s,v)=>s+v,0)/crashHist.length;const sugAt=Math.max(1.3,Math.min(3.5,avg*0.65)).toFixed(2);const sugBet=Math.round(balance*0.03/50)*50||100;el.innerHTML=`<strong>Based on ${crashHist.length} rounds</strong> (avg ${avg.toFixed(2)}x):<br><br>💡 Bet <strong>KES ${sugBet}</strong> with auto cash-out at <strong>${sugAt}x</strong><br><span class="text-xs text-white/35 mt-2 block">Conservative strategy — 65% of average crash point</span>`;},1000);};
-window.toggleSound=function(){soundOn=!soundOn;document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇';showToast(soundOn?'Sound ON 🔊':'Sound OFF 🔇','purple');};
+window.toggleSound=function(){soundOn=!soundOn;document.querySelectorAll('.sound-toggle').forEach(b=>b.textContent=soundOn?'🔊':'🔇');showToast(soundOn?'Sound ON 🔊':'Sound OFF 🔇','purple');};
 
 // ══════════════════════════════════════════════
 // LUCKY SPIN — Wheel of fortune
@@ -3309,6 +3324,34 @@ function renderLuckySpin(){
   renderLuckyStakes();
   renderLuckyPrizes();
   drawLuckyWheel();
+  renderSpinWinners();
+}
+
+// ── FAKE LUCKY WINNERS FEED ──
+const SAFARICOM_PREFIXES=['0700','0701','0702','0703','0704','0705','0706','0707','0708','0709','0710','0711','0712','0713','0714','0715','0716','0717','0718','0719','0720','0721','0722','0723','0724','0725','0726','0727','0728','0729','0730','0731','0732','0733','0734','0735','0736','0737','0738','0739','0740','0741','0742','0743','0744','0745','0746','0747','0748','0749','0750','0751','0752','0753','0754','0755','0756','0757','0758','0759','0760','0761','0762','0763','0764','0765','0766','0767','0768','0769','0790','0791','0792','0793','0794','0795','0796','0797','0798','0799'];
+const SPIN_WIN_AMTS=[50,100,150,200,250,300,500,750,1000,1500,2000,3000,5000,7500];
+let spinWinners=[];
+function genSpinWinners(){
+  spinWinners=Array.from({length:20},()=>{
+    const p=SAFARICOM_PREFIXES[Math.floor(Math.random()*SAFARICOM_PREFIXES.length)];
+    const last=String(Math.floor(Math.random()*1000)).padStart(3,'0');
+    return {phone:p+' *** '+last,amt:SPIN_WIN_AMTS[Math.floor(Math.random()*SPIN_WIN_AMTS.length)]};
+  });
+}
+function renderSpinWinners(){
+  const el=document.getElementById('spinWinnersTicker');
+  if(!el)return;
+  if(!spinWinners.length)genSpinWinners();
+  const chip=w=>`
+    <span style="display:inline-flex;align-items:center;gap:9px;margin-right:44px;">
+      <span style="font-size:13px;flex-shrink:0;">🎉</span>
+      <span class="font-mono font-bold" style="color:white;font-size:12px;flex-shrink:0;">${w.phone}</span>
+      <span style="color:#eab308;font-weight:900;font-size:11px;flex-shrink:0;">won</span>
+      <span style="color:#34d399;font-weight:900;font-size:12px;flex-shrink:0;">KES ${w.amt.toLocaleString()}</span>
+      <span style="color:rgba(255,255,255,0.18);font-size:11px;flex-shrink:0;">✦</span>
+    </span>`;
+  const inner=spinWinners.map(chip).join('');
+  el.innerHTML=inner+inner;
 }
 
 function _weightedPick(items,weights){
@@ -3355,6 +3398,28 @@ function hideSpinResult(){
   if(el)el.style.display='none';
 }
 
+// ── SPIN SOUND (casino reel audio) ──
+let _spinAudioEl=null;
+function _spinAudio(){
+  if(_spinAudioEl)return _spinAudioEl;
+  _spinAudioEl=document.getElementById('spinAudio');
+  return _spinAudioEl;
+}
+function startSpinSound(){
+  if(!soundOn)return;
+  const a=_spinAudio();if(!a)return;
+  try{
+    a.currentTime=0;
+    a.volume=0.9;
+    const p=a.play();
+    if(p&&p.catch)p.catch(()=>{});
+  }catch(e){}
+}
+function stopSpinSound(){
+  const a=_spinAudio();if(!a)return;
+  try{a.pause();a.currentTime=0;}catch(e){}
+}
+
 window.spinLuckyWheel=function(){
   const c=luckySpinConfig;
   if(!c.enabled){showToast('Lucky Spin is temporarily disabled.','red');return;}
@@ -3365,6 +3430,7 @@ window.spinLuckyWheel=function(){
   const btn=document.getElementById('spinBtn');if(btn)btn.disabled=true;
   _spinState.spinning=true;
   hideSpinResult();
+  startSpinSound();
   balance-=stake;
   updateBalDisplay();
   saveUserField({balance:increment(-stake),'stats.spin_staked':increment(stake),'stats.spin_spins':increment(1)}).catch(()=>{});
@@ -3393,6 +3459,7 @@ window.spinLuckyWheel=function(){
 
 function completeSpin(outcome,stake){
   _spinState.spinning=false;
+  stopSpinSound();
   const btn=document.getElementById('spinBtn');if(btn)btn.disabled=false;
   if(outcome.won){
     const prize=luckyPrizeFor(outcome.value);
@@ -3473,6 +3540,7 @@ function closeProductAd(){
 }
 window.closeProductAd=closeProductAd;
 </script>
+<audio id="spinAudio" src="lucky-spin.mp3" loop preload="auto" style="display:none;"></audio>
 <!-- PRODUCT AD MODAL -->
 <div id="adModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.74);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
   <div style="background:#1a2b3d;border-radius:24px;max-width:320px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);position:relative;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);border:1px solid rgba(255,255,255,0.08);">
