@@ -9,13 +9,18 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     *, *::before, *::after { font-family: 'Inter', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow-x: hidden; }
-    body { background: #0a0a0a; color: white; }
+    body { background: #121e2a; color: white; }
     .screen { display: none; }
     .screen.active { display: block; }
-    .canvas-wrap { background: linear-gradient(180deg,#1a0033 0%,#0f001f 100%); border-radius: 20px; overflow: hidden; box-shadow: 0 0 28px rgba(160,32,240,0.25); border: 1px solid rgba(160,32,240,0.25); }
-    .btn-bet { background: linear-gradient(90deg,#a020f0,#c040ff); box-shadow: 0 6px 18px rgba(160,32,240,0.4); border: none; color: white; cursor: pointer; border-radius: 9999px; font-weight: 800; transition: transform 0.15s, opacity 0.15s; width: 100%; }
+    .canvas-wrap { background: linear-gradient(180deg,#1a2b3d 0%,#121e2a 100%); border-radius: 20px; overflow: hidden; box-shadow: 0 0 28px rgba(234,179,8,0.25); border: 1px solid rgba(234,179,8,0.25); }
+    .btn-bet { background: linear-gradient(90deg,#ca8a04,#eab308); box-shadow: 0 6px 18px rgba(234,179,8,0.4); border: none; color: #121e2a; cursor: pointer; border-radius: 9999px; font-weight: 800; transition: transform 0.15s, opacity 0.15s; width: 100%; }
+    .btn-bet-av { background: linear-gradient(90deg,#059669,#22c55e); box-shadow: 0 6px 18px rgba(16,185,129,0.4); border: none; color: #022c22; cursor: pointer; border-radius: 9999px; font-weight: 800; transition: transform 0.15s, opacity 0.15s; width: 100%; }
+    .btn-bet-av.placed { background: linear-gradient(90deg,#ca8a04,#eab308); box-shadow: 0 6px 18px rgba(234,179,8,0.4); color: #121e2a; }
     .btn-bet:active { transform: scale(0.97); }
     .btn-bet:disabled { opacity: 0.4; pointer-events: none; }
+    .btn-place-bet { background: linear-gradient(90deg,#16a34a,#22c55e); box-shadow: 0 6px 18px rgba(34,197,94,0.35); color: #022c22; }
+    .btn-place-bet.placed { background: linear-gradient(90deg,#ca8a04,#eab308); box-shadow: 0 6px 18px rgba(234,179,8,0.4); color: #121e2a; }
+    .btn-place-bet:disabled { opacity: 0.75; pointer-events: none; }
     .btn-cash { background: linear-gradient(90deg,#059669,#34d399); box-shadow: 0 6px 18px rgba(16,185,129,0.4); border: none; color: #022c22; cursor: pointer; border-radius: 9999px; font-weight: 900; transition: transform 0.15s; white-space: nowrap; }
     .btn-cash:active { transform: scale(0.97); }
     .btn-cash:disabled { opacity: 0.45; pointer-events: none; }
@@ -26,18 +31,20 @@
     .btn-red:active { transform: scale(0.97); }
     .btn-ghost { background: transparent; border: 1.5px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.7); cursor: pointer; border-radius: 9999px; font-weight: 700; transition: border-color 0.2s, transform 0.15s; }
     .btn-ghost:active { transform: scale(0.97); }
-    .mpill { background: rgba(160,32,240,0.15); border: 1.5px solid #a020f0; color: #c084fc; border-radius: 9999px; padding: 3px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
-    .mpill.hi { color: #fb923c; border-color: #fb923c; background: rgba(251,146,60,0.15); }
-    .chip { background: #111; border: 1px solid rgba(160,32,240,0.25); color: #c084fc; border-radius: 9999px; font-weight: 700; font-size: 13px; padding: 9px 0; text-align: center; cursor: pointer; transition: background 0.15s; }
-    .chip:active { background: rgba(160,32,240,0.2); }
-    .adj-btn { background: #111; border: 1px solid rgba(255,255,255,0.1); color: white; font-weight: 800; font-size: 18px; cursor: pointer; border-radius: 14px; padding: 10px 0; text-align: center; transition: background 0.15s; }
+    .mpill { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.14); color: rgba(255,255,255,0.75); border-radius: 9999px; padding: 3px 12px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+    .mpill.low { color: #3b82f6; border-color: rgba(59,130,246,0.6); background: rgba(59,130,246,0.15); }
+    .mpill.mid { color: #a855f7; border-color: rgba(168,85,247,0.6); background: rgba(168,85,247,0.15); }
+    .mpill.hi  { color: #b0413e; border-color: #b0413e; background: rgba(176,65,62,0.22); }
+    .chip { background: #1a2b3d; border: 1px solid rgba(234,179,8,0.25); color: #eab308; border-radius: 9999px; font-weight: 700; font-size: 13px; padding: 9px 0; text-align: center; cursor: pointer; transition: background 0.15s; }
+    .chip:active { background: rgba(234,179,8,0.2); }
+    .adj-btn { background: #1a2b3d; border: 1px solid rgba(255,255,255,0.1); color: white; font-weight: 800; font-size: 18px; cursor: pointer; border-radius: 14px; padding: 10px 0; text-align: center; transition: background 0.15s; }
     .adj-btn:active { background: #222; }
-    .tab-on  { background: #a020f0; color: white; border-radius: 9999px; }
+    .tab-on  { background: #eab308; color: white; border-radius: 9999px; }
     .tab-off { color: rgba(255,255,255,0.45); }
-    .ltab-on  { border-bottom: 3px solid #c084fc; color: white; }
+    .ltab-on  { border-bottom: 3px solid #eab308; color: white; }
     .ltab-off { border-bottom: 3px solid transparent; color: rgba(255,255,255,0.4); }
-    .inp { background: #111; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px 15px; color: white; font-size: 16px; width: 100%; outline: none; transition: border-color 0.2s; }
-    .inp:focus { border-color: #a020f0; }
+    .inp { background: #1a2b3d; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 13px 15px; color: white; font-size: 16px; width: 100%; outline: none; transition: border-color 0.2s; }
+    .inp:focus { border-color: #eab308; }
     .inp::placeholder { color: rgba(255,255,255,0.28); }
     .inp:disabled { opacity: 0.5; }
     @keyframes crashGlow { 0%,100%{text-shadow:0 0 18px rgba(255,255,255,0.3)} 50%{text-shadow:0 0 40px rgba(255,60,60,1)} }
@@ -55,25 +62,25 @@
     .pulse-dot  { animation: pulse 1.2s ease infinite; }
     .spinner    { animation: spin 0.7s linear infinite; border: 3px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; width: 20px; height: 20px; display: inline-block; flex-shrink: 0; }
     ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: #a020f0; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #eab308; border-radius: 4px; }
     #bottomNav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
     body { padding-bottom: 72px; }
-    .overlay-screen { position: fixed; inset: 0; z-index: 200; background: #0a0a0a; overflow-y: auto; display: none; flex-direction: column; }
+    .overlay-screen { position: fixed; inset: 0; z-index: 200; background: #121e2a; overflow-y: auto; display: none; flex-direction: column; }
     .overlay-screen.open { display: flex; }
-    .method-card { background: #111; border: 2px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 16px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; gap: 14px; }
-    .method-card.selected { border-color: #a020f0; background: rgba(160,32,240,0.1); }
+    .method-card { background: #1a2b3d; border: 2px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 16px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; gap: 14px; }
+    .method-card.selected { border-color: #eab308; background: rgba(234,179,8,0.1); }
     .method-card:active { transform: scale(0.98); }
     .status-pending  { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
     .status-success  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
     .status-failed   { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
-    .stat-card { background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; padding: 16px 18px; }
-    #appLoader { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    .stat-card { background: #1a2b3d; border: 1px solid rgba(255,255,255,0.07); border-radius: 18px; padding: 16px 18px; }
+    #appLoader { position: fixed; inset: 0; background: #121e2a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
     #appLoader.gone { display: none; }
     /* SIDEBAR */
     #sidebar { position: fixed; inset: 0; z-index: 9000; display: none; }
     #sidebar.open { display: block; }
     #sidebarBackdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.72); }
-    #sidebarPanel { position: absolute; left: 0; top: 0; bottom: 0; width: 280px; background: #0d0d0d; border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; animation: slideLeft 0.3s ease; overflow-y: auto; }
+    #sidebarPanel { position: absolute; left: 0; top: 0; bottom: 0; width: 280px; background: #1a2b3d; border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; animation: slideLeft 0.3s ease; overflow-y: auto; }
     .sidebar-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; color: rgba(255,255,255,0.7); cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; font-weight: 600; font-size: 15px; }
     .sidebar-item:active, .sidebar-item:hover { background: rgba(255,255,255,0.05); color: white; }
     .sidebar-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
@@ -83,35 +90,38 @@
     .bnav-btn svg { width: 22px; height: 22px; }
     /* SPORTS */
     .sport-cat-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 9999px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
-    .sport-cat-btn.active { background: #a020f0; border-color: #a020f0; color: white; }
-    .game-card { background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.15s, border-color 0.15s; margin-bottom: 12px; }
+    .sport-cat-btn.active { background: #eab308; border-color: #eab308; color: white; }
+    .league-filter { width:100%; background:#1a2b3d; border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); border-radius:12px; padding:10px 12px; font-size:13px; font-weight:700; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+    .league-filter:focus { outline:none; border-color:#FFD700; }
+    .league-filter option { background:#1a2b3d; color:rgba(255,255,255,0.85); }
+    .game-card { background: #1a2b3d; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.15s, border-color 0.15s; margin-bottom: 12px; }
     .game-card:active { transform: scale(0.99); }
     .odds-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 8px 4px; text-align: center; cursor: pointer; transition: all 0.15s; flex: 1; }
     .odds-btn:active { transform: scale(0.96); }
-    .odds-btn.selected { background: rgba(234,179,8,0.2); border-color: #eab308; color: #eab308; }
+    .odds-btn.selected { background: rgba(234,179,8,0.2); border-color: #eab308; color: #FFFF00; }
     /* BETSLIP BADGE */
     #betslipBadge { position: absolute; top: -5px; right: -6px; background: #e53e3e; color: white; border-radius: 9999px; font-size: 9px; font-weight: 900; min-width: 16px; height: 16px; display: none; align-items: center; justify-content: center; line-height: 1; }
     /* GAME DETAIL — now full-screen */
     #gameDetailModal { display: none; }
     #gameDetailModal.open { display: flex; }
     /* PROFILE */
-    .profile-menu-item { display: flex; align-items: center; gap: 14px; padding: 16px; background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; cursor: pointer; transition: background 0.15s; }
-    .profile-menu-item:active { background: #1a1a1a; }
+    .profile-menu-item { display: flex; align-items: center; gap: 14px; padding: 16px; background: #1a2b3d; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; cursor: pointer; transition: background 0.15s; }
+    .profile-menu-item:active { background: #1a2b3d; }
     /* MY BETS */
-    .bet-card { background: #111; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 14px; margin-bottom: 10px; }
-    .bet-status-won     { background: rgba(16,185,129,0.15);  color: #34d399; border: 1px solid rgba(16,185,129,0.3);  border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
-    .bet-status-lost    { background: rgba(239,68,68,0.15);   color: #f87171; border: 1px solid rgba(239,68,68,0.3);   border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
-    .bet-status-pending { background: rgba(251,191,36,0.15);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.3);  border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
-    footer { background: #0d0d0d; border-top: 1px solid rgba(255,255,255,0.07); padding: 24px 16px 16px; margin-top: 16px; }
+    .bet-card { background: #1a2b3d; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 14px; margin-bottom: 10px; }
+    .bet-status-won     { background: #10b981;  color: white; border: 1px solid #10b981;  border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
+    .bet-status-lost    { background: #ef4444;  color: white; border: 1px solid #ef4444;  border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
+    .bet-status-pending { background: #fbbf24;  color: white; border: 1px solid #fbbf24;  border-radius: 9999px; font-size: 11px; font-weight: 700; padding: 2px 10px; }
+    footer { background: #1a2b3d; border-top: 1px solid rgba(255,255,255,0.07); padding: 24px 16px 16px; margin-top: 16px; }
     /* CURRENCY PICKER */
     #currencyModal { position:fixed;inset:0;z-index:99000;background:rgba(0,0,0,0.72);display:none;align-items:flex-end;justify-content:center; }
     #currencyModal.open { display:flex; }
-    #currencySheet { background:#0d0d0d;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:0 0 32px;max-height:88vh;overflow-y:auto;border-top:1px solid rgba(255,255,255,0.1); }
+    #currencySheet { background:#1a2b3d;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:0 0 32px;max-height:88vh;overflow-y:auto;border-top:1px solid rgba(255,255,255,0.1); }
     .cur-item { display:flex;align-items:center;gap:14px;padding:13px 20px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.15s; }
     .cur-item:active,.cur-item:hover { background:rgba(255,255,255,0.05); }
-    .cur-item.active { background:rgba(160,32,240,0.1); }
+    .cur-item.active { background:rgba(234,179,8,0.1); }
     #curBtn { display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:9999px;padding:5px 10px;cursor:pointer;font-size:12px;font-weight:800;color:white;white-space:nowrap;transition:border-color 0.2s;flex-shrink:0; }
-    #curBtn:active { border-color:#a020f0; }
+    #curBtn:active { border-color:#eab308; }
   </style>
 </head>
 <body>
@@ -148,7 +158,7 @@
       </div>
     </div>
     <div onclick="navTo('sports');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-green-500/15 text-green-400">⚽</div><span>Sports</span></div>
-    <div onclick="navTo('aviator');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-purple-500/15 text-purple-400">✈️</div><span>Aviator</span></div>
+    <div onclick="navTo('aviator');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-yellow-500/15 text-yellow-400">✈️</div><span>Aviator</span></div>
     <div onclick="navTo('live');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-red-500/15 text-red-400">🔴</div><span>Live Games</span><span class="ml-auto bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full" id="sidebarLiveCount" style="display:none;"></span></div>
     <div onclick="navTo('jackpot');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-yellow-500/15 text-yellow-400">🏆</div><span>Jackpot</span></div>
     <div onclick="navTo('mybets');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-blue-500/15 text-blue-400">📋</div><span>My Bets</span></div>
@@ -160,20 +170,20 @@
 </div>
 
 <!-- FULL-SCREEN MARKETS MODAL -->
-<div id="gameDetailModal" style="position:fixed;inset:0;z-index:8000;background:#0a0a0a;flex-direction:column;overflow:hidden;">
+<div id="gameDetailModal" style="position:fixed;inset:0;z-index:8000;background:#121e2a;flex-direction:column;overflow:hidden;">
   <!-- Sticky Header -->
-  <div id="detailModalHeader" style="flex-shrink:0;background:#111;border-bottom:1px solid rgba(255,255,255,0.08);padding:0 16px 0 16px;">
+  <div id="detailModalHeader" style="flex-shrink:0;background:#1a2b3d;border-bottom:1px solid rgba(255,255,255,0.08);padding:0 16px 0 16px;">
     <!-- Top bar -->
     <div style="display:flex;align-items:center;gap:10px;padding:12px 0 10px;">
       <button onclick="closeGameDetail()" style="width:36px;height:36px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;color:white;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">‹</button>
       <div style="flex:1;min-width:0;">
-        <div id="detailSport" style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:700;text-transform:uppercase;letter-spacing:1px;">⚽ Soccer</div>
+        <div id="detailSport" style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:700;text-transform:uppercase;letter-spacing:1px;">⚽ Soccer</div>
         <div id="detailTitle" style="font-size:16px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Match</div>
       </div>
       <div id="detailLiveBadge" style="display:none;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.35);color:#f87171;font-size:10px;font-weight:900;padding:4px 10px;border-radius:99px;white-space:nowrap;">● LIVE</div>
     </div>
     <!-- Score Panel -->
-    <div id="detailScorePanel" style="background:linear-gradient(135deg,rgba(160,32,240,0.12),rgba(0,0,0,0.2));border:1px solid rgba(160,32,240,0.2);border-radius:16px;padding:14px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+    <div id="detailScorePanel" style="background:linear-gradient(135deg,rgba(234,179,8,0.12),rgba(0,0,0,0.2));border:1px solid rgba(234,179,8,0.2);border-radius:16px;padding:14px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
       <div style="flex:1;text-align:center;">
         <div id="detailHomeTeam" style="font-size:12px;font-weight:800;color:rgba(255,255,255,0.7);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Home</div>
         <div id="detailHomeScore" style="font-size:40px;font-weight:900;font-family:monospace;line-height:1;color:white;">0</div>
@@ -189,7 +199,7 @@
     </div>
     <!-- Market tabs -->
     <div style="display:flex;gap:0;border-bottom:2px solid rgba(255,255,255,0.06);">
-      <button id="dmTab0" onclick="switchDetailTab(0)" style="flex:1;padding:10px 3px;font-size:10px;font-weight:800;border:none;background:transparent;color:white;border-bottom:2px solid #a020f0;margin-bottom:-2px;cursor:pointer;">1X2</button>
+      <button id="dmTab0" onclick="switchDetailTab(0)" style="flex:1;padding:10px 3px;font-size:10px;font-weight:800;border:none;background:transparent;color:white;border-bottom:2px solid #eab308;margin-bottom:-2px;cursor:pointer;">1X2</button>
       <button id="dmTab1" onclick="switchDetailTab(1)" style="flex:1;padding:10px 3px;font-size:10px;font-weight:800;border:none;background:transparent;color:rgba(255,255,255,0.4);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">O/U</button>
       <button id="dmTab2" onclick="switchDetailTab(2)" style="flex:1;padding:10px 3px;font-size:10px;font-weight:800;border:none;background:transparent;color:rgba(255,255,255,0.4);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">DBL CHANCE</button>
       <button id="dmTab3" onclick="switchDetailTab(3)" style="flex:1;padding:10px 3px;font-size:10px;font-weight:800;border:none;background:transparent;color:rgba(255,255,255,0.4);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">BTTS</button>
@@ -207,14 +217,14 @@
     <div id="detailPanel5" style="display:none;"></div>
   </div>
   <!-- Footer -->
-  <div style="flex-shrink:0;background:#111;border-top:1px solid rgba(255,255,255,0.08);padding:12px 16px 20px;">
-    <div id="detailBetslipSummary" style="display:none;background:rgba(160,32,240,0.12);border:1px solid rgba(160,32,240,0.3);border-radius:12px;padding:10px 14px;margin-bottom:10px;align-items:center;justify-content:space-between;font-size:12px;">
-      <span style="color:rgba(255,255,255,0.5);">Selected: <span id="detailSelCount" style="color:#c084fc;font-weight:800;">0</span> picks</span>
-      <span style="color:#c084fc;font-weight:800;" id="detailTotalOdds">Odds: 1.00</span>
+  <div style="flex-shrink:0;background:#1a2b3d;border-top:1px solid rgba(255,255,255,0.08);padding:12px 16px 20px;">
+    <div id="detailBetslipSummary" style="display:none;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);border-radius:12px;padding:10px 14px;margin-bottom:10px;align-items:center;justify-content:space-between;font-size:12px;">
+      <span style="color:rgba(255,255,255,0.5);">Selected: <span id="detailSelCount" style="color:#eab308;font-weight:800;">0</span> picks</span>
+      <span style="color:#eab308;font-weight:800;" id="detailTotalOdds">Odds: 1.00</span>
     </div>
     <div style="display:flex;gap:10px;">
       <button onclick="closeGameDetail()" style="flex:1;padding:14px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;color:rgba(255,255,255,0.7);font-size:14px;font-weight:700;cursor:pointer;">Close</button>
-      <button onclick="addSelectionsToBetslip()" id="addToBetslipBtn" style="flex:2;padding:14px;background:linear-gradient(135deg,#a020f0,#7c3aed);border:none;border-radius:14px;color:white;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(160,32,240,0.4);">➕ Add to Betslip</button>
+      <button onclick="addSelectionsToBetslip()" id="addToBetslipBtn" style="flex:2;padding:14px;background:linear-gradient(135deg,#eab308,#ca8a04);border:none;border-radius:14px;color:white;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(234,179,8,0.4);">➕ Add to Betslip</button>
     </div>
   </div>
 </div>
@@ -223,10 +233,10 @@
 <div id="mainApp">
 
   <!-- HEADER -->
-  <div class="bg-[#111] border-b border-gray-800 sticky top-0 z-40" style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+  <div class="bg-[#1a2b3d] border-b border-gray-800 sticky top-0 z-40" style="overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
     <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;min-width:max-content;white-space:nowrap;">
       <!-- Menu button -->
-      <button onclick="openSidebar()" style="width:32px;height:32px;background:#1a1a1a;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;color:white;">
+      <button onclick="openSidebar()" style="width:32px;height:32px;background:#1a2b3d;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;cursor:pointer;color:white;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <!-- Logo -->
@@ -239,7 +249,7 @@
         <span id="balDisplay" class="font-black text-white font-mono" style="font-size:14px;">0</span>
       </div>
       <!-- Deposit -->
-      <button onclick="openDeposit()" style="background:#f97316;color:white;font-weight:700;padding:5px 12px;border-radius:999px;font-size:11px;border:none;cursor:pointer;flex-shrink:0;white-space:nowrap;">+ DEPOSIT</button>
+      <button onclick="openDeposit()" style="background:#facc15;color:black;font-weight:700;padding:5px 12px;border-radius:999px;font-size:11px;border:none;cursor:pointer;flex-shrink:0;white-space:nowrap;">+ DEPOSIT</button>
       <!-- Currency picker -->
       <button id="curBtn" onclick="openCurrencyPicker()" title="Change currency" style="flex-shrink:0;">
         <span id="curFlagDisplay">🇰🇪</span>
@@ -247,7 +257,7 @@
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity:0.5"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <!-- Online indicator -->
-      <div style="display:flex;align-items:center;background:#1a1a1a;border-radius:999px;padding:4px 10px;flex-shrink:0;">
+      <div style="display:flex;align-items:center;background:#1a2b3d;border-radius:999px;padding:4px 10px;flex-shrink:0;">
         <span class="text-emerald-400 dot-pulse" style="font-size:10px;">●</span>
         <span id="onlineCount" class="font-mono" style="font-size:11px;margin-left:4px;">84</span>
       </div>
@@ -261,16 +271,16 @@
       <div style="position:relative;">
         <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.4;">🔍</span>
         <input id="sportsSearchInput" type="text" placeholder="Search team or league…"
-          style="width:100%;background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px 10px 36px;color:white;font-size:13px;outline:none;transition:border-color 0.2s;"
-          oninput="onSportsSearch()" onfocus="this.style.borderColor='#a020f0'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          style="width:100%;background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 12px 10px 36px;color:white;font-size:13px;outline:none;transition:border-color 0.2s;"
+          oninput="onSportsSearch()" onfocus="this.style.borderColor='#eab308'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
     </div>
-    <!-- Category pills from Firestore -->
-    <div class="px-3 pb-2 overflow-x-auto" style="scrollbar-width:none;">
-      <div class="flex gap-2 min-w-max" id="categoryPillsRow">
-        <button class="sport-cat-btn active" onclick="filterCategory('',this)">🌍 All</button>
-        <!-- Dynamic category pills injected here by JS -->
-      </div>
+    <!-- Category filter dropdown -->
+    <div class="px-3 pb-2">
+      <select id="categoryFilterSelect" class="league-filter" onchange="filterCategory(this.value)">
+        <option value="">🌍 All Categories</option>
+        <!-- Dynamic categories injected here by JS -->
+      </select>
     </div>
     <!-- Status row: live / upcoming tabs -->
     <div class="flex border-b border-white/8 px-3">
@@ -280,21 +290,22 @@
     </div>
     <div id="gamesList" class="px-3 pt-3 pb-4"></div>
     <footer>
-      <div class="flex items-center gap-2 mb-4"><span class="text-orange-500 font-black text-lg tracking-tighter">Sportybet<span class="text-white/30 font-light">.Site</span></span></div>
-      <div class="grid grid-cols-2 gap-3 mb-4 text-xs text-white/40">
-        <div><div class="font-bold text-white/60 mb-2">Games</div><div onclick="navTo('sports')" class="cursor-pointer py-0.5">Sports Betting</div><div onclick="navTo('aviator')" class="cursor-pointer py-0.5">Aviator</div><div onclick="navTo('live')" class="cursor-pointer py-0.5">Live Betting</div><div onclick="navTo('jackpot')" class="cursor-pointer py-0.5">Jackpot</div></div>
-        <div><div class="font-bold text-white/60 mb-2">Account</div><div onclick="navTo('mybets')" class="cursor-pointer py-0.5">My Bets</div><div onclick="navTo('profile')" class="cursor-pointer py-0.5">Profile</div><div onclick="openDeposit()" class="cursor-pointer py-0.5">Deposit</div><div onclick="openWithdraw()" class="cursor-pointer py-0.5">Withdraw</div></div>
-      </div>
-      <div class="text-white/20 text-xs text-center pt-3 border-t border-white/6">© 2026 Sportycash.Site · All rights reserved<br><span class="text-yellow-500/60">⚠️ Gambling can be addictive. Please play responsibly. 18+</span></div>
+      <p style="font-size:13px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">Soccer Betting</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:14px;">SportyCash brings the beautiful game to life with fast soccer betting on the world's top leagues, from the English Premier League and La Liga to the Kenyan Premier League and the biggest international tournaments. Whether you fancy a home win, a draw, or a surprise away upset, our odds update in real time so you always bet on the latest action. With instant M-Pesa deposits and payouts, every kick, goal and last-minute winner is your chance to turn your predictions into winnings.</p>
+      <p style="font-size:13px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">Open a SportyCash Soccer Betting Account and Strike Gold</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:14px;">Opening a SportyCash soccer betting account takes less than a minute and puts a world of football markets at your fingertips. Once your account is ready, you can back your favourite teams on hundreds of matches every day, combine selections for bigger accumulators, and cash out instantly with M-Pesa the moment your bet wins. Strike gold with every goal, bet live, win big, and enjoy the thrill of soccer betting the SportyCash way.</p>
+      <p style="font-size:13px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">How to Register for Soccer Betting with SportyCash</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:14px;">Registering for soccer betting with SportyCash is simple and secure. Create your free account, verify your details, and make your first deposit through M-Pesa to start betting on the matches you love. From there you can browse live and upcoming fixtures, tap an odds button to build your bet slip, and place your bet in seconds. Your winnings are paid out straight to your phone, so you can focus on the game and let SportyCash handle the rest.</p>
+      <div class="text-white/20 text-xs text-center pt-3 border-t border-white/6">© 2026 SportyCash.Site · All rights reserved<br><span class="text-yellow-500/60">Gambling can be addictive. Please play responsibly. 18+</span></div>
     </footer>
   </div>
 
   <!-- AVIATOR SCREEN -->
   <div id="aviatorScreen" class="screen">
-    <div class="px-3 py-2.5 bg-[#0d0d0d] border-b border-white/8 overflow-x-auto">
+    <div class="px-3 py-2.5 bg-[#1a2b3d] border-b border-white/8 overflow-x-auto">
       <div class="flex items-center gap-2">
         <div id="historyBar" class="flex gap-2 min-w-max py-0.5 flex-1"></div>
-        <button id="soundBtn" onclick="toggleSound()" class="w-7 h-7 bg-[#1a1a1a] rounded-xl flex items-center justify-center text-sm flex-shrink-0">🔊</button>
+        <button id="soundBtn" onclick="toggleSound()" class="w-7 h-7 bg-[#1a2b3d] rounded-xl flex items-center justify-center text-sm flex-shrink-0">🔊</button>
       </div>
     </div>
     <div class="px-3 pt-3">
@@ -321,17 +332,17 @@
       </div>
     </div>
     <div class="px-3 mt-3">
-      <div class="bg-[#111] rounded-3xl p-1 flex border border-purple-500/18 mb-3">
+      <div class="bg-[#1a2b3d] rounded-3xl p-1 flex border border-yellow-500/18 mb-3">
         <button id="tabBtn0" onclick="switchTab(0)" class="flex-1 py-2.5 text-sm font-bold rounded-3xl transition tab-on">STAKE SELECTOR</button>
         <button id="tabBtn1" onclick="switchTab(1)" class="flex-1 py-2.5 text-sm font-bold rounded-3xl transition tab-off">AI BET</button>
       </div>
       <div id="stakePanel">
-        <div class="bg-[#120022] rounded-3xl p-4 border border-purple-500/25 mb-3">
+        <div class="bg-[#1a2b3d] rounded-3xl p-4 border border-yellow-500/25 mb-3">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-black text-purple-400 bg-purple-500/15 px-3 py-1 rounded-full">BET 1</span>
+            <span class="text-xs font-black text-yellow-400 bg-yellow-500/15 px-3 py-1 rounded-full">BET 1</span>
             <div class="flex items-center gap-2">
-              <label class="flex items-center gap-1.5 cursor-pointer select-none"><input id="auto1" type="checkbox" class="w-4 h-4 accent-purple-500" checked onchange="syncAuto(1)"><span class="text-white/50 text-xs font-semibold">AUTO</span></label>
-              <div class="flex items-center bg-black rounded-xl px-2 py-1 gap-1"><input id="autoVal1" type="number" min="1.01" step="0.1" value="1.20" class="bg-transparent w-14 text-center outline-none text-sm font-black text-white" onchange="syncAuto(1)"><span class="text-purple-400 text-xs font-bold">x</span></div>
+              <label class="flex items-center gap-1.5 cursor-pointer select-none"><input id="auto1" type="checkbox" class="w-4 h-4 accent-yellow-500" checked onchange="syncAuto(1)"><span class="text-white/50 text-xs font-semibold">AUTO</span></label>
+              <div class="flex items-center bg-black rounded-xl px-2 py-1 gap-1"><input id="autoVal1" type="number" min="1.01" step="0.1" value="1.20" class="bg-transparent w-14 text-center outline-none text-sm font-black text-white" onchange="syncAuto(1)"><span class="text-yellow-400 text-xs font-bold">x</span></div>
             </div>
           </div>
           <div class="grid grid-cols-4 gap-1.5 mb-2">
@@ -343,18 +354,18 @@
           <div class="grid grid-cols-4 gap-1.5 mb-4">
             <button onclick="setBet(1,100)" class="chip" id="chip1_100"></button><button onclick="setBet(1,200)" class="chip" id="chip1_200"></button><button onclick="setBet(1,500)" class="chip" id="chip1_500"></button><button onclick="setBet(1,1000)" class="chip" id="chip1_1000"></button>
           </div>
-          <button id="betBtn1" onclick="placeBet(1)" class="btn-bet py-4 text-xl">BET <span id="betLbl1" class="font-mono">KES 100</span></button>
+          <button id="betBtn1" onclick="placeBet(1)" class="btn-bet-av py-4 text-xl">BET <span id="betLbl1" class="font-mono">KES 100</span></button>
           <div id="activeBet1" style="display:none" class="mt-3 bg-black/50 rounded-2xl p-3 flex items-center justify-between slide-up">
             <div><div class="text-xs text-white/40 mb-0.5">YOUR BET</div><div id="activeBetAmt1" class="font-black text-xl font-mono">KES 100</div></div>
             <button onclick="cashOut(1)" class="btn-cash px-5 py-3 text-sm">CASH OUT <span id="cashVal1" class="font-mono ml-1">KES 120</span></button>
           </div>
         </div>
-        <div class="bg-[#120022] rounded-3xl p-4 border border-purple-500/25">
+        <div class="bg-[#1a2b3d] rounded-3xl p-4 border border-yellow-500/25">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-xs font-black text-purple-400 bg-purple-500/15 px-3 py-1 rounded-full">BET 2</span>
+            <span class="text-xs font-black text-yellow-400 bg-yellow-500/15 px-3 py-1 rounded-full">BET 2</span>
             <div class="flex items-center gap-2">
-              <label class="flex items-center gap-1.5 cursor-pointer select-none"><input id="auto2" type="checkbox" class="w-4 h-4 accent-purple-500" onchange="syncAuto(2)"><span class="text-white/50 text-xs font-semibold">AUTO</span></label>
-              <div class="flex items-center bg-black rounded-xl px-2 py-1 gap-1"><input id="autoVal2" type="number" min="1.01" step="0.1" value="2.00" class="bg-transparent w-14 text-center outline-none text-sm font-black text-white" onchange="syncAuto(2)"><span class="text-purple-400 text-xs font-bold">x</span></div>
+              <label class="flex items-center gap-1.5 cursor-pointer select-none"><input id="auto2" type="checkbox" class="w-4 h-4 accent-yellow-500" onchange="syncAuto(2)"><span class="text-white/50 text-xs font-semibold">AUTO</span></label>
+              <div class="flex items-center bg-black rounded-xl px-2 py-1 gap-1"><input id="autoVal2" type="number" min="1.01" step="0.1" value="2.00" class="bg-transparent w-14 text-center outline-none text-sm font-black text-white" onchange="syncAuto(2)"><span class="text-yellow-400 text-xs font-bold">x</span></div>
             </div>
           </div>
           <div class="grid grid-cols-4 gap-1.5 mb-2">
@@ -366,14 +377,14 @@
           <div class="grid grid-cols-4 gap-1.5 mb-4">
             <button onclick="setBet(2,100)" class="chip" id="chip2_100"></button><button onclick="setBet(2,200)" class="chip" id="chip2_200"></button><button onclick="setBet(2,500)" class="chip" id="chip2_500"></button><button onclick="setBet(2,1000)" class="chip" id="chip2_1000"></button>
           </div>
-          <button id="betBtn2" onclick="placeBet(2)" class="btn-bet py-4 text-xl">BET <span id="betLbl2" class="font-mono">KES 200</span></button>
+          <button id="betBtn2" onclick="placeBet(2)" class="btn-bet-av py-4 text-xl">BET <span id="betLbl2" class="font-mono">KES 200</span></button>
           <div id="activeBet2" style="display:none" class="mt-3 bg-black/50 rounded-2xl p-3 flex items-center justify-between slide-up">
             <div><div class="text-xs text-white/40 mb-0.5">YOUR BET</div><div id="activeBetAmt2" class="font-black text-xl font-mono">KES 200</div></div>
             <button onclick="cashOut(2)" class="btn-cash px-5 py-3 text-sm">CASH OUT <span id="cashVal2" class="font-mono ml-1">KES 400</span></button>
           </div>
         </div>
       </div>
-      <div id="aiPanel" style="display:none" class="bg-[#120022] rounded-3xl p-6 border border-purple-500/25 text-center">
+      <div id="aiPanel" style="display:none" class="bg-[#1a2b3d] rounded-3xl p-6 border border-yellow-500/25 text-center">
         <div class="text-4xl mb-3">🤖</div>
         <div class="text-lg font-black mb-2">AI Bet Advisor</div>
         <div id="aiMsg" class="text-white/50 text-sm mb-5 leading-relaxed">Tap below to get a smart suggestion based on recent crash history.</div>
@@ -387,28 +398,28 @@
         <button id="ltab2" onclick="switchLiveTab(2)" class="flex-1 py-3.5 text-xs font-black ltab-off transition">CHAT</button>
       </div>
       <div id="liveBetsPanel">
-        <div class="flex justify-between items-center bg-purple-700/45 px-4 py-2 rounded-t-2xl mt-3 text-xs font-bold"><span>ONLINE: <span id="onlinePlayers" class="text-white">60</span></span><span class="text-emerald-400">● PLAYING: <span id="playingPlayers">24</span></span></div>
-        <div class="bg-[#0f001f] grid grid-cols-3 text-center py-3 rounded-b-2xl mb-2 text-xs">
+        <div class="flex justify-between items-center bg-yellow-700/45 px-4 py-2 rounded-t-2xl mt-3 text-xs font-bold"><span>ONLINE: <span id="onlinePlayers" class="text-white">60</span></span><span class="text-emerald-400">● PLAYING: <span id="playingPlayers">24</span></span></div>
+        <div class="bg-[#1a2b3d] grid grid-cols-3 text-center py-3 rounded-b-2xl mb-2 text-xs">
           <div><div class="text-white/35">BETS</div><div id="statBets" class="font-black text-base mt-0.5">23</div></div>
           <div><div class="text-white/35">STAKED</div><div id="statStaked" class="font-black text-base mt-0.5">149,426</div></div>
           <div><div class="text-white/35">WON</div><div id="statWon" class="font-black text-base mt-0.5 text-emerald-400">99,762</div></div>
         </div>
-        <div id="liveBetsTable" class="bg-[#0d0d0d] rounded-2xl px-2 py-1 text-sm max-h-80 overflow-y-auto"></div>
+        <div id="liveBetsTable" class="bg-[#1a2b3d] rounded-2xl px-2 py-1 text-sm max-h-80 overflow-y-auto"></div>
       </div>
       <div id="withdrawPanel" style="display:none" class="mt-3">
-        <div class="bg-[#120022] rounded-2xl p-4 border border-purple-500/25 mb-3">
+        <div class="bg-[#1a2b3d] rounded-2xl p-4 border border-yellow-500/25 mb-3">
           <div class="flex items-center justify-between mb-3">
             <div><div class="text-xs text-white/40 font-bold uppercase tracking-wider">Available Balance</div><div class="text-2xl font-black font-mono text-white mt-0.5"><span id="wdCurLabel" class="text-orange-400">KES</span> <span id="wdBalDisplay">0</span></div></div>
             <button onclick="openWithdraw()" class="btn-cash px-5 py-3 text-sm font-black rounded-2xl">WITHDRAW</button>
           </div>
           <div class="text-xs text-white/30">Minimum: <span id="minWdInlineNote" class="text-yellow-400 font-bold">KES 200</span></div>
         </div>
-        <div class="bg-[#0d0d0d] rounded-2xl overflow-hidden">
-          <div class="px-4 py-2.5 bg-purple-700/30 flex items-center justify-between text-xs font-black"><span>RECENT WITHDRAWALS</span><span class="text-emerald-400">● LIVE</span></div>
+        <div class="bg-[#1a2b3d] rounded-2xl overflow-hidden">
+          <div class="px-4 py-2.5 bg-yellow-700/30 flex items-center justify-between text-xs font-black"><span>RECENT WITHDRAWALS</span><span class="text-emerald-400">● LIVE</span></div>
           <div id="withdrawList" class="divide-y divide-white/5 text-sm"></div>
         </div>
       </div>
-      <div id="chatPanel" style="display:none" class="mt-3 bg-[#0d0d0d] rounded-2xl p-4">
+      <div id="chatPanel" style="display:none" class="mt-3 bg-[#1a2b3d] rounded-2xl p-4">
         <div class="flex justify-between text-xs font-bold text-white/35 mb-3"><span>💬 LIVE CHAT</span><span class="text-emerald-400">SECURE</span></div>
         <div id="chatBox" class="space-y-3 text-sm max-h-56 overflow-y-auto mb-3"></div>
         <div class="flex gap-2">
@@ -420,7 +431,7 @@
     <!-- BET HISTORY SECTION -->
     <div class="px-3 mt-6 mb-2">
       <div class="flex items-center justify-between mb-3">
-        <div class="font-black text-sm flex items-center gap-2">📜 My Bet History <span id="avHistBadge" class="bg-purple-500/20 text-purple-400 text-xs font-bold px-2 py-0.5 rounded-full">0</span></div>
+        <div class="font-black text-sm flex items-center gap-2">📜 My Bet History <span id="avHistBadge" class="bg-yellow-500/20 text-yellow-400 text-xs font-bold px-2 py-0.5 rounded-full">0</span></div>
         <span class="text-white/25 text-xs">Last 30 days</span>
       </div>
       <div class="flex gap-2 mb-3">
@@ -428,10 +439,18 @@
         <button id="avHistTabLost" onclick="switchAvHistTab('lost')" style="flex:1;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.35);">💥 Lost</button>
         <button id="avHistTabAll"  onclick="switchAvHistTab('all')"  style="flex:1;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.35);">📋 All</button>
       </div>
-      <div id="avBetHistoryList" class="bg-[#0d0d0d] rounded-2xl overflow-hidden" style="max-height:320px;overflow-y:auto;"></div>
+      <div id="avBetHistoryList" class="bg-[#1a2b3d] rounded-2xl overflow-hidden" style="max-height:320px;overflow-y:auto;"></div>
     </div>
     <div class="h-4"></div>
-    <footer><div class="text-white/20 text-xs text-center">© 2026 Sportycash.Site<br><span class="text-yellow-500/60">⚠️ Gambling is addictive. Play responsibly. 18+</span></div></footer>
+    <footer>
+      <p style="font-size:13px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">Soccer Betting</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:14px;">SportyCash brings the beautiful game to life with fast soccer betting on the world's top leagues, from the English Premier League and La Liga to the Kenyan Premier League and the biggest international tournaments. Whether you fancy a home win, a draw, or a surprise away upset, our odds update in real time so you always bet on the latest action. With instant M-Pesa deposits and payouts, every kick, goal and last-minute winner is your chance to turn your predictions into winnings.</p>
+      <p style="font-size:13px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">Open a SportyCash Soccer Betting Account and Strike Gold</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:14px;">Opening a SportyCash soccer betting account takes less than a minute and puts a world of football markets at your fingertips. Once your account is ready, you can back your favourite teams on hundreds of matches every day, combine selections for bigger accumulators, and cash out instantly with M-Pesa the moment your bet wins. Strike gold with every goal, bet live, win big, and enjoy the thrill of soccer betting the SportyCash way.</p>
+      <p style="font-size:13px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">How to Register for Soccer Betting with SportyCash</p>
+      <p style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:14px;">Registering for soccer betting with SportyCash is simple and secure. Create your free account, verify your details, and make your first deposit through M-Pesa to start betting on the matches you love. From there you can browse live and upcoming fixtures, tap an odds button to build your bet slip, and place your bet in seconds. Your winnings are paid out straight to your phone, so you can focus on the game and let SportyCash handle the rest.</p>
+      <div class="text-white/20 text-xs text-center pt-3 border-t border-white/6">© 2026 SportyCash.Site · All rights reserved<br><span class="text-yellow-500/60">Gambling can be addictive. Please play responsibly. 18+</span></div>
+    </footer>
   </div>
 
   <!-- LIVE SCREEN -->
@@ -466,19 +485,19 @@
     <div class="px-3 pt-4 pb-6">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
         <h2 class="font-black text-xl">My Bets</h2>
-        <button onclick="navTo('betslip')" style="background:rgba(160,32,240,0.15);border:1px solid rgba(160,32,240,0.35);color:#c084fc;font-size:11px;font-weight:800;padding:7px 14px;border-radius:99px;cursor:pointer;">🎯 Betslip</button>
+        <button onclick="navTo('betslip')" style="background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.35);color:#eab308;font-size:11px;font-weight:800;padding:7px 14px;border-radius:99px;cursor:pointer;">🎯 Betslip</button>
       </div>
       <!-- FILTER ROW -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;" id="mybetsFilters">
         <!-- Date filters -->
         <div style="display:flex;gap:6px;flex:1;">
-          <button id="flt-all" onclick="setMyBetsFilter('date','all')" style="flex:1;padding:8px 6px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid #a020f0;background:#a020f0;color:white;cursor:pointer;white-space:nowrap;">All</button>
+          <button id="flt-all" onclick="setMyBetsFilter('date','all')" style="flex:1;padding:8px 6px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid #eab308;background:#eab308;color:white;cursor:pointer;white-space:nowrap;">All</button>
           <button id="flt-week" onclick="setMyBetsFilter('date','week')" style="flex:1;padding:8px 6px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.55);cursor:pointer;white-space:nowrap;">This Week</button>
           <button id="flt-month" onclick="setMyBetsFilter('date','month')" style="flex:1;padding:8px 6px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.55);cursor:pointer;white-space:nowrap;">This Month</button>
         </div>
         <!-- Status filters -->
         <div style="display:flex;gap:6px;">
-          <button id="flt-status-all" onclick="setMyBetsFilter('status','all')" style="padding:8px 10px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid #a020f0;background:#a020f0;color:white;cursor:pointer;white-space:nowrap;">All</button>
+          <button id="flt-status-all" onclick="setMyBetsFilter('status','all')" style="padding:8px 10px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid #eab308;background:#eab308;color:white;cursor:pointer;white-space:nowrap;">All</button>
           <button id="flt-won" onclick="setMyBetsFilter('status','won')" style="padding:8px 10px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid rgba(52,211,153,0.4);background:rgba(52,211,153,0.08);color:#34d399;cursor:pointer;white-space:nowrap;">Won</button>
           <button id="flt-lost" onclick="setMyBetsFilter('status','lost')" style="padding:8px 10px;border-radius:99px;font-size:11px;font-weight:800;border:1.5px solid rgba(248,113,113,0.4);background:rgba(248,113,113,0.08);color:#f87171;cursor:pointer;white-space:nowrap;">Lost</button>
         </div>
@@ -496,26 +515,26 @@
         <button onclick="clearBetslip()" class="text-xs text-red-400 font-bold bg-red-500/10 px-3 py-1.5 rounded-full">Clear All</button>
       </div>
       <!-- SEARCH BY CODE SECTION -->
-      <div style="background:#111;border:1.5px solid rgba(160,32,240,0.25);border-radius:16px;padding:14px;margin-bottom:16px;">
+      <div style="background:#1a2b3d;border:1.5px solid rgba(234,179,8,0.25);border-radius:16px;padding:14px;margin-bottom:16px;">
         <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">🔍 Search Betslip by Code</div>
         <div style="display:flex;gap:8px;">
           <input id="betCodeSearchInput" type="text" placeholder="#ABC123" maxlength="7"
-            style="flex:1;background:#0a0a0a;border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;padding:11px 14px;color:white;font-size:15px;font-weight:700;font-family:monospace;outline:none;text-transform:uppercase;transition:border-color 0.2s;"
+            style="flex:1;background:#121e2a;border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;padding:11px 14px;color:white;font-size:15px;font-weight:700;font-family:monospace;outline:none;text-transform:uppercase;transition:border-color 0.2s;"
             oninput="this.value=this.value.toUpperCase()"
-            onfocus="this.style.borderColor='#a020f0'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"
+            onfocus="this.style.borderColor='#eab308'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"
             onkeydown="if(event.key==='Enter')searchBetslip()">
-          <button onclick="searchBetslip()" style="background:linear-gradient(135deg,#a020f0,#7c3aed);border:none;color:white;font-weight:900;font-size:13px;padding:11px 18px;border-radius:12px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(160,32,240,0.4);">FIND</button>
+          <button onclick="searchBetslip()" style="background:linear-gradient(135deg,#eab308,#ca8a04);border:none;color:white;font-weight:900;font-size:13px;padding:11px 18px;border-radius:12px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(234,179,8,0.4);">FIND</button>
         </div>
         <div id="betslipSearchResult" style="margin-top:10px;"></div>
       </div>
-      <div class="bg-[#120022] border border-purple-500/25 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
+      <div class="bg-[#1a2b3d] border border-yellow-500/25 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
         <div class="text-xs text-white/40 font-bold">AVAILABLE BALANCE</div>
         <div class="font-black font-mono text-orange-400"><span id="slipBalPref">KES</span> <span id="slipBalDisplay">0</span></div>
       </div>
       <div id="betslipSelections" class="space-y-2 mb-4"></div>
       <div id="betslipEmpty" class="text-center py-10 hidden"><div class="text-4xl mb-3">🎯</div><div class="text-white/40 text-sm">No selections yet<br>Go to Sports to add games</div></div>
       <div id="betslipStakeArea" class="hidden">
-        <div class="bg-[#111] border border-white/8 rounded-2xl px-4 py-3 mb-3">
+        <div class="bg-[#1a2b3d] border border-white/8 rounded-2xl px-4 py-3 mb-3">
           <div class="text-xs text-white/40 font-bold mb-2 uppercase tracking-wider">Stake Amount (<span id="slipCurLabel">KES</span>)</div>
           <input id="slipStake" type="number" min="50" placeholder="Min. KES 50" class="inp text-center text-2xl font-mono" oninput="updateSlipSummary()">
           <div class="grid grid-cols-4 gap-2 mt-3">
@@ -525,12 +544,12 @@
             <button onclick="setSlipStake(1000)" class="chip text-xs py-2">1K</button>
           </div>
         </div>
-        <div id="slipSummary" class="bg-[#0d0d0d] border border-white/5 rounded-2xl px-4 py-3 mb-4 space-y-2 text-sm hidden">
+        <div id="slipSummary" class="bg-[#1a2b3d] border border-white/5 rounded-2xl px-4 py-3 mb-4 space-y-2 text-sm hidden">
           <div class="flex justify-between"><span class="text-white/40">Selections</span><span id="slipCount" class="font-bold">0</span></div>
-          <div class="flex justify-between"><span class="text-white/40">Total Odds</span><span id="slipOdds" class="font-bold text-purple-400">0.00</span></div>
+          <div class="flex justify-between"><span class="text-white/40">Total Odds</span><span id="slipOdds" class="font-bold text-yellow-400">0.00</span></div>
           <div class="flex justify-between"><span class="text-white/40">Potential Win</span><span id="slipWin" class="font-black text-emerald-400">0</span></div>
         </div>
-        <button onclick="placeSportsBet()" class="btn-bet py-4 text-lg w-full">PLACE BET</button>
+        <button id="placeSportsBetBtn" onclick="placeSportsBet()" class="btn-bet btn-place-bet py-4 text-lg w-full">PLACE BET</button>
       </div>
     </div>
   </div>
@@ -538,7 +557,7 @@
   <!-- PROFILE SCREEN -->
   <div id="profileScreen" class="screen">
     <div class="px-3 pt-4 pb-8">
-      <div class="bg-gradient-to-br from-purple-900/60 to-black border border-purple-500/30 rounded-3xl p-5 mb-5">
+      <div class="bg-gradient-to-br from-yellow-900/60 to-black border border-yellow-500/30 rounded-3xl p-5 mb-5">
         <div class="flex items-center gap-4 mb-4">
           <div class="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center font-black text-2xl" id="profileAvatar">P</div>
           <div>
@@ -556,13 +575,13 @@
         <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Balance</div><div class="text-xl font-black font-mono text-orange-400">KES <span id="profileBal">0</span></div></div>
         <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Deposited</div><div class="text-xl font-black font-mono text-white">KES <span id="profileDeposited">0</span></div></div>
         <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Won</div><div class="text-xl font-black font-mono text-emerald-400">KES <span id="profileWon">0</span></div></div>
-        <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Withdrawn</div><div class="text-xl font-black font-mono text-purple-400">KES <span id="profileWithdrawn">0</span></div></div>
+        <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Withdrawn</div><div class="text-xl font-black font-mono text-yellow-400">KES <span id="profileWithdrawn">0</span></div></div>
       </div>
       <div class="space-y-3 mb-5">
         <div class="profile-menu-item" onclick="openWallet()"><div class="w-10 h-10 bg-orange-500/15 rounded-2xl flex items-center justify-center text-xl">💼</div><div class="flex-1"><div class="font-bold">My Wallet</div><div class="text-white/40 text-xs">Transactions &amp; history</div></div><span class="text-white/30">›</span></div>
         <div class="profile-menu-item" onclick="navTo('mybets')"><div class="w-10 h-10 bg-blue-500/15 rounded-2xl flex items-center justify-center text-xl">📋</div><div class="flex-1"><div class="font-bold">My Bets</div><div class="text-white/40 text-xs">Bet history &amp; results</div></div><span class="text-white/30">›</span></div>
         <div class="profile-menu-item" onclick="openDeposit()"><div class="w-10 h-10 bg-green-500/15 rounded-2xl flex items-center justify-center text-xl">📱</div><div class="flex-1"><div class="font-bold">Deposit via M-Pesa</div><div class="text-white/40 text-xs">Instant · Min KES 100</div></div><span class="text-white/30">›</span></div>
-        <div class="profile-menu-item" onclick="openWithdraw()"><div class="w-10 h-10 bg-purple-500/15 rounded-2xl flex items-center justify-center text-xl">⬇️</div><div class="flex-1"><div class="font-bold">Withdraw Funds</div><div class="text-white/40 text-xs">M-Pesa, Airtel, Bank</div></div><span class="text-white/30">›</span></div>
+        <div class="profile-menu-item" onclick="openWithdraw()"><div class="w-10 h-10 bg-yellow-500/15 rounded-2xl flex items-center justify-center text-xl">⬇️</div><div class="flex-1"><div class="font-bold">Withdraw Funds</div><div class="text-white/40 text-xs">M-Pesa, Airtel, Bank</div></div><span class="text-white/30">›</span></div>
       </div>
       <button onclick="doLogout()" class="btn-red w-full py-4 text-base font-black rounded-2xl">🚪 Sign Out</button>
     </div>
@@ -574,7 +593,7 @@
 <div id="depositScreen" class="overlay-screen" style="flex-direction:column;">
 
   <!-- STICKY HEADER -->
-  <div style="background:#0d0d0d;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;position:sticky;top:0;z-index:10;">
+  <div style="background:#1a2b3d;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;position:sticky;top:0;z-index:10;">
     <!-- Top bar -->
     <div style="display:flex;align-items:center;gap:12px;padding:14px 16px 10px;">
       <button id="depBackBtn" type="button" onclick="if(window._depStep<=1){window.closeDeposit();}else{window.depGoToStep(window._depStep-1);} return false;" style="width:36px;height:36px;background:rgba(255,255,255,0.07);border:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;color:white;cursor:pointer;flex-shrink:0;">‹</button>
@@ -585,15 +604,15 @@
     </div>
     <!-- Step pill progress -->
     <div style="display:flex;align-items:center;gap:6px;padding:0 16px 12px;">
-      <div id="pill1" style="flex:1;height:4px;border-radius:99px;background:#a020f0;transition:background 0.25s;"></div>
+      <div id="pill1" style="flex:1;height:4px;border-radius:99px;background:#eab308;transition:background 0.25s;"></div>
       <div id="pill2" style="flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,0.1);transition:background 0.25s;"></div>
       <div id="pill3" style="flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,0.1);transition:background 0.25s;"></div>
     </div>
     <!-- Selected summary chips (shown after step 1 / step 2) -->
     <div id="depBreadcrumb" style="display:none;padding:0 16px 12px;display:none;gap:8px;flex-wrap:wrap;">
-      <div id="bcCountry" style="display:none;align-items:center;gap:6px;background:rgba(160,32,240,0.15);border:1px solid rgba(160,32,240,0.35);border-radius:99px;padding:5px 12px;cursor:pointer;" onclick="depGoToStep(1)">
+      <div id="bcCountry" style="display:none;align-items:center;gap:6px;background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.35);border-radius:99px;padding:5px 12px;cursor:pointer;" onclick="depGoToStep(1)">
         <span id="bcCountryFlag" style="font-size:14px;"></span>
-        <span id="bcCountryName" style="font-size:11px;font-weight:800;color:#c084fc;"></span>
+        <span id="bcCountryName" style="font-size:11px;font-weight:800;color:#eab308;"></span>
         <span style="font-size:11px;color:rgba(255,255,255,0.3);">✕</span>
       </div>
       <div id="bcMethod" style="display:none;align-items:center;gap:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);border-radius:99px;padding:5px 12px;cursor:pointer;" onclick="depGoToStep(2)">
@@ -611,8 +630,8 @@
         <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;">🔍</span>
         <input id="countrySearch" type="text" placeholder="Search country…"
           oninput="filterCountries(this.value)"
-          style="width:100%;background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:13px 14px 13px 42px;color:white;font-size:15px;outline:none;box-sizing:border-box;transition:border-color 0.2s;"
-          onfocus="this.style.borderColor='#a020f0'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          style="width:100%;background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:13px 14px 13px 42px;color:white;font-size:15px;outline:none;box-sizing:border-box;transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='#eab308'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
     </div>
     <div id="countryList" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -635,18 +654,18 @@
       </div>
       <div id="depErr" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;margin-bottom:14px;"></div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
-        <button onclick="setDepAmt(100)"   style="background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;transition:border-color 0.15s;" onmousedown="this.style.borderColor='#a020f0'" onmouseup="this.style.borderColor='rgba(255,255,255,0.08)'"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>100</button>
-        <button onclick="setDepAmt(500)"   style="background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>500</button>
-        <button onclick="setDepAmt(1000)"  style="background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>1,000</button>
-        <button onclick="setDepAmt(2000)"  style="background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>2,000</button>
-        <button onclick="setDepAmt(5000)"  style="background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>5,000</button>
-        <button onclick="setDepAmt(10000)" style="background:#111;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>10,000</button>
+        <button onclick="setDepAmt(100)"   style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;transition:border-color 0.15s;" onmousedown="this.style.borderColor='#eab308'" onmouseup="this.style.borderColor='rgba(255,255,255,0.08)'"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>100</button>
+        <button onclick="setDepAmt(500)"   style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>500</button>
+        <button onclick="setDepAmt(1000)"  style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>1,000</button>
+        <button onclick="setDepAmt(2000)"  style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>2,000</button>
+        <button onclick="setDepAmt(5000)"  style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>5,000</button>
+        <button onclick="setDepAmt(10000)" style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 4px;font-weight:900;font-size:13px;color:white;cursor:pointer;"><span style="color:#f97316;font-size:10px;font-weight:800;display:block;">KES</span>10,000</button>
       </div>
       <div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;margin-bottom:10px;">— or enter custom amount —</div>
-      <input id="depInput" type="number" min="100" placeholder="Amount (KES min. 100)" style="width:100%;background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;color:white;font-size:20px;font-family:monospace;text-align:center;outline:none;box-sizing:border-box;margin-bottom:16px;transition:border-color 0.2s;" onfocus="this.style.borderColor='#a020f0'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      <input id="depInput" type="number" min="100" placeholder="Amount (KES min. 100)" style="width:100%;background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;color:white;font-size:20px;font-family:monospace;text-align:center;outline:none;box-sizing:border-box;margin-bottom:16px;transition:border-color 0.2s;" onfocus="this.style.borderColor='#eab308'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       <div style="margin-bottom:20px;">
         <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">M-Pesa Number</div>
-        <div style="background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
           <span id="depPhoneDisplay" style="color:white;font-weight:700;font-size:17px;font-family:monospace;">—</span>
           <span style="font-size:11px;font-weight:800;color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:99px;padding:4px 10px;">✔ VERIFIED</span>
         </div>
@@ -664,7 +683,7 @@
         <div style="font-weight:900;font-size:18px;">Binance TRC-20 USDT</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">Send USDT on TRC-20 network only</div>
       </div>
-      <div style="background:#111;border:2px solid rgba(245,158,11,0.25);border-radius:18px;padding:18px;margin-bottom:14px;">
+      <div style="background:#1a2b3d;border:2px solid rgba(245,158,11,0.25);border-radius:18px;padding:18px;margin-bottom:14px;">
         <div style="font-size:10px;font-weight:800;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">TRC-20 Wallet Address</div>
         <div id="binanceAddr" style="font-family:monospace;font-size:13px;color:#fcd34d;word-break:break-all;line-height:1.6;margin-bottom:14px;">TLsV52sRDL79HXGGm9yzwKibb6BerEtrU2</div>
         <button onclick="copyBinanceAddress()" id="copyBinanceBtn" style="width:100%;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;color:#000;font-weight:900;font-size:14px;padding:14px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;">
@@ -688,13 +707,13 @@
         <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">Visa · Mastercard · All major cards</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
-        <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" oninput="fmtCard(this)" style="background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;font-family:monospace;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" >
+        <input type="text" id="cardNumber" placeholder="Card Number" maxlength="19" oninput="fmtCard(this)" style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;font-family:monospace;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" >
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <input type="text" id="cardExpiry" placeholder="MM / YY" maxlength="7" oninput="fmtExpiry(this)" style="background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-          <input type="text" id="cardCvv" placeholder="CVV" maxlength="4" inputmode="numeric" style="background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          <input type="text" id="cardExpiry" placeholder="MM / YY" maxlength="7" oninput="fmtExpiry(this)" style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          <input type="text" id="cardCvv" placeholder="CVV" maxlength="4" inputmode="numeric" style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
         </div>
-        <input type="text" id="cardName" placeholder="Name on Card" style="background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-        <input type="number" id="cardAmt" placeholder="Amount (USD)" min="5" style="background:#111;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:18px;font-family:monospace;text-align:center;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <input type="text" id="cardName" placeholder="Name on Card" style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:16px;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <input type="number" id="cardAmt" placeholder="Amount (USD)" min="5" style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:18px;font-family:monospace;text-align:center;outline:none;box-sizing:border-box;transition:border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
       <button onclick="showToast('Card processing coming soon — use Binance for now','purple')" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;color:white;font-weight:900;font-size:17px;padding:18px;border-radius:16px;cursor:pointer;box-shadow:0 8px 24px rgba(37,99,235,0.35);">💳 PAY SECURELY</button>
       <div style="text-align:center;color:rgba(255,255,255,0.2);font-size:11px;margin-top:10px;">🔒 256-bit SSL · Min $5</div>
@@ -705,13 +724,13 @@
       <div id="csfEmoji" style="font-size:56px;margin-bottom:16px;">🚀</div>
       <div id="csfTitle" style="font-weight:900;font-size:22px;margin-bottom:8px;">Coming Soon!</div>
       <div id="csfMsg" style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:28px;"></div>
-      <div style="background:#111;border:1px solid rgba(160,32,240,0.2);border-radius:18px;padding:16px;margin-bottom:20px;">
+      <div style="background:#1a2b3d;border:1px solid rgba(234,179,8,0.2);border-radius:18px;padding:16px;margin-bottom:20px;">
         <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:12px;">Available right now:</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <button onclick="depSelectMethod({id:'binance',icon:'₿',label:'Binance TRC-20',sub:'USDT · Min 5 USDT',works:true})" style="background:#1a1a1a;border:1.5px solid rgba(245,158,11,0.3);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;width:100%;">
+          <button onclick="depSelectMethod({id:'binance',icon:'₿',label:'Binance TRC-20',sub:'USDT · Min 5 USDT',works:true})" style="background:#1a2b3d;border:1.5px solid rgba(245,158,11,0.3);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;width:100%;">
             <span style="font-size:22px;">₿</span><div><div style="font-weight:800;font-size:14px;color:#fcd34d;">Binance TRC-20</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">USDT · Min 5 USDT</div></div>
           </button>
-          <button onclick="depSelectMethod({id:'card',icon:'💳',label:'Card Payment',sub:'Visa / Mastercard',works:true})" style="background:#1a1a1a;border:1.5px solid rgba(59,130,246,0.3);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;width:100%;">
+          <button onclick="depSelectMethod({id:'card',icon:'💳',label:'Card Payment',sub:'Visa / Mastercard',works:true})" style="background:#1a2b3d;border:1.5px solid rgba(59,130,246,0.3);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;width:100%;">
             <span style="font-size:22px;">💳</span><div><div style="font-weight:800;font-size:14px;color:#93c5fd;">Card Payment</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Visa / Mastercard</div></div>
           </button>
         </div>
@@ -727,12 +746,12 @@
         </div>
         <div style="font-weight:900;font-size:22px;">Waiting for Payment</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.5);">STK push sent to<br><span id="depPhoneDisplayPending" style="color:#fb923c;font-weight:800;"></span></div>
-        <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:16px;width:100%;text-align:left;">
+        <div style="background:#1a2b3d;border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:16px;width:100%;text-align:left;">
           <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;"><span style="color:rgba(255,255,255,0.4);">Amount</span><span id="depAmtDisplay" style="font-weight:900;font-family:monospace;">—</span></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;"><span style="color:rgba(255,255,255,0.4);">Ref</span><span id="depRefDisplay" style="font-family:monospace;color:#c084fc;font-size:11px;">—</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;"><span style="color:rgba(255,255,255,0.4);">Ref</span><span id="depRefDisplay" style="font-family:monospace;color:#eab308;font-size:11px;">—</span></div>
           <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:rgba(255,255,255,0.4);">Status</span><span style="color:#fb923c;font-weight:800;font-size:11px;display:flex;align-items:center;gap:5px;"><span class="pulse-dot" style="width:7px;height:7px;border-radius:50%;background:#fb923c;display:inline-block;"></span>CHECKING…</span></div>
         </div>
-        <div style="width:100%;background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 16px;">
+        <div style="width:100%;background:#1a2b3d;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 16px;">
           <div id="depPollMsg" style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:8px;">Waiting for M-Pesa confirmation…</div>
           <div style="background:rgba(255,255,255,0.07);border-radius:99px;height:4px;overflow:hidden;"><div id="depPollBar" style="height:100%;background:#f97316;border-radius:99px;transition:width 0.5s;width:0%;"></div></div>
         </div>
@@ -758,12 +777,12 @@
 
 <!-- WITHDRAW SCREEN -->
 <div id="withdrawScreen" class="overlay-screen">
-  <div class="flex items-center gap-3 px-4 py-4 border-b border-white/8 bg-[#0d0d0d] flex-shrink-0">
+  <div class="flex items-center gap-3 px-4 py-4 border-b border-white/8 bg-[#1a2b3d] flex-shrink-0">
     <button onclick="closeWithdraw()" class="w-9 h-9 bg-white/8 rounded-2xl flex items-center justify-center text-xl">‹</button>
     <span class="font-black text-lg">Withdraw Funds</span>
   </div>
   <div class="flex-1 px-5 pt-6 pb-10 max-w-sm mx-auto w-full">
-    <div class="bg-[#120022] border border-purple-500/25 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
+    <div class="bg-[#1a2b3d] border border-yellow-500/25 rounded-2xl px-5 py-4 mb-6 flex items-center justify-between">
       <div><div class="text-xs text-white/40 font-bold uppercase tracking-wider mb-1">Available to Withdraw</div><div class="text-3xl font-black font-mono">KES <span id="wdScreenBal">0</span></div></div>
       <div class="text-4xl">💰</div>
     </div>
@@ -781,7 +800,7 @@
     <div class="mb-5">
       <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-3">Withdrawal Method</label>
       <div class="space-y-3">
-        <div class="method-card selected" id="method-mpesa" onclick="selectMethod('mpesa')"><div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">📱</div><div class="flex-1"><div class="font-black text-sm">M-Pesa</div><div class="text-white/40 text-xs mt-0.5">Instant · No fees</div></div><div id="dot-mpesa" class="w-5 h-5 rounded-full border-2 border-purple-500 flex items-center justify-center flex-shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div></div></div>
+        <div class="method-card selected" id="method-mpesa" onclick="selectMethod('mpesa')"><div class="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">📱</div><div class="flex-1"><div class="font-black text-sm">M-Pesa</div><div class="text-white/40 text-xs mt-0.5">Instant · No fees</div></div><div id="dot-mpesa" class="w-5 h-5 rounded-full border-2 border-yellow-500 flex items-center justify-center flex-shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div></div></div>
         <div class="method-card" id="method-airtel" onclick="selectMethod('airtel')"><div class="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">📲</div><div class="flex-1"><div class="font-black text-sm">Airtel Money</div><div class="text-white/40 text-xs mt-0.5">Instant · No fees</div></div><div id="dot-airtel" class="w-5 h-5 rounded-full border-2 border-white/20 flex items-center justify-center flex-shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-transparent"></div></div></div>
         <div class="method-card" id="method-bank" onclick="selectMethod('bank')"><div class="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏦</div><div class="flex-1"><div class="font-black text-sm">Bank Transfer</div><div class="text-white/40 text-xs mt-0.5">1-2 hours · No fees</div></div><div id="dot-bank" class="w-5 h-5 rounded-full border-2 border-white/20 flex items-center justify-center flex-shrink-0"><div class="w-2.5 h-2.5 rounded-full bg-transparent"></div></div></div>
       </div>
@@ -790,7 +809,7 @@
       <label class="text-xs font-bold text-white/40 uppercase tracking-wider block mb-2" id="phoneLabel">M-Pesa Number</label>
       <input id="wdPhone" type="tel" placeholder="07XX XXX XXX" class="inp">
     </div>
-    <div id="wdSummary" class="hidden bg-[#111] border border-white/8 rounded-2xl px-4 py-3 mb-5 space-y-2 text-sm">
+    <div id="wdSummary" class="hidden bg-[#1a2b3d] border border-white/8 rounded-2xl px-4 py-3 mb-5 space-y-2 text-sm">
       <div class="flex justify-between"><span class="text-white/45">Amount</span><span class="font-mono font-bold" id="sumAmt">—</span></div>
       <div class="flex justify-between"><span class="text-white/45">Fee</span><span class="font-mono text-emerald-400">FREE</span></div>
       <div class="h-px bg-white/8"></div>
@@ -803,12 +822,12 @@
 
 <!-- WALLET SCREEN -->
 <div id="walletScreen" class="overlay-screen">
-  <div class="flex items-center gap-3 px-4 py-4 border-b border-white/8 bg-[#0d0d0d] flex-shrink-0 sticky top-0 z-10">
+  <div class="flex items-center gap-3 px-4 py-4 border-b border-white/8 bg-[#1a2b3d] flex-shrink-0 sticky top-0 z-10">
     <button onclick="closeWallet()" class="w-9 h-9 bg-white/8 rounded-2xl flex items-center justify-center text-xl">‹</button>
     <span class="font-black text-lg">My Wallet</span>
   </div>
   <div class="flex-1 px-4 pt-5 pb-10 max-w-sm mx-auto w-full">
-    <div class="bg-gradient-to-br from-purple-900/60 to-black border border-purple-500/30 rounded-3xl p-5 mb-4">
+    <div class="bg-gradient-to-br from-yellow-900/60 to-black border border-yellow-500/30 rounded-3xl p-5 mb-4">
       <div class="text-xs text-white/40 font-bold uppercase tracking-wider mb-2">Total Balance</div>
       <div class="text-4xl font-black font-mono text-white mb-4">KES <span id="walletBal">0</span></div>
       <div class="flex gap-3">
@@ -819,7 +838,7 @@
     <div class="grid grid-cols-2 gap-3 mb-5">
       <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Deposited</div><div class="text-xl font-black font-mono text-orange-400">KES <span id="statDeposited">0</span></div></div>
       <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Withdrawn</div><div class="text-xl font-black font-mono text-emerald-400">KES <span id="statWithdrawn">0</span></div></div>
-      <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Won</div><div class="text-xl font-black font-mono text-purple-400">KES <span id="statWonTotal">0</span></div></div>
+      <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Won</div><div class="text-xl font-black font-mono text-yellow-400">KES <span id="statWonTotal">0</span></div></div>
       <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Rounds Played</div><div class="text-xl font-black font-mono text-white"><span id="statRounds">0</span></div></div>
     </div>
     <div class="mb-2 flex items-center justify-between">
@@ -827,13 +846,13 @@
       <div class="text-xs text-white/30"><span id="txCount">0</span> transactions</div>
     </div>
     <div id="txList" class="space-y-2"></div>
-    <div id="txEmpty" class="bg-[#111] rounded-2xl p-8 text-center hidden"><div class="text-3xl mb-2">📭</div><div class="text-white/40 text-sm">No transactions yet</div></div>
+    <div id="txEmpty" class="bg-[#1a2b3d] rounded-2xl p-8 text-center hidden"><div class="text-3xl mb-2">📭</div><div class="text-white/40 text-sm">No transactions yet</div></div>
   </div>
 </div>
 
 <!-- WITHDRAWAL POPUP -->
 <div id="wdPopupOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
-  <div id="wdPopupBox" style="background:#111;border-radius:28px;padding:32px 24px;max-width:300px;width:100%;text-align:center;position:relative;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);">
+  <div id="wdPopupBox" style="background:#1a2b3d;border-radius:28px;padding:32px 24px;max-width:300px;width:100%;text-align:center;position:relative;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);">
     <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.08);border-radius:0 0 28px 28px;overflow:hidden;"><div id="wdPopupBar" style="height:100%;width:100%;transition:width linear;border-radius:0 0 28px 28px;"></div></div>
     <div id="wdPopupIcon" style="font-size:52px;margin-bottom:12px;line-height:1;"></div>
     <div id="wdPopupTitle" style="font-size:20px;font-weight:900;margin-bottom:8px;"></div>
@@ -843,7 +862,7 @@
 </div>
 
 <!-- BOTTOM NAV -->
-<div id="bottomNav" class="bg-[#0d0d0d] border-t border-white/8 flex items-stretch px-1 py-1">
+<div id="bottomNav" class="bg-[#1a2b3d] border-t border-white/8 flex items-stretch px-1 py-1">
   <button id="bnav-home" onclick="navTo('sports')" class="bnav-btn active">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
   </button>
@@ -906,6 +925,8 @@ function startFootballGamesListener(){
     if(endedInSlip.length>0){
       showToast(endedInSlip.length+' game(s) in your betslip have ended!','red');
     }
+    // Deferred restore: once games are loaded, refine any pending picks from index.html
+    restorePendingPicks();
   });
 }
 
@@ -918,11 +939,10 @@ function startCategoriesListener(){
 }
 
 function renderCategoryPills(){
-  const row=document.getElementById('categoryPillsRow');
-  if(!row)return;
-  // Keep the "All" button, rebuild the rest
-  row.innerHTML=`<button class="sport-cat-btn ${activeCategoryFilter===''?'active':''}" onclick="filterCategory('',this)">🌍 All</button>`+
-    fbCategories.map(c=>`<button class="sport-cat-btn ${activeCategoryFilter===c.id?'active':''}" onclick="filterCategory('${c.id}',this)">${c.icon||'⚽'} ${c.name}</button>`).join('');
+  const sel=document.getElementById('categoryFilterSelect');
+  if(!sel)return;
+  sel.innerHTML=`<option value="">🌍 All Categories</option>`+
+    fbCategories.map(c=>`<option value="${c.id}" ${activeCategoryFilter===c.id?'selected':''}>${c.icon||'⚽'} ${c.name}</option>`).join('');
 }
 
 function startMyFootBetsListener(){
@@ -1000,7 +1020,7 @@ function buildFbGameCard(game){
     ?(isHT
       ?`<span style="font-size:9px;font-weight:900;color:#fbbf24;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:4px;padding:2px 7px;">⏸ HALF TIME</span>`
       :`<span style="font-size:9px;font-weight:900;color:#f87171;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:2px 7px;animation:pulse 1.4s ease infinite;" id="min_${game.id}">● ${minLabel}</span>`)
-    :`<span style="font-size:10px;font-weight:700;color:rgba(96,165,250,0.85);background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:4px;padding:2px 7px;">🕐 ${kickoffLabel}</span>`;
+    :`<span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.65);background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14);border-radius:4px;padding:2px 7px;">🕐 ${kickoffLabel}</span>`;
 
   // ── Category badge ──
   const catBadge=game.categoryName
@@ -1036,7 +1056,7 @@ function buildFbGameCard(game){
   <div style="padding:12px 12px 4px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:4px;">
       <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-        <span style="font-size:10px;opacity:0.4;">⚽ ${game.league||'Match'}</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.6);">⚽ ${game.league||'Match'}</span>
         ${catBadge}
       </div>
       ${badge}
@@ -1050,7 +1070,7 @@ function buildFbGameCard(game){
     ${oddsH}${oddsD}${oddsA}
   </div>
   <div style="padding:4px 12px 10px;display:flex;align-items:center;justify-content:space-between;" onclick="event.stopPropagation()">
-    <span style="font-size:10px;color:#a78bfa;font-weight:700;" onclick="openFbGameMarkets('${game.id}')">📊 More Markets (O/U) ›</span>
+    <span style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:700;" onclick="openFbGameMarkets('${game.id}')">📊 More Markets (O/U) ›</span>
     ${isLocked?`<span style="font-size:9px;color:#f87171;font-weight:800;">🔒 Locked</span>`:`<span style="font-size:9px;opacity:0.3;">${isLive?(isHT?'Half Time':(half===2?'2nd Half':'1st Half')):'Upcoming'}</span>`}
   </div>
 </div>`;
@@ -1139,9 +1159,9 @@ function updateBetslipBadge(){const b=document.getElementById('betslipBadge');if
 
 // Category filter
 window.filterCategory=function(catId,btn){
-  activeCategoryFilter=catId;
-  document.querySelectorAll('#categoryPillsRow .sport-cat-btn').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
+  activeCategoryFilter=catId||'';
+  const sel=document.getElementById('categoryFilterSelect');
+  if(sel)sel.value=activeCategoryFilter;
   renderGames();
 };
 
@@ -1174,7 +1194,7 @@ window.switchDetailTab = function(n) {
   [0,1,2,3,4,5].forEach(i => {
     const tab = document.getElementById('dmTab'+i);
     const panel = document.getElementById('detailPanel'+i);
-    if (tab) { tab.style.color = i===n ? 'white' : 'rgba(255,255,255,0.4)'; tab.style.borderBottomColor = i===n ? '#a020f0' : 'transparent'; }
+    if (tab) { tab.style.color = i===n ? 'white' : 'rgba(255,255,255,0.4)'; tab.style.borderBottomColor = i===n ? '#eab308' : 'transparent'; }
     if (panel) panel.style.display = i===n ? 'block' : 'none';
   });
   updateDetailBetslipSummary();
@@ -1246,18 +1266,18 @@ window.openFbGameMarkets=function(gameId){
   const mkOddsBtn=(market,pick,label,oddsVal,sub)=>{
     if(!oddsVal)return`<div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px 6px;text-align:center;color:rgba(255,255,255,0.2);font-size:12px;">–</div>`;
     const sel=isBetSelected('fb_'+game.id,market,pick);
-    const selStyle=sel?'background:rgba(160,32,240,0.25);border-color:#a020f0;':'background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);';
+    const selStyle=sel?'background:#FFD700;border-color:#FFD700;color:#121e2a;box-shadow:0 0 10px rgba(255,215,0,0.4);':'background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);';
     const safeLabel=String(label).replace(/"/g,'&quot;');
     const safeGame=String(gameName).replace(/"/g,'&quot;');
-    if(isLocked) return`<div style="flex:1;${selStyle.replace('rgba(160,32,240,0.25)','rgba(255,255,255,0.03)')}border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 6px;text-align:center;opacity:0.4;cursor:not-allowed;" onclick="showToast('Betting closed for this game','red')"><div style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:700;margin-bottom:3px;">${sub}</div><div style="font-weight:900;font-size:17px;">${parseFloat(oddsVal).toFixed(2)}</div></div>`;
+    if(isLocked) return`<div style="flex:1;${selStyle.replace('background:#FFD700;border-color:#FFD700;color:#121e2a;box-shadow:0 0 10px rgba(255,215,0,0.4);','rgba(255,255,255,0.03)')}border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px 6px;text-align:center;opacity:0.4;cursor:not-allowed;" onclick="showToast('Betting closed for this game','red')"><div style="font-size:9px;color:rgba(255,255,255,0.35);font-weight:700;margin-bottom:3px;">${sub}</div><div style="font-weight:900;font-size:17px;">${parseFloat(oddsVal).toFixed(2)}</div></div>`;
     return`<div style="flex:1;${selStyle}border:1px solid;border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:all 0.15s;"
       data-gid="fb_${game.id}" data-market="${market}" data-pick="${pick}"
       data-odds="${parseFloat(oddsVal).toFixed(2)}" data-label="${safeLabel}"
       data-gamename="${safeGame}" data-modalid="${game.id}"
       onclick="handleAviatorModalOdd(this)">
       <div style="font-size:9px;color:rgba(255,255,255,0.38);font-weight:700;margin-bottom:3px;">${sub}</div>
-      <div style="font-weight:900;font-size:17px;">${sel?'<span style="color:#c084fc">'+parseFloat(oddsVal).toFixed(2)+'</span>':parseFloat(oddsVal).toFixed(2)}</div>
-      ${sel?'<div style="font-size:8px;color:#a020f0;font-weight:800;margin-top:2px;">✓ SELECTED</div>':''}
+      <div style="font-weight:900;font-size:17px;">${sel?'<span style="color:#121e2a">'+parseFloat(oddsVal).toFixed(2)+'</span>':parseFloat(oddsVal).toFixed(2)}</div>
+      ${sel?'<div style="font-size:8px;color:#121e2a;font-weight:800;margin-top:2px;">✓ SELECTED</div>':''}
     </div>`;
   };
 
@@ -1302,8 +1322,8 @@ window.openFbGameMarkets=function(gameId){
     ${ouLines.map(m=>{
       const selOv=isBetSelected('fb_'+game.id,'over'+m.line.replace('.',''),'over');
       const selUn=isBetSelected('fb_'+game.id,'under'+m.line.replace('.',''),'under');
-      const ovStyle=selOv?'background:rgba(59,130,246,0.2);border-color:rgba(59,130,246,0.6);':'background:rgba(59,130,246,0.06);border-color:rgba(59,130,246,0.15);';
-      const unStyle=selUn?'background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.6);':'background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.15);';
+      const ovStyle=selOv?'background:#FFD700;border-color:#FFD700;color:#121e2a;box-shadow:0 0 8px rgba(255,215,0,0.4);':'background:rgba(59,130,246,0.06);border-color:rgba(59,130,246,0.15);';
+      const unStyle=selUn?'background:#FFD700;border-color:#FFD700;color:#121e2a;box-shadow:0 0 8px rgba(255,215,0,0.4);':'background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.15);';
       const ovOdds=m.ov?parseFloat(m.ov).toFixed(2):'–';
       const unOdds=m.un?parseFloat(m.un).toFixed(2):'–';
       const mkOvBtn=m.ov&&!isLocked?`<div style="flex:1;${ovStyle}border:1.5px solid;border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;"
@@ -1311,8 +1331,8 @@ window.openFbGameMarkets=function(gameId){
         data-odds="${ovOdds}" data-label="Over ${m.line} Goals"
         data-gamename="${String(gameName).replace(/"/g,'&quot;')}" data-modalid="${game.id}"
         onclick="handleAviatorModalOdd(this)">
-        <div style="font-size:14px;font-weight:900;color:${selOv?'#60a5fa':'#60a5fa'};">${ovOdds}</div>
-        ${selOv?'<div style="font-size:8px;color:#60a5fa;font-weight:800;margin-top:1px;">✓</div>':''}
+        <div style="font-size:14px;font-weight:900;color:${selOv?'#121e2a':'#60a5fa'};">${ovOdds}</div>
+        ${selOv?'<div style="font-size:8px;color:#121e2a;font-weight:800;margin-top:1px;">✓</div>':''}
       </div>`:`<div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:10px 4px;text-align:center;color:rgba(255,255,255,0.2);font-size:13px;${isLocked?'cursor:not-allowed;opacity:0.5;':''}" ${isLocked&&m.ov?`onclick="showToast('Betting closed','red')"`:''}>
         ${m.ov?ovOdds:'–'}
       </div>`;
@@ -1321,8 +1341,8 @@ window.openFbGameMarkets=function(gameId){
         data-odds="${unOdds}" data-label="Under ${m.line} Goals"
         data-gamename="${String(gameName).replace(/"/g,'&quot;')}" data-modalid="${game.id}"
         onclick="handleAviatorModalOdd(this)">
-        <div style="font-size:14px;font-weight:900;color:${selUn?'#f87171':'#f87171'};">${unOdds}</div>
-        ${selUn?'<div style="font-size:8px;color:#f87171;font-weight:800;margin-top:1px;">✓</div>':''}
+        <div style="font-size:14px;font-weight:900;color:${selUn?'#121e2a':'#f87171'};">${unOdds}</div>
+        ${selUn?'<div style="font-size:8px;color:#121e2a;font-weight:800;margin-top:1px;">✓</div>':''}
       </div>`:`<div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:10px 4px;text-align:center;color:rgba(255,255,255,0.2);font-size:13px;${isLocked?'cursor:not-allowed;opacity:0.5;':''}" ${isLocked&&m.un?`onclick="showToast('Betting closed','red')"`:''}>
         ${m.un?unOdds:'–'}
       </div>`;
@@ -1374,14 +1394,14 @@ window.openFbGameMarkets=function(gameId){
         <div style="font-size:13px;font-weight:900;color:rgba(255,255,255,0.4);">${parseFloat(oddsVal).toFixed(2)}</div>
       </div>`;
     }
-    return `<div style="background:${sel?'rgba(160,32,240,0.25)':'rgba(255,255,255,0.04)'};border:1.5px solid ${sel?'#a020f0':'rgba(255,255,255,0.08)'};border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;"
+    return `<div style="background:${sel?'#FFD700':'rgba(255,255,255,0.04)'};border:1.5px solid ${sel?'#FFD700':'rgba(255,255,255,0.08)'};${sel?'box-shadow:0 0 8px rgba(255,215,0,0.4);':''}border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;"
       data-gid="fb_${game.id}" data-market="${market}" data-pick="${scoreKey}"
       data-odds="${parseFloat(oddsVal).toFixed(2)}" data-label="Score ${scoreLabel}"
       data-gamename="${String(gameName).replace(/"/g,'&quot;')}" data-modalid="${game.id}"
       onclick="handleAviatorModalOdd(this)">
-      <div style="font-size:13px;font-weight:800;${sel?'color:#c084fc':''}">${scoreLabel}</div>
-      <div style="font-size:13px;font-weight:900;color:${sel?'#c084fc':'rgba(255,255,255,0.7)'};">${parseFloat(oddsVal).toFixed(2)}</div>
-      ${sel?'<div style="font-size:8px;color:#a020f0;font-weight:800;">✓</div>':''}
+      <div style="font-size:13px;font-weight:800;${sel?'color:#121e2a':''}">${scoreLabel}</div>
+      <div style="font-size:13px;font-weight:900;color:${sel?'#121e2a':'rgba(255,255,255,0.7)'};">${parseFloat(oddsVal).toFixed(2)}</div>
+      ${sel?'<div style="font-size:8px;color:#121e2a;font-weight:800;">✓</div>':''}
     </div>`;
   };
 
@@ -1445,14 +1465,14 @@ window.openFbGameMarkets=function(gameId){
           <div style="font-size:13px;font-weight:900;color:rgba(255,200,80,0.5);">${parseFloat(m.odds).toFixed(2)}</div>
         </div>`;
       } else {
-        p5 += `<div style="background:${sel?'rgba(245,158,11,0.2)':'rgba(255,255,255,0.04)'};border:1.5px solid ${sel?'#f59e0b':'rgba(255,255,255,0.08)'};border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;"
+        p5 += `<div style="background:${sel?'#FFD700':'rgba(255,255,255,0.04)'};border:1.5px solid ${sel?'#FFD700':'rgba(255,255,255,0.08)'};${sel?'box-shadow:0 0 8px rgba(255,215,0,0.4);':''}border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;"
           data-gid="fb_${game.id}" data-market="multigoal" data-pick="${m.label}"
           data-odds="${parseFloat(m.odds).toFixed(2)}" data-label="${m.label} Goals"
           data-gamename="${String(gameName).replace(/"/g,'&quot;')}" data-modalid="${game.id}"
           onclick="handleAviatorModalOdd(this)">
-          <div style="font-size:12px;font-weight:800;${sel?'color:#fbbf24':''}">${m.label} goals</div>
-          <div style="font-size:13px;font-weight:900;color:${sel?'#fbbf24':'rgba(255,200,80,0.8)'};">${parseFloat(m.odds).toFixed(2)}</div>
-          ${sel?'<div style="font-size:8px;color:#f59e0b;font-weight:800;">✓</div>':''}
+          <div style="font-size:12px;font-weight:800;${sel?'color:#121e2a':''}">${m.label} goals</div>
+          <div style="font-size:13px;font-weight:900;color:${sel?'#121e2a':'rgba(255,200,80,0.8)'};">${parseFloat(m.odds).toFixed(2)}</div>
+          ${sel?'<div style="font-size:8px;color:#121e2a;font-weight:800;">✓</div>':''}
         </div>`;
       }
     });
@@ -1530,7 +1550,7 @@ function renderBetslip(){
   const c=document.getElementById('betslipSelections'),e=document.getElementById('betslipEmpty'),sa=document.getElementById('betslipStakeArea');
   if(!betslipSelections.length){c.innerHTML='';e.classList.remove('hidden');sa.classList.add('hidden');return;}
   e.classList.add('hidden');sa.classList.remove('hidden');
-  c.innerHTML=betslipSelections.map((s,i)=>`<div class="bg-[#111] border border-white/8 rounded-2xl p-3 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="text-xs text-white/40 truncate">${s.gameName}</div><div class="font-bold text-sm">${s.label}</div></div><div class="font-black text-purple-400 text-lg">${s.odds.toFixed(2)}</div><button onclick="removeBetslipItem(${i})" class="w-7 h-7 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 text-sm flex-shrink-0">✕</button></div>`).join('');
+  c.innerHTML=betslipSelections.map((s,i)=>`<div class="bg-[#1a2b3d] border border-white/8 rounded-2xl p-3 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="text-xs text-white/40 truncate">${s.gameName}</div><div class="font-bold text-sm">${s.label}</div></div><div class="font-black text-yellow-400 text-lg">${s.odds.toFixed(2)}</div><button onclick="removeBetslipItem(${i})" class="w-7 h-7 bg-red-500/10 rounded-xl flex items-center justify-center text-red-400 text-sm flex-shrink-0">✕</button></div>`).join('');
   updateSlipSummary();
 }
 window.removeBetslipItem=function(i){betslipSelections.splice(i,1);updateBetslipBadge();renderBetslip();};
@@ -1560,6 +1580,7 @@ function generateBetCode(){
 
 window.placeSportsBet=async function(){
   if(!betslipSelections.length){showToast('Add selections first!','red');return;}
+  function setPlaceBtn(state){const b=document.getElementById('placeSportsBetBtn');if(!b)return;if(state==='placed'){b.classList.add('placed');b.disabled=true;b.innerHTML='BET PLACED ✓';}else if(state==='pending'){b.classList.add('placed');b.disabled=true;b.innerHTML='PLACING...';}else{b.classList.remove('placed');b.disabled=false;b.innerHTML='PLACE BET';}}
   // ── Block bets on ended or locked games ──
   const endedSels=betslipSelections.filter(s=>{
     if(!s.gameId||!s.gameId.startsWith('fb_'))return false;
@@ -1593,6 +1614,7 @@ window.placeSportsBet=async function(){
   if(stake>balance){showToast('Insufficient balance!','red');return;}
   const totalOdds=betslipSelections.reduce((a,s)=>a*s.odds,1);
   const potWin=Math.floor(stake*totalOdds);
+  setPlaceBtn('pending');
   const now=new Date();
   const dateStr=now.toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'numeric'})+' '+now.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
   const betCode=generateBetCode();
@@ -1634,12 +1656,14 @@ window.placeSportsBet=async function(){
       });
     }
     await updateDoc(doc(db,'users',USER.uid),{balance:balance-stake,'stats.sports_staked':increment(stake)});
-  }catch(e){showToast('Error saving bet: '+e.message,'red');return;}
+  }catch(e){setPlaceBtn('');showToast('Error saving bet: '+e.message,'red');return;}
   // Local tracking + balance deduct
   sportsBets.unshift({id:betCode,betCode,picks:picksForFirestore,selections:[...betslipSelections],stake,totalOdds:parseFloat(totalOdds.toFixed(2)),potWin,status:'pending',date:dateStr,isFb:hasRealGame});
   balance-=stake;updateBalDisplay();
   betslipSelections=[];updateBetslipBadge();renderBetslip();renderGames();
   // Show bet code in a toast + modal
+  setPlaceBtn('placed');
+  setTimeout(()=>setPlaceBtn(''),3000);
   showBetCodeModal(betCode,stake,potWin,totalOdds);
   navTo('mybets');
 };
@@ -1650,19 +1674,19 @@ function showBetCodeModal(code,stake,potWin,odds){
     modal=document.createElement('div');
     modal.id='betCodeModal';
     modal.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:16px;';
-    modal.innerHTML=`<div style="background:#111;border:2px solid rgba(160,32,240,0.5);border-radius:24px;padding:28px 24px;max-width:360px;width:100%;text-align:center;">
+    modal.innerHTML=`<div style="background:#1a2b3d;border:2px solid rgba(234,179,8,0.5);border-radius:24px;padding:28px 24px;max-width:360px;width:100%;text-align:center;">
       <div style="font-size:42px;margin-bottom:12px;">🎫</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Bet Placed Successfully!</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Your unique Betslip Code</div>
-      <div id="bcModalCode" style="background:rgba(160,32,240,0.15);border:2px solid #a020f0;border-radius:14px;padding:16px;font-family:monospace;font-size:32px;font-weight:900;color:#c084fc;letter-spacing:3px;margin-bottom:8px;cursor:pointer;" onclick="copyBetCode()"></div>
+      <div id="bcModalCode" style="background:rgba(234,179,8,0.15);border:2px solid #eab308;border-radius:14px;padding:16px;font-family:monospace;font-size:32px;font-weight:900;color:#eab308;letter-spacing:3px;margin-bottom:8px;cursor:pointer;" onclick="copyBetCode()"></div>
       <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:16px;">Tap code to copy • Share with friends to copy your betslip</div>
       <div id="bcModalDetails" style="background:rgba(255,255,255,0.04);border-radius:12px;padding:12px;margin-bottom:20px;display:flex;justify-content:space-between;font-size:12px;"></div>
-      <button onclick="document.getElementById('betCodeModal').style.display='none'" style="width:100%;background:linear-gradient(135deg,#a020f0,#7c3aed);border:none;color:white;font-weight:900;font-size:15px;padding:14px;border-radius:14px;cursor:pointer;">✓ CLOSE</button>
+      <button onclick="document.getElementById('betCodeModal').style.display='none'" style="width:100%;background:linear-gradient(135deg,#eab308,#ca8a04);border:none;color:white;font-weight:900;font-size:15px;padding:14px;border-radius:14px;cursor:pointer;">✓ CLOSE</button>
     </div>`;
     document.body.appendChild(modal);
   }
   document.getElementById('bcModalCode').textContent=code;
-  document.getElementById('bcModalDetails').innerHTML=`<div><div style="color:rgba(255,255,255,0.35);">Stake</div><div style="font-weight:800;color:white;">KES ${stake.toLocaleString()}</div></div><div><div style="color:rgba(255,255,255,0.35);">Odds</div><div style="font-weight:800;color:#c084fc;">${parseFloat(odds).toFixed(2)}x</div></div><div><div style="color:rgba(255,255,255,0.35);">Pot Win</div><div style="font-weight:800;color:#34d399;">KES ${potWin.toLocaleString()}</div></div>`;
+  document.getElementById('bcModalDetails').innerHTML=`<div><div style="color:rgba(255,255,255,0.35);">Stake</div><div style="font-weight:800;color:white;">KES ${stake.toLocaleString()}</div></div><div><div style="color:rgba(255,255,255,0.35);">Odds</div><div style="font-weight:800;color:#eab308;">${parseFloat(odds).toFixed(2)}x</div></div><div><div style="color:rgba(255,255,255,0.35);">Pot Win</div><div style="font-weight:800;color:#34d399;">KES ${potWin.toLocaleString()}</div></div>`;
   modal.style.display='flex';
   window._lastBetCode=code;
 }
@@ -1715,10 +1739,10 @@ function buildBetCardHTML(b,isFirestore){
   const placedAt=b.placedAt||Date.now();
   const dateLabel=new Date(placedAt).toLocaleDateString('en-KE',{day:'2-digit',month:'2-digit'})+', '+new Date(placedAt).toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
   const payoutText=effectiveStatus==='pending'
-    ?`<span style="color:#fbbf24;font-weight:800;">Pot Win: KES ${(b.potWin||b.potential||0).toLocaleString()}</span>`
+    ?`<span style="color:white;font-weight:800;">Pot Win: KES ${(b.potWin||b.potential||0).toLocaleString()}</span>`
     :effectiveStatus==='won'
-    ?`<span style="color:#34d399;font-weight:800;">+KES ${(b.payout||b.potWin||b.potential||0).toLocaleString()}</span>`
-    :`<span style="color:#f87171;font-weight:800;">-KES ${(b.stake||0).toLocaleString()}</span>`;
+    ?`<span style="color:white;font-weight:800;">+KES ${(b.payout||b.potWin||b.potential||0).toLocaleString()}</span>`
+    :`<span style="color:white;font-weight:800;">-KES ${(b.stake||0).toLocaleString()}</span>`;
 
   // Count won/lost/pending picks (only show ✅/❌ when settled)
   const settledWon=picks.filter(p=>pickWon(p)).length;
@@ -1740,14 +1764,14 @@ function buildBetCardHTML(b,isFirestore){
     return`<div style="background:rgba(255,255,255,0.04);border:1.5px solid ${pickBorderColor};border-radius:10px;padding:9px 12px;margin-bottom:5px;">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.gameName||''}</div>
+        <div style="font-size:10px;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.gameName||''}</div>
         <div style="font-weight:800;font-size:13px;margin-top:1px;">${p.label||p.pick||''}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Type: 1×2 &nbsp;·&nbsp; FT Results</div>
-        ${settled&&p.result?`<div style="font-size:10px;margin-top:1px;font-weight:700;color:${won?'#34d399':'#f87171'};">${won?'Won':'Lost'}</div>`:''}
-        ${!settled?`<div style="font-size:10px;margin-top:1px;color:rgba(251,191,36,0.8);font-weight:700;">⏳ In play</div>`:''}
+        <div style="font-size:10px;color:white;margin-top:1px;">Type: 1×2 &nbsp;·&nbsp; FT Results</div>
+        ${settled&&p.result?`<div style="font-size:10px;margin-top:1px;font-weight:700;color:white;">${won?'Won':'Lost'}</div>`:''}
+        ${!settled?`<div style="font-size:10px;margin-top:1px;color:white;font-weight:700;">⏳ In play</div>`:''}
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <div style="font-weight:900;font-size:15px;color:#c084fc;">${parseFloat(p.odds||1).toFixed(2)}</div>
+        <div style="font-weight:900;font-size:15px;color:#eab308;">${parseFloat(p.odds||1).toFixed(2)}</div>
         ${pickIcon}
       </div>
     </div>
@@ -1766,32 +1790,32 @@ function buildBetCardHTML(b,isFirestore){
       odds:parseFloat(p.odds||1).toFixed(2),result:p.result||null,gameId:p.gameId||null
     }))
   };
-  return `<div class="bet-card" style="border-color:rgba(160,32,240,0.25);margin-bottom:12px;cursor:pointer;" onclick="showSportsBetDetail(this.dataset.key)" data-key="${_mapKey.replace(/"/g,'&quot;')}">
+  return `<div class="bet-card" style="border-color:rgba(234,179,8,0.25);margin-bottom:12px;cursor:pointer;" onclick="showSportsBetDetail(this.dataset.key)" data-key="${_mapKey.replace(/"/g,'&quot;')}">
     <div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <div style="font-family:monospace;font-weight:900;font-size:14px;color:#c084fc;letter-spacing:1px;">${code}</div>
-          ${isBonus?'<span style="background:rgba(160,32,240,0.15);border:1px solid rgba(160,32,240,0.4);color:#c084fc;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">bonus</span>':''}
+          <div style="font-family:monospace;font-weight:900;font-size:14px;color:#eab308;letter-spacing:1px;">${code}</div>
+          ${isBonus?'<span style="background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.4);color:#eab308;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;">bonus</span>':''}
         </div>
         <div style="font-weight:900;font-size:14px;font-family:monospace;">${payoutText}</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);">${dateLabel}</div>
-        <div style="display:flex;align-items:center;gap:8px;"><span class="${statusCls}">${statusLabel}</span><span style="color:rgba(255,255,255,0.25);font-size:16px;">›</span></div>
+        <div style="font-size:11px;color:white;">${dateLabel}</div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="${statusCls}">${statusLabel}</span><span style="color:white;font-size:16px;">›</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);">
         <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:600;">Picks:</span>
+          <span style="font-size:10px;color:white;font-weight:600;">Picks:</span>
           <span style="font-size:11px;font-weight:800;color:white;">${picks.length}</span>
         </div>
         <div style="width:1px;height:12px;background:rgba(255,255,255,0.1);"></div>
         <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:600;">Odds:</span>
-          <span style="font-size:11px;font-weight:800;color:#c084fc;">${totalOdds}</span>
+          <span style="font-size:10px;color:white;font-weight:600;">Odds:</span>
+          <span style="font-size:11px;font-weight:800;color:white;">${totalOdds}</span>
         </div>
         <div style="width:1px;height:12px;background:rgba(255,255,255,0.1);"></div>
-        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);">${wltStr}</div>
-        <div style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.2);font-weight:600;">Tap for details</div>
+        <div style="font-size:10px;font-weight:700;color:white;">${wltStr}</div>
+        <div style="margin-left:auto;font-size:10px;color:white;font-weight:600;">Tap for details</div>
       </div>
     </div>
   </div>`;
@@ -1817,7 +1841,7 @@ window.showSportsBetDetail=function(key){
           ${settled?`<div style="font-size:11px;font-weight:700;margin-top:2px;color:${won?'#34d399':'#f87171'};">${won?'Won ✓':'Lost ✗'}</div>`:'<div style="font-size:11px;color:rgba(251,191,36,0.7);font-weight:700;margin-top:2px;">⏳ In play</div>'}
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-          <div style="font-weight:900;font-size:16px;color:#c084fc;">${p.odds}</div>
+          <div style="font-weight:900;font-size:16px;color:#eab308;">${p.odds}</div>
           ${pickIcon}
         </div>
       </div>
@@ -1826,49 +1850,49 @@ window.showSportsBetDetail=function(key){
   if(!modal){
     modal=document.createElement('div');
     modal.id='sportsBetDetailModal';
-    modal.style.cssText='position:fixed;inset:0;z-index:99999;background:#0a0a0a;display:none;flex-direction:column;overflow-y:auto;';
+    modal.style.cssText='position:fixed;inset:0;z-index:99999;background:#121e2a;display:none;flex-direction:column;overflow-y:auto;';
     document.body.appendChild(modal);
   }
   modal.innerHTML=`
-    <div style="flex-shrink:0;background:#111;border-bottom:1px solid rgba(255,255,255,0.08);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;">
+    <div style="flex-shrink:0;background:#1a2b3d;border-bottom:1px solid rgba(255,255,255,0.08);padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;">
       <button onclick="closeSportsBetDetail()" style="width:36px;height:36px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">‹</button>
       <div style="font-weight:900;font-size:16px;">Bet Details</div>
       <div style="margin-left:auto;"><span class="${b.statusCls}" style="font-size:12px;">${b.statusLabel}</span></div>
     </div>
     <div style="padding:20px 16px 32px;max-width:480px;margin:0 auto;width:100%;">
       <!-- Result banner -->
-      <div style="background:linear-gradient(160deg,rgba(160,32,240,0.15),rgba(0,0,0,0.3));border:1.5px solid ${accentColor};border-radius:20px;padding:22px 20px;margin-bottom:16px;text-align:center;box-shadow:0 8px 32px ${accentGlow};">
+      <div style="background:linear-gradient(160deg,rgba(234,179,8,0.15),rgba(0,0,0,0.3));border:1.5px solid ${accentColor};border-radius:20px;padding:22px 20px;margin-bottom:16px;text-align:center;box-shadow:0 8px 32px ${accentGlow};">
         <div style="font-size:40px;margin-bottom:8px;">${statusIcon}</div>
-        <div style="font-family:monospace;font-weight:900;font-size:20px;color:#c084fc;letter-spacing:2px;margin-bottom:4px;">${b.code}</div>
+        <div style="font-family:monospace;font-weight:900;font-size:20px;color:#eab308;letter-spacing:2px;margin-bottom:4px;">${b.code}</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.35);">${b.dateLabel}</div>
         <div style="font-size:22px;font-weight:900;color:${statusColor};margin-top:8px;">${isWon?'+ KES '+(b.potWin||0).toLocaleString():isLost?'- KES '+(b.stake||0).toLocaleString():'Pending'}</div>
       </div>
       <!-- Stats grid -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
-        <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px;text-align:center;">
+        <div style="background:#1a2b3d;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px;text-align:center;">
           <div style="font-size:9px;color:rgba(255,255,255,0.3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Stake</div>
           <div style="font-weight:900;font-size:14px;font-family:monospace;">KES ${(b.stake||0).toLocaleString()}</div>
         </div>
-        <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px;text-align:center;">
+        <div style="background:#1a2b3d;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px;text-align:center;">
           <div style="font-size:9px;color:rgba(255,255,255,0.3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Pot Win</div>
           <div style="font-weight:900;font-size:14px;font-family:monospace;color:#34d399;">KES ${(b.potWin||0).toLocaleString()}</div>
         </div>
-        <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px;text-align:center;">
+        <div style="background:#1a2b3d;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px;text-align:center;">
           <div style="font-size:9px;color:rgba(255,255,255,0.3);font-weight:700;text-transform:uppercase;margin-bottom:4px;">Total Odds</div>
-          <div style="font-weight:900;font-size:14px;font-family:monospace;color:#c084fc;">${b.totalOdds}</div>
+          <div style="font-weight:900;font-size:14px;font-family:monospace;color:#eab308;">${b.totalOdds}</div>
         </div>
       </div>
       <!-- Results summary -->
-      <div style="background:#111;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="background:#1a2b3d;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
         <span style="font-size:12px;color:rgba(255,255,255,0.4);font-weight:700;">RESULTS</span>
-        <span style="font-weight:900;font-size:13px;color:#c084fc;">${b.wltStr}</span>
+        <span style="font-weight:900;font-size:13px;color:#eab308;">${b.wltStr}</span>
       </div>
       <!-- Picks -->
       <div style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Events (${b.picks.length} pick${b.picks.length!==1?'s':''})</div>
       ${picksHTML}
       <!-- Action buttons -->
       <div style="display:flex;gap:10px;margin-top:16px;">
-        <button onclick="copyBetCodeFromCard('${b.code}');event.stopPropagation();" style="flex:1;background:rgba(160,32,240,0.15);border:1.5px solid rgba(160,32,240,0.4);color:#c084fc;font-weight:800;font-size:13px;padding:13px;border-radius:14px;cursor:pointer;">📋 Copy Code</button>
+        <button onclick="copyBetCodeFromCard('${b.code}');event.stopPropagation();" style="flex:1;background:rgba(234,179,8,0.15);border:1.5px solid rgba(234,179,8,0.4);color:#eab308;font-weight:800;font-size:13px;padding:13px;border-radius:14px;cursor:pointer;">📋 Copy Code</button>
         <button onclick="closeSportsBetDetail();loadBetslipFromCode('${b.code.replace('#','')}',true);" style="flex:1;background:rgba(34,197,94,0.1);border:1.5px solid rgba(34,197,94,0.35);color:#34d399;font-weight:800;font-size:13px;padding:13px;border-radius:14px;cursor:pointer;">♻️ Rebook</button>
       </div>
       <button onclick="closeSportsBetDetail()" style="width:100%;margin-top:10px;padding:14px;border-radius:9999px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:14px;font-weight:800;cursor:pointer;">CLOSE</button>
@@ -1896,8 +1920,8 @@ window.setMyBetsFilter=function(type,val){
     ['flt-all','flt-week','flt-month'].forEach(id=>{
       const el=document.getElementById(id);if(!el)return;
       const isActive=(id==='flt-'+val)||(val==='all'&&id==='flt-all');
-      el.style.background=isActive?'#a020f0':'transparent';
-      el.style.borderColor=isActive?'#a020f0':'rgba(255,255,255,0.15)';
+      el.style.background=isActive?'#eab308':'transparent';
+      el.style.borderColor=isActive?'#eab308':'rgba(255,255,255,0.15)';
       el.style.color=isActive?'white':'rgba(255,255,255,0.55)';
     });
   } else {
@@ -1906,7 +1930,7 @@ window.setMyBetsFilter=function(type,val){
     Object.entries(statusMap).forEach(([k,id])=>{
       const el=document.getElementById(id);if(!el)return;
       const isActive=k===val;
-      if(k==='all'){el.style.background=isActive?'#a020f0':'transparent';el.style.borderColor=isActive?'#a020f0':'rgba(255,255,255,0.15)';el.style.color=isActive?'white':'rgba(255,255,255,0.55)';}
+      if(k==='all'){el.style.background=isActive?'#eab308':'transparent';el.style.borderColor=isActive?'#eab308':'rgba(255,255,255,0.15)';el.style.color=isActive?'white':'rgba(255,255,255,0.55)';}
       else if(k==='won'){el.style.background=isActive?'rgba(52,211,153,0.2)':'rgba(52,211,153,0.08)';el.style.borderColor=isActive?'#34d399':'rgba(52,211,153,0.4)';}
       else if(k==='lost'){el.style.background=isActive?'rgba(248,113,113,0.2)':'rgba(248,113,113,0.08)';el.style.borderColor=isActive?'#f87171':'rgba(248,113,113,0.4)';}
     });
@@ -1986,12 +2010,12 @@ window.searchBetslip=async function(){
 
     const picksHTML=picks.map(p=>{
       const ended=isPickGameEnded(p)&&p.gameId;
-      const borderColor=ended?'rgba(239,68,68,0.3)':'rgba(160,32,240,0.2)';
+      const borderColor=ended?'rgba(239,68,68,0.3)':'rgba(234,179,8,0.2)';
       const bgColor=ended?'rgba(239,68,68,0.05)':'rgba(255,255,255,0.03)';
       return`<div style="background:${bgColor};border:1.5px solid ${borderColor};border-radius:12px;padding:11px 13px;margin-bottom:8px;">
         <div style="font-weight:800;font-size:14px;color:${ended?'rgba(255,255,255,0.4)':'white'};margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.gameName||'Match'}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <div style="font-size:12px;font-weight:700;color:${ended?'rgba(255,255,255,0.3)':'#c084fc'};">${p.label||p.pick||'—'}</div>
+          <div style="font-size:12px;font-weight:700;color:${ended?'rgba(255,255,255,0.3)':'#eab308'};">${p.label||p.pick||'—'}</div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <div style="font-weight:900;font-size:15px;color:${ended?'rgba(255,255,255,0.25)':'#fbbf24'};">${parseFloat(p.odds||1).toFixed(2)}</div>
             ${ended?'<span style="font-size:10px;color:#f87171;font-weight:800;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:99px;padding:2px 7px;">ENDED</span>':'<span style="font-size:10px;color:#34d399;font-weight:800;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:99px;padding:2px 7px;">ACTIVE</span>'}
@@ -2002,10 +2026,10 @@ window.searchBetslip=async function(){
     const statusCls=b.status==='won'?'bet-status-won':b.status==='lost'?'bet-status-lost':'bet-status-pending';
     const canLoad=activePicks.length>0;
     resultEl.innerHTML=`
-      <div style="background:#111;border:2px solid rgba(160,32,240,0.4);border-radius:18px;overflow:hidden;">
-        <div style="background:linear-gradient(135deg,rgba(160,32,240,0.2),rgba(0,0,0,0.3));padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07);">
+      <div style="background:#1a2b3d;border:2px solid rgba(234,179,8,0.4);border-radius:18px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,rgba(234,179,8,0.2),rgba(0,0,0,0.3));padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07);">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <div style="font-family:monospace;font-weight:900;font-size:18px;color:#c084fc;letter-spacing:2px;">BetID: ${code.replace('#','')}</div>
+            <div style="font-family:monospace;font-weight:900;font-size:18px;color:#eab308;letter-spacing:2px;">BetID: ${code.replace('#','')}</div>
             <span class="${statusCls}">${(b.status||'PENDING').toUpperCase()}</span>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.35);">Placed at ${dateLabel}</div>
@@ -2023,7 +2047,7 @@ window.searchBetslip=async function(){
             </div>
             <div style="text-align:center;background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 6px;">
               <div style="font-size:10px;color:rgba(255,255,255,0.35);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Odds</div>
-              <div style="font-weight:900;font-size:14px;color:#c084fc;">${totalOdds}</div>
+              <div style="font-weight:900;font-size:14px;color:#eab308;">${totalOdds}</div>
             </div>
           </div>
         </div>
@@ -2033,10 +2057,10 @@ window.searchBetslip=async function(){
           ${picksHTML}
         </div>
         ${!isOwn&&canLoad?`<div style="padding:10px 16px 16px;">
-          <button onclick="loadBetslipFromCode('${rawCode}',false)" style="width:100%;background:linear-gradient(135deg,#a020f0,#7c3aed);border:none;color:white;font-weight:900;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;">♻️ USE THIS BETSLIP${endedPicks.length>0?' ('+activePicks.length+' active picks only)':''}</button>
+          <button onclick="loadBetslipFromCode('${rawCode}',false)" style="width:100%;background:linear-gradient(135deg,#eab308,#ca8a04);border:none;color:white;font-weight:900;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;">♻️ USE THIS BETSLIP${endedPicks.length>0?' ('+activePicks.length+' active picks only)':''}</button>
           ${endedPicks.length>0?`<div style="text-align:center;font-size:10px;color:#fbbf24;margin-top:6px;">⚠️ Ended games will be removed automatically</div>`:`<div style="text-align:center;font-size:10px;color:rgba(255,255,255,0.25);margin-top:6px;">Loads all ${picks.length} selection(s) into your betslip</div>`}
         </div>`:!isOwn&&!canLoad?`<div style="padding:10px 16px 16px;"><div style="text-align:center;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:12px;font-size:13px;font-weight:700;color:#f87171;">🚫 Cannot load — all games in this betslip have ended</div></div>`:`<div style="padding:10px 16px 16px;">
-          <button onclick="copyBetCodeFromCard('${code}')" style="width:100%;background:rgba(160,32,240,0.15);border:1.5px solid rgba(160,32,240,0.4);color:#c084fc;font-weight:800;font-size:13px;padding:12px;border-radius:12px;cursor:pointer;">📋 COPY & SHARE CODE</button>
+          <button onclick="copyBetCodeFromCard('${code}')" style="width:100%;background:rgba(234,179,8,0.15);border:1.5px solid rgba(234,179,8,0.4);color:#eab308;font-weight:800;font-size:13px;padding:12px;border-radius:12px;cursor:pointer;">📋 COPY & SHARE CODE</button>
         </div>`}
       </div>`;
   }catch(e){resultEl.innerHTML='<div style="color:#f87171;font-size:12px;padding:8px 0;">Error: '+e.message+'</div>';}
@@ -2070,6 +2094,49 @@ window.loadBetslipFromCode=async function(rawCode,isRebook){
     navTo('betslip');
   }catch(e){showToast('Error: '+e.message,'red');}
 };
+
+// ── RESTORE PICKS from index.html (sessionStorage) ──
+let _pendingRestoreShown=false;
+function restorePendingPicks(){
+  try{
+    const raw=sessionStorage.getItem('pendingFbPicks');
+    if(!raw)return false;
+    let picks;try{picks=JSON.parse(raw);}catch(e){sessionStorage.removeItem('pendingFbPicks');return false;}
+    if(!Array.isArray(picks)||!picks.length){sessionStorage.removeItem('pendingFbPicks');return false;}
+    // Map index.html pick conventions → aviator betslip conventions
+    const mapped=picks.map(p=>{
+      let market=p.market||'1x2';
+      let pick=p.pick||'h';
+      if(String(market).toUpperCase()==='1X2'){
+        const M={1:'h',H:'h',X:'d',D:'d',2:'a',A:'a'};
+        pick=M[String(pick).toUpperCase()]||'h';
+        market='1x2';
+      }else if(market==='dc'&&String(pick).toLowerCase()==='1x'){
+        pick='1X';
+      }
+      const gid=(p.gameId&&String(p.gameId).startsWith('fb_'))?p.gameId:('fb_'+(p.gameId||''));
+      return {gameId:gid,market,pick,odds:parseFloat(p.odds||1),label:p.label||p.pick||'—',gameName:p.gameName||'Match'};
+    });
+    // Games not loaded yet — restore now (unfiltered), refine on first games snapshot
+    if(!fbFootballGames.length){
+      if(!_pendingRestoreShown){
+        _pendingRestoreShown=true;
+        betslipSelections=mapped;
+        updateBetslipBadge();renderBetslip();renderGames();navTo('betslip');
+        showToast(betslipSelections.length+' pick(s) loaded from the site — place your bet!','emerald');
+      }
+      return true;
+    }
+    _pendingRestoreShown=false;
+    const active=mapped.filter(s=>!isPickGameEnded(s)||!s.gameId);
+    if(!active.length){sessionStorage.removeItem('pendingFbPicks');showToast('All selected games have ended','red');return true;}
+    betslipSelections=active;
+    sessionStorage.removeItem('pendingFbPicks');
+    updateBetslipBadge();renderBetslip();renderGames();navTo('betslip');
+    showToast(betslipSelections.length+' pick(s) loaded from the site — place your bet!','emerald');
+    return true;
+  }catch(e){console.warn('restorePendingPicks',e);return false;}
+}
 
 // ── PROFILE ──
 function renderProfileScreen(){
@@ -2273,6 +2340,8 @@ onAuthStateChanged(auth,async user=>{
   startGameLifecycle();
   // Kick off the first round automatically — no admin dashboard needed.
   ensureRoundRunning();
+  // Restore any picks transferred from index.html (placed on this page)
+  restorePendingPicks();
 });
 
 async function loadUserData(){
@@ -2374,7 +2443,7 @@ function renderCurrencyList() {
         <div style="font-weight:800;font-size:14px;">${c.name}</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;">${c.code} · ${c.symbol}</div>
       </div>
-      ${isActive ? '<span style="color:#a020f0;font-size:18px;font-weight:900;">✓</span>' : ''}
+      ${isActive ? '<span style="color:#eab308;font-size:18px;font-weight:900;">✓</span>' : ''}
     </div>`;
   }).join('');
 }
@@ -2579,7 +2648,7 @@ const DEP_METHOD_DEFS = {
   binance:     {icon:'₿',  label:'Binance TRC-20',  sub:'USDT · Min 5 USDT',          works:true,  color:'#fcd34d'},
   card:        {icon:'💳', label:'Card Payment',    sub:'Visa / Mastercard',           works:true,  color:'#93c5fd'},
   mobilemoney: {icon:'📲', label:'Mobile Money',    sub:'MTN · Airtel · Tigo',         works:false, color:'#fb923c'},
-  bank:        {icon:'🏦', label:'Bank Transfer',   sub:'Local bank deposit',          works:false, color:'#a78bfa'},
+  bank:        {icon:'🏦', label:'Bank Transfer',   sub:'Local bank deposit',          works:false, color:'#eab308'},
 };
 
 let _depStep = 1;
@@ -2595,7 +2664,7 @@ function depSetStep(n) {
   document.getElementById('depWizStep3').style.display = n===3 ? 'block' : 'none';
   // progress pills
   ['pill1','pill2','pill3'].forEach((id,i)=>{
-    document.getElementById(id).style.background = i<n ? '#a020f0' : 'rgba(255,255,255,0.1)';
+    document.getElementById(id).style.background = i<n ? '#eab308' : 'rgba(255,255,255,0.1)';
   });
   // header
   const titles = ['Choose Country','Choose Payment Method','Complete Payment'];
@@ -2628,8 +2697,8 @@ function depRenderCountries(filter) {
   const filtered = DEP_COUNTRIES.filter(c => c.name.toLowerCase().includes(q));
   list.innerHTML = filtered.map(c => `
     <button onclick="depSelectCountry(${JSON.stringify(c.name).replace(/"/g,"'")})"
-      style="width:100%;background:${_depCountry&&_depCountry.name===c.name?'rgba(160,32,240,0.12)':'#111'};
-      border:1.5px solid ${_depCountry&&_depCountry.name===c.name?'#a020f0':'rgba(255,255,255,0.07)'};
+      style="width:100%;background:${_depCountry&&_depCountry.name===c.name?'rgba(234,179,8,0.12)':'#1a2b3d'};
+      border:1.5px solid ${_depCountry&&_depCountry.name===c.name?'#eab308':'rgba(255,255,255,0.07)'};
       border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;transition:border-color 0.15s;box-sizing:border-box;">
       <span style="font-size:26px;flex-shrink:0;">${c.flag}</span>
       <div style="flex:1;min-width:0;">
@@ -2659,15 +2728,15 @@ function depRenderMethods(){
     const selected = _depMethod && _depMethod.id===mid;
     return `
     <button onclick="depSelectMethod(${JSON.stringify({id:mid,icon:m.icon,label:m.label,sub:m.sub,works:m.works}).replace(/"/g,"'")})"
-      style="width:100%;background:${selected?'rgba(160,32,240,0.1)':'#111'};
-      border:2px solid ${selected?'#a020f0':'rgba(255,255,255,0.07)'};
+      style="width:100%;background:${selected?'rgba(234,179,8,0.1)':'#1a2b3d'};
+      border:2px solid ${selected?'#eab308':'rgba(255,255,255,0.07)'};
       border-radius:18px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;box-sizing:border-box;transition:all 0.15s;position:relative;">
       <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${m.icon}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:900;font-size:15px;color:${m.color};">${m.label}</div>
         <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;">${m.sub}</div>
       </div>
-      ${!m.works ? `<span style="font-size:9px;font-weight:900;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);border-radius:99px;padding:3px 9px;flex-shrink:0;">SOON</span>` : `<div style="width:22px;height:22px;border-radius:50%;border:2px solid ${selected?'#a020f0':'rgba(255,255,255,0.2)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:11px;height:11px;border-radius:50%;background:${selected?'#a020f0':'transparent'};"></div></div>`}
+      ${!m.works ? `<span style="font-size:9px;font-weight:900;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.3);border-radius:99px;padding:3px 9px;flex-shrink:0;">SOON</span>` : `<div style="width:22px;height:22px;border-radius:50%;border:2px solid ${selected?'#eab308':'rgba(255,255,255,0.2)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:11px;height:11px;border-radius:50%;background:${selected?'#eab308':'transparent'};"></div></div>`}
     </button>`;
   }).join('');
 }
@@ -2790,7 +2859,7 @@ window.retryDeposit=function(){clearTimeout(depPollTimer);if(window._depBarInter
 let selectedMethod='mpesa';
 window.openWithdraw=function(){document.getElementById('withdrawScreen').classList.add('open');document.getElementById('wdScreenBal').textContent=balance.toLocaleString();document.getElementById('wdAmount').value='';document.getElementById('wdPhone').value='';document.getElementById('wdErr').classList.add('hidden');document.getElementById('wdSummary').classList.add('hidden');document.getElementById('wdBtnTxt').textContent='CONFIRM WITHDRAWAL';document.getElementById('wdConfirmBtn').disabled=false;selectMethod('mpesa');};
 window.closeWithdraw=function(){document.getElementById('withdrawScreen').classList.remove('open');};
-window.selectMethod=function(m){selectedMethod=m;['mpesa','airtel','bank'].forEach(id=>{const card=document.getElementById('method-'+id),dot=document.getElementById('dot-'+id);if(id===m){card.classList.add('selected');dot.innerHTML='<div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div>';if(dot.classList.contains('border-white/20'))dot.classList.replace('border-white/20','border-purple-500');}else{card.classList.remove('selected');dot.innerHTML='<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';if(dot.classList.contains('border-purple-500'))dot.classList.replace('border-purple-500','border-white/20');}});const labels={mpesa:'M-Pesa Number',airtel:'Airtel Money Number',bank:'Bank Account Number'};const phs={mpesa:'07XX XXX XXX',airtel:'07XX XXX XXX',bank:'Account number'};document.getElementById('phoneLabel').textContent=labels[m];document.getElementById('wdPhone').placeholder=phs[m];};
+window.selectMethod=function(m){selectedMethod=m;['mpesa','airtel','bank'].forEach(id=>{const card=document.getElementById('method-'+id),dot=document.getElementById('dot-'+id);if(id===m){card.classList.add('selected');dot.innerHTML='<div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>';if(dot.classList.contains('border-white/20'))dot.classList.replace('border-white/20','border-yellow-500');}else{card.classList.remove('selected');dot.innerHTML='<div class="w-2.5 h-2.5 rounded-full bg-transparent"></div>';if(dot.classList.contains('border-yellow-500'))dot.classList.replace('border-yellow-500','border-white/20');}});const labels={mpesa:'M-Pesa Number',airtel:'Airtel Money Number',bank:'Bank Account Number'};const phs={mpesa:'07XX XXX XXX',airtel:'07XX XXX XXX',bank:'Account number'};document.getElementById('phoneLabel').textContent=labels[m];document.getElementById('wdPhone').placeholder=phs[m];};
 window.setWdAmt=function(v){document.getElementById('wdAmount').value=v;wdAmtChanged();};
 window.setWdAmtAll=function(){document.getElementById('wdAmount').value=Math.floor(balance);wdAmtChanged();};
 function wdAmtChangedInternal(){const val=parseInt(document.getElementById('wdAmount').value)||0,MIN=storeConfig.minWithdrawal,sum=document.getElementById('wdSummary');if(val>=MIN){sum.classList.remove('hidden');document.getElementById('sumAmt').textContent='KES '+val.toLocaleString();document.getElementById('sumReceive').textContent='KES '+val.toLocaleString();}else sum.classList.add('hidden');}
@@ -2830,8 +2899,8 @@ window.closeWallet=function(){document.getElementById('walletScreen').classList.
 function renderTxList(txs){
   const list=document.getElementById('txList'),empty=document.getElementById('txEmpty');document.getElementById('txCount').textContent=txs.length;
   if(!txs.length){list.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');
-  const icons={deposit:'⬆️',withdraw:'⬇️',win:'🏆',loss:'💔'};const colors={deposit:'text-orange-400',withdraw:'text-emerald-400',win:'text-purple-400',loss:'text-red-400'};
-  list.innerHTML=[...txs].reverse().slice(0,30).map(tx=>`<div class="flex items-center gap-3 bg-[#111] rounded-2xl px-4 py-3 border border-white/5"><div class="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center text-base flex-shrink-0">${icons[tx.type]||'💳'}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm capitalize">${tx.type}</div><div class="text-white/35 text-xs truncate">${tx.note||tx.method||''} · ${tx.time||''}</div></div><div class="text-right flex-shrink-0"><div class="font-black font-mono text-sm ${colors[tx.type]||'text-white'}">${tx.type==='withdraw'||tx.type==='loss'?'-':'+'}KES ${Number(tx.amount).toLocaleString()}</div><div class="text-xs mt-0.5"><span class="px-2 py-0.5 rounded-full font-bold ${tx.status==='success'?'status-success':'status-pending'}">${(tx.status||'pending').toUpperCase()}</span></div></div></div>`).join('');
+  const icons={deposit:'⬆️',withdraw:'⬇️',win:'🏆',loss:'💔'};const colors={deposit:'text-orange-400',withdraw:'text-emerald-400',win:'text-yellow-400',loss:'text-red-400'};
+  list.innerHTML=[...txs].reverse().slice(0,30).map(tx=>`<div class="flex items-center gap-3 bg-[#1a2b3d] rounded-2xl px-4 py-3 border border-white/5"><div class="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center text-base flex-shrink-0">${icons[tx.type]||'💳'}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm capitalize">${tx.type}</div><div class="text-white/35 text-xs truncate">${tx.note||tx.method||''} · ${tx.time||''}</div></div><div class="text-right flex-shrink-0"><div class="font-black font-mono text-sm ${colors[tx.type]||'text-white'}">${tx.type==='withdraw'||tx.type==='loss'?'-':'+'}KES ${Number(tx.amount).toLocaleString()}</div><div class="text-xs mt-0.5"><span class="px-2 py-0.5 rounded-full font-bold ${tx.status==='success'?'status-success':'status-pending'}">${(tx.status||'pending').toUpperCase()}</span></div></div></div>`).join('');
 }
 
 // ── GAME ENGINE ──
@@ -2851,7 +2920,7 @@ let oscYOffset=0,idleStartTime=0,idleActive=false;
 function seedOscillator(){oscYOffset=0;idleActive=false;idleStartTime=0;}
 function drawFrame(){
   if(!ctx)return;ctx.clearRect(0,0,cvW*3,cvH*3);
-  const P=26,W=cvW,H=cvH;ctx.strokeStyle='rgba(160,32,240,0.10)';ctx.lineWidth=0.5;
+  const P=26,W=cvW,H=cvH;ctx.strokeStyle='rgba(234,179,8,0.10)';ctx.lineWidth=0.5;
   for(let x=P;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,P);ctx.lineTo(x,H-P);ctx.stroke();}
   for(let y=P;y<H;y+=42){ctx.beginPath();ctx.moveTo(P,y);ctx.lineTo(W-P,y);ctx.stroke();}
   if(!isPlaying&&!hasCrashed)return;
@@ -2903,9 +2972,9 @@ window.switchAvHistTab=function(tab){
     const btn=document.getElementById('avHistTab'+t.charAt(0).toUpperCase()+t.slice(1));
     if(!btn)return;
     if(t===tab){
-      btn.style.background=t==='won'?'rgba(16,185,129,0.25)':t==='lost'?'rgba(239,68,68,0.2)':'rgba(160,32,240,0.2)';
-      btn.style.color=t==='won'?'#34d399':t==='lost'?'#f87171':'#c084fc';
-      btn.style.borderColor=t==='won'?'rgba(16,185,129,0.5)':t==='lost'?'rgba(239,68,68,0.4)':'rgba(160,32,240,0.5)';
+      btn.style.background=t==='won'?'rgba(16,185,129,0.25)':t==='lost'?'rgba(239,68,68,0.2)':'rgba(234,179,8,0.2)';
+      btn.style.color=t==='won'?'#34d399':t==='lost'?'#f87171':'#eab308';
+      btn.style.borderColor=t==='won'?'rgba(16,185,129,0.5)':t==='lost'?'rgba(239,68,68,0.4)':'rgba(234,179,8,0.5)';
     }else{
       btn.style.background='rgba(255,255,255,0.05)';
       btn.style.color='rgba(255,255,255,0.35)';
@@ -2966,7 +3035,7 @@ window.showBetDetail=function(idx){
     document.body.appendChild(modal);
   }
   modal.innerHTML=`
-    <div style="width:100%;max-width:420px;margin:0 16px;background:linear-gradient(160deg,#1a0a2e,#0f0018);border:1.5px solid ${isWon?'rgba(52,211,153,0.3)':'rgba(248,113,113,0.3)'};border-radius:24px;overflow:hidden;animation:scaleIn 0.22s ease;box-shadow:0 24px 60px rgba(0,0,0,0.7),0 0 40px ${isWon?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};">
+    <div style="width:100%;max-width:420px;margin:0 16px;background:linear-gradient(160deg,#1a2b3d,#172430);border:1.5px solid ${isWon?'rgba(52,211,153,0.3)':'rgba(248,113,113,0.3)'};border-radius:24px;overflow:hidden;animation:scaleIn 0.22s ease;box-shadow:0 24px 60px rgba(0,0,0,0.7),0 0 40px ${isWon?'rgba(52,211,153,0.08)':'rgba(248,113,113,0.08)'};">
       <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,0.07);">
         <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.05em;">BET DETAILS</div>
@@ -2978,24 +3047,24 @@ window.showBetDetail=function(idx){
         <div style="text-align:center;">
           <div style="font-size:13px;font-weight:800;letter-spacing:0.12em;color:${isWon?'#34d399':'#f87171'};">${isWon?'YOU WON':'YOU LOST'}</div>
           <div style="font-size:32px;font-weight:900;font-family:monospace;color:${isWon?'#34d399':'#f87171'};margin-top:4px;">${isWon?'+':'-'}KES ${isWon?h.amount.toLocaleString():h.stake.toLocaleString()}</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:4px;">Crashed @ <span style="color:#c084fc;font-weight:700;">${h.mult}x</span></div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:4px;">Crashed @ <span style="color:#eab308;font-weight:700;">${h.mult}x</span></div>
         </div>
       </div>
       <!-- Stats grid -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,0.06);margin:0 20px;border-radius:16px;overflow:hidden;">
-        <div style="background:#0f0018;padding:14px 16px;">
+        <div style="background:#172430;padding:14px 16px;">
           <div style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;letter-spacing:0.08em;margin-bottom:5px;">STAKE</div>
           <div style="font-size:16px;font-weight:900;font-family:monospace;color:white;">KES ${h.stake.toLocaleString()}</div>
         </div>
-        <div style="background:#0f0018;padding:14px 16px;">
+        <div style="background:#172430;padding:14px 16px;">
           <div style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;letter-spacing:0.08em;margin-bottom:5px;">PAYOUT</div>
           <div style="font-size:16px;font-weight:900;font-family:monospace;color:${isWon?'#34d399':'rgba(255,255,255,0.25)'};">${isWon?'KES '+h.amount.toLocaleString():'—'}</div>
         </div>
-        <div style="background:#0f0018;padding:14px 16px;">
+        <div style="background:#172430;padding:14px 16px;">
           <div style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;letter-spacing:0.08em;margin-bottom:5px;">MULTIPLIER</div>
-          <div style="font-size:16px;font-weight:900;font-family:monospace;color:#c084fc;">${h.mult}x</div>
+          <div style="font-size:16px;font-weight:900;font-family:monospace;color:#eab308;">${h.mult}x</div>
         </div>
-        <div style="background:#0f0018;padding:14px 16px;">
+        <div style="background:#172430;padding:14px 16px;">
           <div style="font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;letter-spacing:0.08em;margin-bottom:5px;">${isWon?'PROFIT':'LOSS'}</div>
           <div style="font-size:16px;font-weight:900;font-family:monospace;color:${isWon?'#34d399':'#f87171'};">${isWon?'+':'-'}KES ${profit.toLocaleString()}</div>
         </div>
@@ -3032,7 +3101,7 @@ function checkAutosCashout(){for(let s=1;s<=2;s++){const b=bets[s];if(b.active&&
   saveAvBetEntry({ts:Date.now(),stake:b.amount,amount:win,mult:curMult.toFixed(2),result:'won'});
   saveUserField({balance:increment(net),'stats.won':increment(net>0?net:0)});showToast(`AUTO CASH OUT BET ${s} @ ${curMult.toFixed(2)}x — +${fmtCur(win)}`,'emerald');refreshBetUI();}}}
 function refreshCashoutVals(){for(let s=1;s<=2;s++){if(bets[s].active){const el=document.getElementById('cashVal'+s);if(el)el.textContent=fmtCur(Math.floor(bets[s].amount*curMult));}}}
-function refreshBetUI(){updateBalDisplay();for(let s=1;s<=2;s++){const b=bets[s],ab=document.getElementById('activeBet'+s),bb=document.getElementById('betBtn'+s);if(!ab||!bb)continue;if(b.active){bb.style.display='none';ab.style.display='flex';document.getElementById('activeBetAmt'+s).textContent=fmtCur(b.amount);document.getElementById('cashVal'+s).textContent=fmtCur(Math.floor(b.amount*curMult));}else{ab.style.display='none';bb.style.display='block';if(!b.queued)bb.disabled=false;}}}
+function refreshBetUI(){updateBalDisplay();for(let s=1;s<=2;s++){const b=bets[s],ab=document.getElementById('activeBet'+s),bb=document.getElementById('betBtn'+s);if(!ab||!bb)continue;bb.classList.toggle('placed',b.active||b.queued);if(b.active){bb.style.display='none';ab.style.display='flex';document.getElementById('activeBetAmt'+s).textContent=fmtCur(b.amount);document.getElementById('cashVal'+s).textContent=fmtCur(Math.floor(b.amount*curMult));}else{ab.style.display='none';bb.style.display='block';if(!b.queued)bb.disabled=false;}}}
 window.adjBet=function(slot,op){let a=bets[slot].amount;const mb=MIN_BET();const step=Math.max(50,Math.round(mb));if(op==='half')a=Math.max(mb,Math.floor(a/2));else if(op==='minus')a=Math.max(mb,a-step);else a=a*2;bets[slot].amount=a;document.getElementById('betAmt'+slot).textContent=fmtCur(a);document.getElementById('betLbl'+slot).textContent=fmtCur(a);};
 window.setBet=function(slot,v){bets[slot].amount=v;document.getElementById('betAmt'+slot).textContent=fmtCur(v);document.getElementById('betLbl'+slot).textContent=fmtCur(v);};
 function refreshChipLabels(){
@@ -3054,21 +3123,21 @@ function refreshChipLabels(){
   });
 }
 window.syncAuto=function(slot){bets[slot].autoOn=document.getElementById('auto'+slot).checked;bets[slot].autoAt=parseFloat(document.getElementById('autoVal'+slot).value)||1.5;};
-function renderHistory(){const hb=document.getElementById('historyBar');if(hb)hb.innerHTML=crashHist.slice(0,16).map(m=>`<div class="mpill${m>=10?' hi':''}">${m.toFixed(2)}x</div>`).join('');}
+function renderHistory(){const hb=document.getElementById('historyBar');if(hb)hb.innerHTML=crashHist.slice(0,16).map(m=>{const c=m<2?'low':(m<10?'mid':'hi');return`<div class="mpill ${c}">${m.toFixed(2)}x</div>`;}).join('');}
 function buildLiveBets(){liveBetsData=BASE_PLAYERS.map(p=>({...p,multiplier:null,payout:null}));if(Math.random()>0.4){const n=GUEST_NAMES[Math.floor(Math.random()*GUEST_NAMES.length)];liveBetsData.unshift({user:n,bet:Math.floor(300+Math.random()*1500),multiplier:null,payout:null});}liveBetsData.sort(()=>Math.random()-0.5);}
 function finalizeLiveBets(){liveBetsData.forEach(e=>{if(!e.payout&&crashAt>1.05&&Math.random()>0.3){e.multiplier=parseFloat((1.01+Math.random()*(crashAt-1.01)).toFixed(2));e.payout=Math.floor(e.bet*e.multiplier);}});const total=liveBetsData.reduce((s,e)=>s+e.bet,0),won=liveBetsData.filter(e=>e.payout).reduce((s,e)=>s+e.payout,0);const sb=document.getElementById('statBets');if(sb)sb.textContent=liveBetsData.length;const ss=document.getElementById('statStaked');if(ss)ss.textContent=total.toLocaleString();const sw=document.getElementById('statWon');if(sw)sw.textContent=won.toLocaleString();}
 function renderLiveBets(){const box=document.getElementById('liveBetsTable');if(!box)return;box.innerHTML=`<div class="grid grid-cols-12 text-xs text-white/30 font-bold px-3 py-2 border-b border-white/8"><div class="col-span-5">USER</div><div class="col-span-3 text-right">STAKE</div><div class="col-span-4 text-right">PAYOUT</div></div>`+liveBetsData.map(e=>`<div class="grid grid-cols-12 items-center py-2.5 px-3 border-b border-white/5 last:border-none text-sm"><div class="col-span-5 font-semibold truncate">${e.user}</div><div class="col-span-3 text-right font-mono text-white/55">${e.bet.toLocaleString()}</div>${e.payout?`<div class="col-span-4 text-right font-black text-emerald-400">${e.payout.toLocaleString()}<span class="text-white/30 font-normal text-xs ml-1">${e.multiplier}x</span></div>`:`<div class="col-span-4 text-right text-white/20">—</div>`}</div>`).join('');const op=document.getElementById('onlinePlayers');if(op)op.textContent=Math.floor(55+Math.random()*20);const pp=document.getElementById('playingPlayers');if(pp)pp.textContent=liveBetsData.length;const oc=document.getElementById('onlineCount');if(oc)oc.textContent=Math.floor(72+Math.random()*20);}
 setInterval(()=>{if(!isPlaying)return;const p=liveBetsData.filter(e=>!e.payout);if(!p.length)return;if(Math.random()>0.5){const e=p[Math.floor(Math.random()*p.length)];const m=parseFloat((1.01+Math.random()*(curMult-1.01)).toFixed(2));e.multiplier=m;e.payout=Math.floor(e.bet*m);renderLiveBets();}},1900);
 function updateWithdrawals(){const fresh=liveBetsData.filter(e=>e.payout&&e.payout>1000).slice(0,3).map(e=>({user:e.user,amount:e.payout}));withdrawData=[...fresh,...WITHDRAW_SEED].slice(0,8);}
 function renderWithdrawals(){const wb=document.getElementById('wdBalDisplay');if(wb)wb.textContent=balance.toLocaleString();const wl2=document.getElementById('wdCurLabel');if(wl2)wl2.textContent=activeCurrency.code;const wl=document.getElementById('withdrawList');if(!wl)return;const methods=['M-Pesa','M-Pesa','Airtel','M-Pesa','Bank','M-Pesa','Airtel','M-Pesa'];wl.innerHTML=withdrawData.map((w,i)=>`<div class="flex items-center px-4 py-3 gap-3"><div class="w-9 h-9 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-base flex-shrink-0">⬇️</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${w.user}</div><div class="text-white/35 text-xs">${methods[i%methods.length]} · just now</div></div><div class="text-right flex-shrink-0"><div class="font-black font-mono text-emerald-400 text-sm">${fmtCur(Number(w.amount))}</div><div class="text-xs mt-0.5"><span class="status-success px-2 py-0.5 rounded-full text-xs font-bold">SUCCESS</span></div></div></div>`).join('');}
-function renderChat(){const box=document.getElementById('chatBox');if(!box)return;const myName=userData?(userData.name||userData.displayName||userData.username||userData.email||'You').split(' ')[0]:'You';box.innerHTML=chatLog.map(m=>`<div class="flex gap-2"><span class="${m.user===myName||m.user==='You'?'text-orange-400':'text-purple-400'} font-bold flex-shrink-0">${m.user}:</span><span class="text-white/75">${m.msg}</span></div>`).join('');box.scrollTop=box.scrollHeight;}
+function renderChat(){const box=document.getElementById('chatBox');if(!box)return;const myName=userData?(userData.name||userData.displayName||userData.username||userData.email||'You').split(' ')[0]:'You';box.innerHTML=chatLog.map(m=>`<div class="flex gap-2"><span class="${m.user===myName||m.user==='You'?'text-orange-400':'text-yellow-400'} font-bold flex-shrink-0">${m.user}:</span><span class="text-white/75">${m.msg}</span></div>`).join('');box.scrollTop=box.scrollHeight;}
 window.sendChat=function(){const inp=document.getElementById('chatInput');const text=inp.value.trim();if(!text)return;const myName=userData?(userData.name||userData.displayName||userData.username||userData.email||'You').split(' ')[0]:'You';chatLog.push({user:myName,msg:text});inp.value='';renderChat();setTimeout(()=>{const replies=["Nice one! 🔥","Let's go!","Same here 🤞","Risky play lol","Hope it hits!"];const users=['Emily','BrianJ','Mulee','Wanjiku99','Njugu256'];chatLog.push({user:users[Math.floor(Math.random()*users.length)],msg:replies[Math.floor(Math.random()*replies.length)]});renderChat();},1000+Math.random()*1500);};
 setInterval(()=>{const msgs=["🔥 On fire!","Anyone else cashing early?","2x feels safe rn","let it ride!!","omg that crash 😭"];const users=['Emily','BrianJ','Mulee','Wanjiku99','Njugu256','Steve254','Akinyi'];if(Math.random()>0.7){chatLog.push({user:users[Math.floor(Math.random()*users.length)],msg:msgs[Math.floor(Math.random()*msgs.length)]});if(chatLog.length>40)chatLog.shift();const cp=document.getElementById('chatPanel');if(cp&&cp.style.display!=='none')renderChat();}},5000);
 window.switchTab=function(n){document.getElementById('stakePanel').style.display=n===0?'block':'none';document.getElementById('aiPanel').style.display=n===1?'block':'none';document.getElementById('tabBtn0').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===0?'tab-on':'tab-off');document.getElementById('tabBtn1').className='flex-1 py-2.5 text-sm font-bold rounded-3xl transition '+(n===1?'tab-on':'tab-off');if(n===1)runAI();};
 window.switchLiveTab=function(n){document.getElementById('liveBetsPanel').style.display=n===0?'block':'none';document.getElementById('withdrawPanel').style.display=n===1?'block':'none';document.getElementById('chatPanel').style.display=n===2?'block':'none';['ltab0','ltab1','ltab2'].forEach((id,i)=>{document.getElementById(id).className='flex-1 py-3.5 text-xs font-black transition '+(i===n?'ltab-on':'ltab-off');});if(n===1)renderWithdrawals();if(n===2)renderChat();const ls=document.getElementById('liveSection');if(ls)ls.scrollIntoView({behavior:'smooth',block:'start'});};
 window.runAI=function(){const el=document.getElementById('aiMsg');el.textContent='Analysing last '+crashHist.length+' rounds…';setTimeout(()=>{const avg=crashHist.reduce((s,v)=>s+v,0)/crashHist.length;const sugAt=Math.max(1.3,Math.min(3.5,avg*0.65)).toFixed(2);const sugBet=Math.round(balance*0.03/50)*50||100;el.innerHTML=`<strong>Based on ${crashHist.length} rounds</strong> (avg ${avg.toFixed(2)}x):<br><br>💡 Bet <strong>KES ${sugBet}</strong> with auto cash-out at <strong>${sugAt}x</strong><br><span class="text-xs text-white/35 mt-2 block">Conservative strategy — 65% of average crash point</span>`;},1000);};
 window.toggleSound=function(){soundOn=!soundOn;document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇';showToast(soundOn?'Sound ON 🔊':'Sound OFF 🔇','purple');};
-function showToast(text,color){const cols={emerald:'#059669',red:'#ef4444',purple:'#a020f0'};const t=document.createElement('div');t.style.cssText=`position:fixed;bottom:82px;left:50%;transform:translateX(-50%);background:${cols[color]||cols.purple};color:white;padding:11px 20px;border-radius:9999px;box-shadow:0 6px 20px rgba(0,0,0,0.4);white-space:nowrap;z-index:9999;font-size:13px;font-weight:700;pointer-events:none;transition:opacity 0.3s;`;t.textContent=text;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);}
+function showToast(text,color){const cols={emerald:'#059669',red:'#ef4444',purple:'#eab308'};const t=document.createElement('div');t.style.cssText=`position:fixed;bottom:82px;left:50%;transform:translateX(-50%);background:${cols[color]||cols.purple};color:white;padding:11px 20px;border-radius:9999px;box-shadow:0 6px 20px rgba(0,0,0,0.4);white-space:nowrap;z-index:9999;font-size:13px;font-weight:700;pointer-events:none;transition:opacity 0.3s;`;t.textContent=text;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);}
 window.showToast=showToast;
 
 function initApp(){

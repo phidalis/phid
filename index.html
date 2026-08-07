@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SportyCash.Site — Global's #1 Betting Platform</title>
+  <title>SportyCash.Site — Sports Betting & Live Casino</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:        #080b10;
-      --bg2:       #0d1117;
-      --bg3:       #111720;
-      --card:      #131a24;
-      --card2:     #161e2b;
+      --bg:        #1a1a1e;
+      --bg2:       #222228;
+      --bg3:       #2b2b32;
+      --card:      #2e2e35;
+      --card2:     #36363e;
       --border:    rgba(255,255,255,0.07);
       --border2:   rgba(255,255,255,0.12);
       --orange:    #f97316;
@@ -44,7 +44,6 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
     @keyframes spin { to{transform:rotate(360deg)} }
     @keyframes slide-in { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
     @keyframes glow-pulse { 0%,100%{box-shadow:0 0 20px rgba(249,115,22,0.3)} 50%{box-shadow:0 0 40px rgba(249,115,22,0.7)} }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
     @keyframes count-up { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
@@ -55,7 +54,7 @@
     /* ── HEADER ── */
     .header {
       position:sticky; top:0; z-index:100;
-      background:rgba(8,11,16,0.97); backdrop-filter:blur(20px);
+      background:rgba(26,26,30,0.97); backdrop-filter:blur(20px);
       border-bottom:1px solid var(--border);
     }
     .header-top {
@@ -78,13 +77,13 @@
     .header-actions { display:flex; gap:8px; align-items:center; }
     .btn-login {
       padding:8px 16px; border-radius:8px; border:1.5px solid var(--border2);
-      background:transparent; color:white; font-family:'Barlow',sans-serif;
+      background:transparent; color:var(--green); font-family:'Barlow',sans-serif;
       font-weight:700; font-size:13px; cursor:pointer; transition:all 0.2s;
     }
-    .btn-login:hover { border-color:var(--orange); color:var(--orange); }
+    .btn-login:hover { border-color:var(--green); color:var(--green); }
     .btn-signup {
       padding:8px 16px; border-radius:8px; border:none;
-      background:var(--orange); color:white; font-family:'Barlow',sans-serif;
+      background:var(--green); color:white; font-family:'Barlow',sans-serif;
       font-weight:800; font-size:13px; cursor:pointer; transition:all 0.15s;
     }
     .btn-signup:active { transform:scale(0.96); }
@@ -118,71 +117,6 @@
     }
     .nav-tab.active { color:var(--orange); border-bottom-color:var(--orange); }
     .nav-tab-icon { font-size:15px; }
-
-    /* ── LIVE TICKER ── */
-    .ticker-wrap { overflow:hidden; background:var(--orange); padding:6px 0; }
-    .ticker-inner { display:flex; animation:ticker 30s linear infinite; }
-    .ticker-inner:hover { animation-play-state:paused; }
-    .ticker-item {
-      display:flex; align-items:center; gap:6px; padding:0 20px;
-      font-size:12px; font-weight:700; white-space:nowrap; color:white;
-      font-family:'Barlow Condensed',sans-serif; letter-spacing:0.3px;
-    }
-    .ticker-sep { color:rgba(255,255,255,0.5); }
-
-    /* ── HERO BANNER ── */
-    .hero-banner {
-      position:relative; overflow:hidden;
-      background:linear-gradient(135deg,#0f1a35 0%,#1a0a2e 50%,#0d1a10 100%);
-      padding:24px 16px 28px;
-    }
-    .hero-bg-grid {
-      position:absolute; inset:0;
-      background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
-      background-size:30px 30px;
-    }
-    .hero-badge {
-      display:inline-flex; align-items:center; gap:6px;
-      background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3);
-      color:var(--green); border-radius:20px; padding:4px 12px;
-      font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;
-      margin-bottom:12px;
-    }
-    .live-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:pulse 1.5s infinite; }
-    .hero-title {
-      font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:42px;
-      line-height:0.95; letter-spacing:-1px; margin-bottom:10px;
-    }
-    .hero-title .hl { color:var(--orange); }
-    .hero-sub { font-size:13px; color:var(--text2); margin-bottom:18px; line-height:1.5; }
-    .hero-ctas { display:flex; gap:10px; }
-    .hero-cta-primary {
-      flex:1; padding:14px; border-radius:10px; border:none;
-      background:var(--orange); color:white; font-family:'Barlow Condensed',sans-serif;
-      font-weight:900; font-size:17px; cursor:pointer; letter-spacing:0.3px;
-      animation:glow-pulse 2.5s ease infinite; transition:transform 0.15s;
-    }
-    .hero-cta-primary:active { transform:scale(0.97); }
-    .hero-cta-secondary {
-      flex:1; padding:14px; border-radius:10px;
-      border:1.5px solid rgba(255,255,255,0.2);
-      background:rgba(255,255,255,0.05); color:white;
-      font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:17px;
-      cursor:pointer; transition:all 0.2s;
-    }
-    .hero-stats {
-      display:grid; grid-template-columns:repeat(4,1fr);
-      margin-top:20px; background:rgba(0,0,0,0.35);
-      border-radius:12px; overflow:hidden; border:1px solid var(--border);
-    }
-    .hero-stat {
-      flex:1; padding:10px 8px; text-align:center;
-      border-right:1px solid var(--border);
-    }
-    .hero-stat:last-child { border-right:none; }
-    .hero-stat-val { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:18px; color:var(--orange); }
-    .hero-stat-lbl { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; font-weight:700; margin-top:2px; }
 
     /* ── SECTION ── */
     .section { padding:14px; width:100%; }
@@ -244,7 +178,7 @@
     }
     .match-league {
       display:flex; align-items:center; gap:6px;
-      font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.3px;
+      font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:0.3px;
     }
     .live-badge {
       display:flex; align-items:center; gap:4px;
@@ -259,7 +193,7 @@
     .team-name { font-weight:800; font-size:14px; }
     .team-score { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:28px; color:var(--orange); }
     .match-center { text-align:center; }
-    .match-time { font-size:11px; color:var(--green); font-weight:800; }
+    .match-time { font-size:11px; color:rgba(255,255,255,0.6); font-weight:800; }
     .match-odds {
       display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:10px;
     }
@@ -268,6 +202,8 @@
       padding:8px 6px; text-align:center; cursor:pointer; transition:all 0.2s;
     }
     .odd-btn:active { transform:scale(0.96); background:rgba(249,115,22,0.15); border-color:var(--orange); }
+    .odd-btn.selected { background:#FFD700; border-color:#FFD700; box-shadow:0 0 10px rgba(255,215,0,0.4); }
+    .odd-btn.selected .odd-label, .odd-btn.selected .odd-val { color:#1a1a1a; }
     .odd-label { font-size:9px; color:var(--text3); font-weight:700; text-transform:uppercase; }
     .odd-val { font-weight:900; font-size:16px; color:white; font-family:'Barlow Condensed',sans-serif; }
 
@@ -410,7 +346,7 @@
     .inp::placeholder { color:var(--text3); }
     .btn-auth {
       width:100%; padding:15px; border-radius:10px; border:none;
-      background:var(--orange); color:white;
+      background:var(--green); color:white;
       font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:20px;
       cursor:pointer; transition:transform 0.15s; letter-spacing:0.3px;
       margin-top:8px;
@@ -461,6 +397,19 @@
       white-space:nowrap;
     }
     .cat-pill.active { background:rgba(249,115,22,0.15); border-color:var(--orange); color:var(--orange); }
+
+    /* ── LEAGUE FILTER DROPDOWN ── */
+    .league-filter { padding:10px 14px 0; flex-shrink:0; }
+    .league-filter select {
+      width:100%; padding:11px 14px; border-radius:12px;
+      background:var(--card); color:white; border:1.5px solid var(--border2);
+      font-family:'Barlow',sans-serif; font-weight:700; font-size:13px;
+      outline:none; cursor:pointer;
+      -webkit-appearance:none; -moz-appearance:none; appearance:none;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='2' fill='none'/></svg>");
+      background-repeat:no-repeat; background-position:right 14px center;
+    }
+    .league-filter select option { background:#222228; color:white; }
 
     /* ── SPORT CARD ── */
     .sport-section-title {
@@ -599,190 +548,80 @@
     </div>
   </header>
 
-  <!-- TICKER -->
-  <div class="ticker-wrap">
-    <div class="ticker-inner" id="tickerInner"></div>
-  </div>
-
   <!-- PAGE: HOME -->
   <div id="homePage" style="flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:68px;">
 
-    <!-- HERO -->
-    <div class="hero-banner">
-      <div class="hero-bg-grid"></div>
-      <div style="position:relative;">
-        <div class="hero-badge"><span class="live-dot"></span><span id="onlineCount">1,247</span> Players Online</div>
-        <div class="hero-title">Globals's #1<br><span class="hl">Betting Site</span></div>
-        <div class="hero-sub">Sports · Casino · Aviator · Virtual Sports · Jackpots. Cash out with M-Pesa instantly.</div>
-        <div class="hero-ctas">
-          <button class="hero-cta-primary" onclick="openScreen('signupScreen')">🚀 JOIN & GET BONUS</button>
-          <button class="hero-cta-secondary" onclick="openScreen('loginScreen')">LOG IN</button>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat"><div class="hero-stat-val" id="statWins">USD 10,OOO+</div><div class="hero-stat-lbl">Won Today</div></div>
-          <div class="hero-stat"><div class="hero-stat-val">5K+</div><div class="hero-stat-lbl">Members</div></div>
-          <div class="hero-stat"><div class="hero-stat-val">USD 0.36</div><div class="hero-stat-lbl">Min Deposit</div></div>
-          <div class="hero-stat"><div class="hero-stat-val">24/7</div><div class="hero-stat-lbl">Support</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- QUICK GAMES -->
+    <!-- FOOTBALL — Live & Upcoming -->
     <div class="section">
       <div class="section-header">
-        <div class="section-title">🔥 Popular Games</div>
-        <div class="section-more">All →</div>
+        <div class="section-title">⚽ Football — Live & Upcoming</div>
+        <div class="section-more" onclick="switchPage('live', document.querySelectorAll('#mainNavTabs .nav-tab')[1])">View All →</div>
       </div>
-      <div class="games-scroll" id="popularGamesRow"></div>
+      <div id="homeFbGames" style="display:none;padding-bottom:8px;"></div>
+      <div id="homeFbEmpty" style="display:none;text-align:center;padding:26px 0;color:var(--text3);font-size:13px;font-weight:600;">No matches right now — check back soon.</div>
     </div>
     <div class="divider"></div>
-
-    <!-- LIVE MATCHES PREVIEW -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title"><span style="color:var(--red)">●</span> Live Now</div>
-        <div class="section-more" onclick="switchPage('live', document.querySelector('[onclick*=live]'))">View All →</div>
-      </div>
-      <div id="liveSampleMatches"></div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- AVIATOR PROMO -->
-    <div class="section">
-      <div class="crash-promo" onclick="switchPage('aviator', document.querySelectorAll('.nav-tab')[5])">
-        <div class="crash-tag">✈️ Crash Game</div>
-        <div class="crash-multiplier" id="crashPromoMult">1.00x</div>
-        <div class="crash-desc">Watch it fly — cash out before it crashes! Up to 1000x wins.</div>
-        <button style="margin-top:14px;padding:11px 22px;border-radius:9px;border:none;background:var(--purple);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;cursor:pointer;">PLAY AVIATOR →</button>
-        <div style="position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;padding-right:14px;font-size:60px;opacity:0.12">✈️</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- PROMOS -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🎁 Bonuses & Promos</div>
-        <div class="section-more">See All →</div>
-      </div>
-      <div class="promo-card promo-card-1" onclick="openScreen('signupScreen')">
-        <div class="promo-tag">New Player Offer</div>
-        <div class="promo-title">100% Welcome<br>Bonus up to USD 10</div>
-        <div class="promo-sub">Deposit minimum USD 0.36 and get matched instantly</div>
-        <button class="promo-btn" style="background:#3b82f6;">CLAIM BONUS →</button>
-        <div class="promo-icon">🎁</div>
-      </div>
-      <div class="promo-card promo-card-2">
-        <div class="promo-tag">Daily Jackpot</div>
-        <div class="promo-title">Win USD 10,OOO<br>Every Day</div>
-        <div class="promo-sub">Predict 13 correct scores to win the Jackpot</div>
-        <button class="promo-btn" style="background:var(--orange);">PLAY JACKPOT →</button>
-        <div class="promo-icon">🏆</div>
-      </div>
-      <div class="promo-card promo-card-3">
-        <div class="promo-tag">Referral Bonus</div>
-        <div class="promo-title">Refer Friends —<br>Earn USD 1 Each</div>
-        <div class="promo-sub">No limit — the more friends, the more you earn</div>
-        <button class="promo-btn" style="background:var(--green);">REFER NOW →</button>
-        <div class="promo-icon">👥</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- CASINO PREVIEW -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🎰 Casino Games</div>
-        <div class="section-more" onclick="switchPage('casino', document.querySelectorAll('.nav-tab')[3])">All Games →</div>
-      </div>
-      <div class="casino-grid" id="casinoPreviewGrid"></div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- VIRTUAL SPORTS -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🎮 Virtual Sports</div>
-        <div class="section-more">All →</div>
-      </div>
-      <div class="virtual-row" id="virtualPreviewRow"></div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- JACKPOT -->
-    <div class="section">
-      <div class="jackpot-section">
-        <div class="jackpot-title">🏆 Mega Jackpot</div>
-        <div class="jackpot-amount" id="jackpotAmt">USD 10,000</div>
-        <div class="jackpot-label">Current Prize Pool</div>
-        <div class="jackpot-progress"><div class="jackpot-progress-fill"></div></div>
-        <div class="jackpot-countdown">Closes in <span id="jackpotTimer">06:42:18</span> • 13 games remaining</div>
-        <button class="jackpot-btn" onclick="openScreen('signupScreen')">JOIN JACKPOT NOW</button>
-      </div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- BIG WINS -->
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">💰 Recent Big Wins</div>
-      </div>
-      <div id="bigWinsSection"></div>
-    </div>
 
     <!-- FOOTER -->
-    <div style="background:var(--bg2);border-top:1px solid var(--border);padding:20px 16px 10px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <div class="logo-icon" style="width:30px;height:30px;font-size:14px;">SC</div>
-        <div class="logo-text" style="font-size:16px;">Sporty<span>Cash</span>.Site</div>
-      </div>
-      <p style="font-size:11px;color:var(--text3);line-height:1.6;margin-bottom:14px;">
-        Licensed online gaming platform. 18+ only. Please gamble responsibly. <br>
-        Paybill: <strong style="color:var(--text2)"></strong> • Support: <strong style="color:var(--text2)">+1 601 595 0025</strong>
+    <div style="background:var(--bg2);border-top:1px solid var(--border);padding:24px 16px 14px;">
+      <p style="font-size:12px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">Soccer Betting</p>
+      <p style="font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:14px;">
+        SportyCash brings the beautiful game to life with fast soccer betting on the world's top leagues, from the English Premier League and La Liga to the Kenyan Premier League and the biggest international tournaments. Whether you fancy a home win, a draw, or a surprise away upset, our odds update in real time so you always bet on the latest action. With instant M-Pesa deposits and payouts, every kick, goal and last-minute winner is your chance to turn your predictions into winnings.
       </p>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--text3);">
-        <span>Terms & Conditions</span><span>Privacy Policy</span><span>Responsible Gaming</span><span>Help Center</span>
-      </div>
-      <div style="margin-top:12px;font-size:10px;color:rgba(255,255,255,0.1);">© 2026 SportyCash.Site. All rights reserved.</div>
+      <p style="font-size:12px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">Open a SportyCash Soccer Betting Account and Strike Gold</p>
+      <p style="font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:14px;">
+        Opening a SportyCash soccer betting account takes less than a minute and puts a world of football markets at your fingertips. Once your account is ready, you can back your favourite teams on hundreds of matches every day, combine selections for bigger accumulators, and cash out instantly with M-Pesa the moment your bet wins. Strike gold with every goal, bet live, win big, and enjoy the thrill of soccer betting the SportyCash way.
+      </p>
+      <p style="font-size:12px;color:#fff;font-weight:800;letter-spacing:0.5px;margin-bottom:6px;">How to Register for Soccer Betting with SportyCash</p>
+      <p style="font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:14px;">
+        Registering for soccer betting with SportyCash is simple and secure. Create your free account, verify your details, and make your first deposit through M-Pesa to start betting on the matches you love. From there you can browse live and upcoming fixtures, tap an odds button to build your bet slip, and place your bet in seconds. Your winnings are paid out straight to your phone, so you can focus on the game and let SportyCash handle the rest.
+      </p>
+      <div style="margin-top:6px;font-size:10px;color:rgba(255,255,255,0.25);text-align:center;padding-top:10px;border-top:1px solid var(--border);">© 2026 SportyCash.Site · All rights reserved<br><span style="color:rgba(234,179,8,0.6);">Gambling can be addictive. Please play responsibly. 18+</span></div>
     </div>
   </div>
 
   <!-- PAGE: LIVE -->
   <div id="livePage" style="display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:68px;">
-    <div class="cat-pills">
-      <div class="cat-pill active" onclick="setCatActive(this,'live')">🔴 All Live</div>
-      <div class="cat-pill" onclick="setCatActive(this,'live')">⚽ Football</div>
-      <div class="cat-pill" onclick="setCatActive(this,'live')">🏀 Basketball</div>
-      <div class="cat-pill" onclick="setCatActive(this,'live')">🎾 Tennis</div>
-      <div class="cat-pill" onclick="setCatActive(this,'live')">🏐 Volleyball</div>
-      <div class="cat-pill" onclick="setCatActive(this,'live')">🏈 Rugby</div>
+    <div class="league-filter">
+      <select onchange="setCatFilter('live', this.value)">
+        <option value="">🔴 All Live</option>
+        <option value="Football">⚽ Football</option>
+        <option value="Basketball">🏀 Basketball</option>
+        <option value="Tennis">🎾 Tennis</option>
+        <option value="Volleyball">🏐 Volleyball</option>
+        <option value="Rugby">🏈 Rugby</option>
+      </select>
     </div>
     <div id="allLiveMatches" class="section" style="padding-top:0;"></div>
   </div>
 
   <!-- PAGE: SPORTS -->
   <div id="sportsPage" style="display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:68px;">
-    <div class="cat-pills">
-      <div class="cat-pill active" onclick="setCatActive(this,'sports')">⭐ Featured</div>
-      <div class="cat-pill" onclick="setCatActive(this,'sports')">⚽ Football</div>
-      <div class="cat-pill" onclick="setCatActive(this,'sports')">🏀 Basketball</div>
-      <div class="cat-pill" onclick="setCatActive(this,'sports')">🎾 Tennis</div>
-      <div class="cat-pill" onclick="setCatActive(this,'sports')">🏏 Cricket</div>
-      <div class="cat-pill" onclick="setCatActive(this,'sports')">🏃 Athletics</div>
-      <div class="cat-pill" onclick="setCatActive(this,'sports')">🥊 Boxing</div>
+    <div class="league-filter">
+      <select onchange="setCatFilter('sports', this.value)">
+        <option value="">⭐ Featured</option>
+        <option value="Football">⚽ Football</option>
+        <option value="Basketball">🏀 Basketball</option>
+        <option value="Tennis">🎾 Tennis</option>
+        <option value="Cricket">🏏 Cricket</option>
+        <option value="Athletics">🏃 Athletics</option>
+        <option value="Boxing">🥊 Boxing</option>
+      </select>
     </div>
     <div id="sportsMatches" class="section" style="padding-top:0;"></div>
   </div>
 
   <!-- PAGE: CASINO -->
   <div id="casinoPage" style="display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:68px;">
-    <div class="cat-pills">
-      <div class="cat-pill active" onclick="setCatActive(this,'casino')">🎰 All Games</div>
-      <div class="cat-pill" onclick="setCatActive(this,'casino')">🎡 Slots</div>
-      <div class="cat-pill" onclick="setCatActive(this,'casino')">🃏 Table Games</div>
-      <div class="cat-pill" onclick="setCatActive(this,'casino')">📹 Live Casino</div>
-      <div class="cat-pill" onclick="setCatActive(this,'casino')">💥 Crash Games</div>
-      <div class="cat-pill" onclick="setCatActive(this,'casino')">🎯 Instant Win</div>
+    <div class="league-filter">
+      <select onchange="setCatFilter('casino', this.value)">
+        <option value="">🎰 All Games</option>
+        <option value="Slots">🎡 Slots</option>
+        <option value="Table Games">🃏 Table Games</option>
+        <option value="Live Casino">📹 Live Casino</option>
+        <option value="Crash Games">💥 Crash Games</option>
+        <option value="Instant Win">🎯 Instant Win</option>
+      </select>
     </div>
     <div class="section" style="padding-top:4px;">
       <div class="casino-grid" id="fullCasinoGrid"></div>
@@ -1058,10 +897,6 @@
     <div class="auth-back" onclick="openScreen(null)">← Back</div>
     <div class="auth-title">Create Account 🚀</div>
     <div class="auth-sub">Join 50,000+ winners on SportyBet.Site</div>
-    <div class="bonus-box">
-      <div class="bonus-icon">🎁</div>
-      <div class="bonus-text">Sign up and get a <strong>KES 500 Welcome Bonus</strong> instantly credited to your account!</div>
-    </div>
     <div class="err-box" id="signupErr"></div>
     <div class="field">
       <label>Full Name</label>
@@ -1213,7 +1048,7 @@ function fbMatchCardHTML(game, isLive) {
     ? (isHT
       ? '<span style="font-size:9px;font-weight:900;color:#fbbf24;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:4px;padding:2px 7px;">⏸ HALF TIME</span>'
       : '<span class="live-badge" style="font-size:9px;">🔴 ' + minLabel + '</span>')
-    : '<span style="font-size:11px;color:var(--text3);font-weight:700;">' + (game.kickoffTime||'TBD') + '</span>';
+    : '<span style="font-size:11px;color:rgba(255,255,255,0.6);font-weight:700;">' + (game.kickoffTime||'TBD') + '</span>';
 
   const scoreHtml = isLive
     ? '<div style="text-align:center;"><div style="font-size:22px;font-weight:900;color:var(--yellow);">' + (game.homeScore||0) + ' – ' + (game.awayScore||0) + '</div>' + (isHT ? '<div style="font-size:10px;color:#fbbf24;font-weight:800;">HT</div>' : '<div style="font-size:10px;color:var(--red);font-weight:800;">' + (half===2?'2H ':'1H ') + (game.minute||0) + "'" + '</div>') + '</div>'
@@ -1228,7 +1063,7 @@ function fbMatchCardHTML(game, isLive) {
   return '<div class="live-match fb-match-real" style="margin-bottom:10px;padding:0;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;" onclick="openIndexFbModal(\'' + game.id + '\')">' +
     '<div style="padding:12px 12px 6px;">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
-      '<span style="font-size:10px;color:var(--text3);font-weight:700;">' + (game.league||'Match') + '</span>' +
+      '<span style="font-size:10px;color:rgba(255,255,255,0.6);font-weight:700;">' + (game.league||'Match') + '</span>' +
       timeBadge +
     '</div>' +
     htBanner +
@@ -1255,12 +1090,18 @@ function fbMatchCardHTML(game, isLive) {
 
 function renderHomeFootballHighlight() {
   const el = document.getElementById('homeFbGames');
+  const empty = document.getElementById('homeFbEmpty');
   if (!el) return;
   const live     = fbGames.filter(g => g.status === 'live');
   const upcoming = fbGames.filter(g => g.status === 'upcoming');
-  const toShow   = [...live, ...upcoming].slice(0, 3);
-  if (!toShow.length) { el.style.display = 'none'; return; }
+  const toShow   = [...live, ...upcoming].slice(0, 8);
+  if (!toShow.length) {
+    el.style.display = 'none';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
   el.style.display = 'block';
+  if (empty) empty.style.display = 'none';
   el.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:0 14px;margin-bottom:10px;"><div style="display:flex;align-items:center;gap:8px;"><span class="live-badge" style="font-size:9px;">LIVE</span><span style="font-weight:800;font-size:14px;">Football</span></div><span onclick="switchPage(\'live\',document.querySelectorAll(\'#mainNavTabs .nav-tab\')[1])" style="font-size:12px;color:var(--yellow);cursor:pointer;font-weight:700;">View All \u2192</span></div>'
     + toShow.map(g => fbMatchCardHTML(g, g.status==='live')).join('');
 }
@@ -1413,7 +1254,7 @@ window.openIndexFbModal = function(gameId) {
     const val = parseFloat(odds).toFixed(2);
     const sel = isSel(market, pick);
     const base = sel
-      ? 'background:rgba(234,179,8,0.22);border:1.5px solid #eab308;color:#eab308;'
+      ? 'background:#FFD700;border:1.5px solid #FFD700;color:#1a1a1a;'
       : 'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:white;';
     const locked = isLocked
       ? 'opacity:0.45;cursor:not-allowed;'
@@ -1422,9 +1263,9 @@ window.openIndexFbModal = function(gameId) {
       ? 'onclick="showToastIndex(\'Betting closed for this game\',\'red\')"'
       : 'data-gid="' + game.id + '" data-market="' + market + '" data-pick="' + pick + '" data-label="' + labelStr.replace(/"/g,'&quot;') + '" data-odds="' + val + '" data-modal="' + gameId + '" onclick="handleModalOddClick(this)"';
     return '<button style="flex:1;' + base + locked + 'border-radius:10px;padding:11px 4px;text-align:center;font-family:inherit;transition:all 0.15s;" ' + click + '>' +
-      '<div style="font-size:9px;color:rgba(255,255,255,0.38);font-weight:700;margin-bottom:3px;">' + sub + '</div>' +
+      '<div style="font-size:9px;' + (sel?'color:rgba(0,0,0,0.6);':'color:rgba(255,255,255,0.38);') + 'font-weight:700;margin-bottom:3px;">' + sub + '</div>' +
       '<div style="font-size:15px;font-weight:900;">' + val + '</div>' +
-      (sel ? '<div style="font-size:8px;color:#eab308;font-weight:800;margin-top:2px;">✓</div>' : '') +
+      (sel ? '<div style="font-size:8px;color:#1a1a1a;font-weight:800;margin-top:2px;">✓</div>' : '') +
       '</button>';
   }
 
@@ -1640,62 +1481,34 @@ function generateBetCode(){
   return code;
 }
 
-window.fbPlaceBet = async function() {
+// ── PENDING PICKS — transferred to aviator.html for placement ──
+window.persistPendingFbPicks = function() {
+  try {
+    const items = fbBetSlipItems.map(b => {
+      const g = fbGames.find(x => x.id === b.gameId);
+      return {
+        gameId:   b.gameId,
+        market:   b.market,
+        pick:     b.pick,
+        label:    b.label,
+        odds:     b.odds,
+        gameName: g ? (g.home + ' vs ' + g.away) : ''
+      };
+    });
+    if (items.length) sessionStorage.setItem('pendingFbPicks', JSON.stringify(items));
+    else sessionStorage.removeItem('pendingFbPicks');
+  } catch(e) { console.warn('persistPendingFbPicks', e); }
+};
+
+window.fbPlaceBet = function() {
   if (!fbBetSlipItems.length) return;
   const stake = parseFloat(document.getElementById('fbBetStake').value) || 0;
   if (stake < 10) { alert('Minimum stake is KES 10'); return; }
-  if (!currentUser) { closeFbBetslip(); openScreen('signupScreen'); return; }
-  const pSnap = await getDoc(doc(db, 'users', currentUser.uid));
-  const pData = pSnap.exists() ? pSnap.data() : {};
-  if ((pData.balance||0) < stake) { alert('Insufficient balance. Please deposit first.'); return; }
-  const totalOdds = fbBetSlipItems.reduce((acc, b) => acc * b.odds, 1);
-  const potential = stake * totalOdds;
-  const gameId    = fbBetSlipItems[0].gameId;
-  const betCode   = generateBetCode();
-  const rawCode   = betCode.replace('#','');
-  const expiresAt = Date.now() + (30*24*60*60*1000);
-  const picksForFirestore = fbBetSlipItems.map(b => ({
-    market:b.market, pick:b.pick, label:b.label, odds:b.odds,
-    gameName: (fbGames.find(g=>g.id===b.gameId)||{home:'',away:''}).home + ' vs ' + (fbGames.find(g=>g.id===b.gameId)||{away:''}).away
-  }));
-  try {
-    // Save to sportsBets with betCode (searchable by any user)
-    await setDoc(doc(db,'sportsBets',rawCode), {
-      betCode,
-      playerId:   currentUser.uid,
-      playerName: pData.displayName || pData.phone || currentUser.uid,
-      gameId,
-      picks:      picksForFirestore,
-      stake, totalOdds: parseFloat(totalOdds.toFixed(2)), potential: Math.floor(potential),
-      status:    'pending',
-      placedAt:  Date.now(),
-      createdAt: serverTimestamp(),
-      expiresAt,
-      isBonus: false
-    });
-    // Also save to footballBets for admin results
-    await addDoc(collection(db, 'footballBets'), {
-      betCode,
-      playerId:   currentUser.uid,
-      playerName: pData.displayName || pData.phone || currentUser.uid,
-      gameId,
-      picks:      picksForFirestore,
-      stake, totalOdds: parseFloat(totalOdds.toFixed(2)), potential: Math.floor(potential),
-      status:    'pending',
-      placedAt:  Date.now(),
-      createdAt: serverTimestamp(),
-      expiresAt
-    });
-    await updateDoc(doc(db, 'users', currentUser.uid), { balance: (pData.balance||0) - stake });
-    fbBetSlipItems = [];
-    fbRenderBetslip();
-    closeFbBetslip();
-    renderHomeFootballHighlight();
-    if (currentPage === 'live')   renderAllLiveMatches();
-    if (currentPage === 'sports') renderSportsMatches();
-    // Show bet code modal
-    showIndexBetCodeModal(betCode, stake, Math.floor(potential), totalOdds);
-  } catch(e) { alert('Error: ' + e.message); }
+  // Save picks, then continue on aviator.html where the bet is placed
+  persistPendingFbPicks();
+  closeFbBetslip();
+  if (!currentUser) { openScreen('loginScreen'); return; }
+  window.location.href = 'aviator.html';
 };
 
 // ── BET CODE MODAL ──
@@ -1728,20 +1541,12 @@ window.copyIndexBetCode = function() {
   if (el) { el.style.background = 'rgba(34,197,94,0.15)'; setTimeout(() => { el.style.background = 'rgba(249,115,22,0.12)'; }, 800); }
 };
 
-// ── Add CSS for odd buttons & inject homeFbGames placeholder ───
+// ── Add CSS for odd buttons & start football feed on load ───
 (function() {
   const s = document.createElement('style');
-  s.textContent = '.fb-odd-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--yellow);font-weight:900;font-size:14px;border-radius:9px;padding:9px 4px;cursor:pointer;width:100%;font-family:\'Barlow Condensed\',sans-serif;transition:background 0.15s,border-color 0.15s;text-align:center;}.fb-odd-btn:hover,.fb-odd-btn:active{background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.35);color:#22c55e;}.fb-odd-btn.fb-selected{background:rgba(234,179,8,0.18);border-color:#eab308;color:#eab308;}';
+  s.textContent = '.fb-odd-btn{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;font-weight:900;font-size:14px;border-radius:9px;padding:9px 4px;cursor:pointer;width:100%;font-family:\'Barlow Condensed\',sans-serif;transition:background 0.15s,border-color 0.15s;text-align:center;}.fb-odd-btn:hover,.fb-odd-btn:active{background:rgba(234,179,8,0.12);border-color:rgba(234,179,8,0.35);color:#eab308;}.fb-odd-btn.fb-selected{background:#eab308;border-color:#eab308;color:#121e2a;box-shadow:0 0 10px rgba(234,179,8,0.4);}';
   document.head.appendChild(s);
-  // Add placeholder for real games in home page after DOM ready
   window.addEventListener('load', function() {
-    const homePageEl = document.getElementById('homePage');
-    if (homePageEl) {
-      const placeholder = document.createElement('div');
-      placeholder.id = 'homeFbGames';
-      placeholder.style.cssText = 'display:none;padding-bottom:8px;';
-      homePageEl.insertBefore(placeholder, homePageEl.firstChild);
-    }
     startFbGamesListener();
   });
 })();
@@ -1758,6 +1563,7 @@ onAuthStateChanged(auth, async user => {
     // doSignup() handles its own redirect after the Firestore write completes.
     // We detect this by checking a flag set at the start of doSignup().
     if (!window._signingUp) {
+      persistPendingFbPicks();
       window.location.href = 'aviator.html';
     }
     return;
@@ -1861,9 +1667,19 @@ function closeAccount() {
 }
 window.closeAccountPanel = closeAccount;
 
-window.setCatActive = function(el, group) {
-  el.closest('.cat-pills').querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
+window.catFilters = { live:'', sports:'', casino:'' };
+
+window.matchCat = function(m, cat) {
+  if (!cat) return true;
+  const hay = String((m.categoryName||'') + ' ' + (m.league||'') + ' ' + (m.sport||'') + ' ' + (m.cat||'') + ' ' + (m.category||'')).toLowerCase();
+  return hay.includes(cat.toLowerCase());
+};
+
+window.setCatFilter = function(page, val) {
+  catFilters[page] = val;
+  if (page === 'live')   renderAllLiveMatches();
+  if (page === 'sports') renderSportsMatches();
+  if (page === 'casino') renderFullCasino();
 };
 
 // ════════════════════════════════════════════════════════════
@@ -2023,6 +1839,7 @@ window.doLogin = async function() {
     const phone = loginSelectedCountry.dial + digits;
     const email = phone.replace(/\+/,'') + '@sportybet.site';
     await signInWithEmailAndPassword(auth, email, pass);
+    persistPendingFbPicks();
     window.location.href = 'aviator.html';
   } catch(e) {
     err.textContent = 'Wrong phone or password. Please try again.';
@@ -2072,6 +1889,7 @@ window.doSignup = async function() {
       createdAt: serverTimestamp(),
     });
     // Doc confirmed written — safe to redirect now
+    persistPendingFbPicks();
     window.location.href = 'aviator.html';
   } catch(e) {
     window._signingUp = false;
@@ -2111,6 +1929,8 @@ window.addToBetslip = function(match, pick, odd) {
   betslip.push({ matchId: match.id, matchName: match.home + ' vs ' + match.away, pick, odd });
   document.getElementById('betslipCount').textContent = betslip.length;
   document.getElementById('betslipFab').style.display = betslip.length > 0 ? 'flex' : 'none';
+  if (currentPage === 'live')   renderAllLiveMatches();
+  if (currentPage === 'sports') renderSportsMatches();
 };
 window.openBetslip = function() {
   // Populate the betslip drawer and open it
@@ -2223,15 +2043,16 @@ function startJackpotGamesListener() {
 //  RENDER
 // ════════════════════════════════════════════════════════════
 function matchCardHTML(m, isLive) {
+  const inSlip = p => betslip.some(b => b.matchId === m.id && b.pick === p);
   const odds = m.odds.length === 3
     ? `<div class="match-odds">
-        <div class="odd-btn" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'1',${m.odds[0]})"><div class="odd-label">1</div><div class="odd-val">${m.odds[0]}</div></div>
-        <div class="odd-btn" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'X',${m.odds[1]})"><div class="odd-label">X</div><div class="odd-val">${m.odds[1]}</div></div>
-        <div class="odd-btn" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'2',${m.odds[2]})"><div class="odd-label">2</div><div class="odd-val">${m.odds[2]}</div></div>
+        <div class="odd-btn${inSlip('1')?' selected':''}" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'1',${m.odds[0]})"><div class="odd-label">1</div><div class="odd-val">${m.odds[0]}</div></div>
+        <div class="odd-btn${inSlip('X')?' selected':''}" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'X',${m.odds[1]})"><div class="odd-label">X</div><div class="odd-val">${m.odds[1]}</div></div>
+        <div class="odd-btn${inSlip('2')?' selected':''}" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'2',${m.odds[2]})"><div class="odd-label">2</div><div class="odd-val">${m.odds[2]}</div></div>
       </div>`
     : `<div class="match-odds" style="grid-template-columns:1fr 1fr">
-        <div class="odd-btn" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'1',${m.odds[0]})"><div class="odd-label">${m.home.split(' ')[0]}</div><div class="odd-val">${m.odds[0]}</div></div>
-        <div class="odd-btn" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'2',${m.odds[1]})"><div class="odd-label">${m.away.split(' ')[0]}</div><div class="odd-val">${m.odds[1]}</div></div>
+        <div class="odd-btn${inSlip('1')?' selected':''}" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'1',${m.odds[0]})"><div class="odd-label">${m.home.split(' ')[0]}</div><div class="odd-val">${m.odds[0]}</div></div>
+        <div class="odd-btn${inSlip('2')?' selected':''}" onclick="addToBetslip({id:${m.id},home:'${m.home}',away:'${m.away}'},'2',${m.odds[1]})"><div class="odd-label">${m.away.split(' ')[0]}</div><div class="odd-val">${m.odds[1]}</div></div>
       </div>`;
 
   const score = isLive
@@ -2239,7 +2060,7 @@ function matchCardHTML(m, isLive) {
         <div class="match-time">${m.minute}'</div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:26px;line-height:1;">${m.scoreH} - ${m.scoreA}</div>
       </div>`
-    : `<div class="match-center" style="color:var(--text3);font-size:12px;font-weight:700;">${m.time}</div>`;
+    : `<div class="match-center" style="color:rgba(255,255,255,0.6);font-size:12px;font-weight:700;">${m.time}</div>`;
 
   return `<div class="live-match">
     <div class="match-header">
@@ -2273,18 +2094,20 @@ function renderLiveSample() {
 function renderAllLiveMatches() {
   const liveEl = document.getElementById('allLiveMatches');
   if (!liveEl) return;
-  const fbLive = (window.fbGames||[]).filter(g => g.status === 'live');
-  const cards = [...fbLive.map(g => fbMatchCardHTML(g, true)), ...LIVE_MATCHES.map(m => matchCardHTML(m, true))].join('');
+  const cat = catFilters.live || '';
+  const fbLive = (window.fbGames||[]).filter(g => g.status === 'live' && matchCat(g, cat));
+  const cards = [...fbLive.map(g => fbMatchCardHTML(g, true)), ...LIVE_MATCHES.filter(m => matchCat(m, cat)).map(m => matchCardHTML(m, true))].join('');
   liveEl.innerHTML = cards || '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">No live matches right now</div>';
 }
 
 function renderSportsMatches() {
   const sEl = document.getElementById('sportsMatches');
   if (!sEl) return;
-  const fbLive     = (window.fbGames||[]).filter(g => g.status === 'live');
-  const fbUpcoming = (window.fbGames||[]).filter(g => g.status === 'upcoming');
-  const allLive     = [...fbLive.map(g => fbMatchCardHTML(g, true)),     ...LIVE_MATCHES.map(m => matchCardHTML(m, true))];
-  const allUpcoming = [...fbUpcoming.map(g => fbMatchCardHTML(g, false)), ...UPCOMING_MATCHES.map(m => matchCardHTML(m, false))];
+  const cat = catFilters.sports || '';
+  const fbLive     = (window.fbGames||[]).filter(g => g.status === 'live' && matchCat(g, cat));
+  const fbUpcoming = (window.fbGames||[]).filter(g => g.status === 'upcoming' && matchCat(g, cat));
+  const allLive     = [...fbLive.map(g => fbMatchCardHTML(g, true)),     ...LIVE_MATCHES.filter(m => matchCat(m, cat)).map(m => matchCardHTML(m, true))];
+  const allUpcoming = [...fbUpcoming.map(g => fbMatchCardHTML(g, false)), ...UPCOMING_MATCHES.filter(m => matchCat(m, cat)).map(m => matchCardHTML(m, false))];
   let out = '';
   if (allUpcoming.length) {
     out += '<div class="sport-section-title">📅 Upcoming</div>';
@@ -2308,7 +2131,8 @@ function renderFullCasino() {
   const el = document.getElementById('fullCasinoGrid');
   if (!el) return;
   if (!CASINO_GAMES.length) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:20px;">Loading…</div>'; return; }
-  el.innerHTML = CASINO_GAMES.map(g => casinoCardHTML(g)).join('');
+  const cat = catFilters.casino || '';
+  el.innerHTML = CASINO_GAMES.filter(g => matchCat(g, cat)).map(g => casinoCardHTML(g)).join('');
 }
 
 function renderVirtualPreview() {
@@ -2551,6 +2375,8 @@ window.doLogout = async function() {
 //  TICKER
 // ════════════════════════════════════════════════════════════
 function renderTicker() {
+  const el = document.getElementById('tickerInner');
+  if (!el) return;
   const items = [
     '🏆 Wanjiku99 won KES 14,950 on Aviator',
     '⚽ Man City 2-1 Arsenal • 67\'',
@@ -2564,7 +2390,7 @@ function renderTicker() {
     '🎯 Jackpot prize: KES 1,247,500',
   ];
   const html = [...items, ...items].map(t => `<div class="ticker-item">${t} <span class="ticker-sep">•</span></div>`).join('');
-  document.getElementById('tickerInner').innerHTML = html;
+  el.innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2857,14 +2683,6 @@ setInterval(() => {
 }, 8000);
 
 // ════════════════════════════════════════════════════════════
-//  ONLINE COUNT ANIMATION
-// ════════════════════════════════════════════════════════════
-setInterval(() => {
-  const el = document.getElementById('onlineCount');
-  if (el) el.textContent = Math.floor(1100 + Math.random() * 400).toLocaleString();
-}, 8000);
-
-// ════════════════════════════════════════════════════════════
 //  OLD BETSLIP DRAWER — alias functions (used by betslipDrawer HTML)
 // ════════════════════════════════════════════════════════════
 window.closeBetslip = function() {
@@ -2900,7 +2718,6 @@ window.placeBet = function() {
 // ════════════════════════════════════════════════════════════
 //  INIT
 // ════════════════════════════════════════════════════════════
-renderTicker();
 // Start all Firestore listeners / loaders
 loadPopularGames();
 loadCasinoGames();
