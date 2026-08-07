@@ -161,6 +161,7 @@
     <div onclick="navTo('aviator');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-yellow-500/15 text-yellow-400">✈️</div><span>Aviator</span></div>
     <div onclick="navTo('live');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-red-500/15 text-red-400">🔴</div><span>Live Games</span><span class="ml-auto bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-full" id="sidebarLiveCount" style="display:none;"></span></div>
     <div onclick="navTo('jackpot');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-yellow-500/15 text-yellow-400">🏆</div><span>Jackpot</span></div>
+    <div onclick="navTo('lucky');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-purple-500/15 text-purple-400">🎰</div><span>Lucky Spin</span></div>
     <div onclick="navTo('mybets');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-blue-500/15 text-blue-400">📋</div><span>My Bets</span></div>
     <div onclick="navTo('profile');closeSidebar();" class="sidebar-item"><div class="sidebar-icon bg-orange-500/15 text-orange-400">👤</div><span>Account</span></div>
     <div style="flex:1;min-height:20px;"></div>
@@ -587,6 +588,50 @@
     </div>
   </div>
 
+  <!-- LUCKY SPIN SCREEN -->
+  <div id="luckyScreen" class="screen">
+    <div class="px-3 pt-4 pb-8">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <div class="font-black text-xl tracking-tight">🎰 Lucky Spin</div>
+          <div class="text-white/40 text-xs mt-0.5">Pick a stake and spin the wheel of luck!</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;background:black;border-radius:999px;padding:7px 12px;flex-shrink:0;">
+          <span class="text-orange-400 font-black" style="font-size:11px;">KES</span>
+          <span id="spinBalDisplay" class="font-black text-white font-mono" style="font-size:14px;">0</span>
+        </div>
+      </div>
+
+      <div style="max-width:400px;margin:0 auto;">
+        <!-- Wheel -->
+        <div style="position:relative;margin:0 auto 8px;width:100%;max-width:380px;aspect-ratio:1;">
+          <canvas id="luckyWheel" style="width:100%;height:100%;display:block;"></canvas>
+          <div style="position:absolute;left:50%;top:-6px;transform:translateX(-50%);z-index:3;width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:26px solid #facc15;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));"></div>
+          <div id="spinResultMsg" style="position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);z-index:3;display:none;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,0.5);"></div>
+        </div>
+
+        <!-- Stake presets -->
+        <div class="mb-2">
+          <div class="text-xs text-white/45 font-bold uppercase tracking-wider mb-2">Stake</div>
+          <div id="spinStakeOptions" class="flex gap-2 flex-wrap"></div>
+        </div>
+
+        <!-- Spin button -->
+        <button id="spinBtn" onclick="spinLuckyWheel()" class="btn-orange w-full py-4 text-base font-black rounded-2xl" style="margin-top:6px;">🎰 SPIN</button>
+
+        <!-- Prize table -->
+        <div class="mt-5 bg-[#1a2b3d] rounded-2xl border border-white/7 overflow-hidden">
+          <div class="px-4 py-3 border-b border-white/6 font-black text-sm flex items-center justify-between">
+            <span>🏆 Prize Table</span>
+            <span id="spinStakeLabel" style="color:#eab308;font-weight:900;"></span>
+          </div>
+          <div id="spinPrizeTable" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px;"></div>
+          <div id="spinBoostNote" style="display:none;padding:8px 14px 12px;font-size:10px;color:rgba(251,191,36,0.8);font-weight:700;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- end mainApp -->
 
 <!-- DEPOSIT SCREEN — 3-step wizard -->
@@ -896,6 +941,18 @@ import{getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,increment,s
 const app=initializeApp(FIREBASE_CONFIG);const auth=getAuth(app);const db=getFirestore(app);
 let USER=null,userData=null,balance=0,crashHist=[2.30,2.28,1.74,2.29,28.70,1.05,4.10,93.31],unsubUser=null;
 let storeConfig={depositsEnabled:true,minDeposit:100,maxDeposit:100000,withdrawalsEnabled:true,minWithdrawal:200,maxWithdrawal:50000,withdrawLockAmount:500,minBet:50};
+let luckySpinConfig={
+  enabled:true,
+  stakeOptions:[50,100,200,500],
+  baseStake:50,
+  segments:[0,10,20,50,100,200,500,1000,1500],
+  winRate:0.25,
+  bigWinRate:0.05,
+  bigWinThreshold:500,
+  newUserWinRate:0.45,
+  newUserSpins:3,
+  newUserMaxPrize:100
+};
 let unsubStore=null;
 
 // ── SPORTS DATA ──
@@ -1077,7 +1134,7 @@ function buildFbGameCard(game){
 }
 
 // ── NAVIGATION ──
-const SCREENS={sports:'sportsScreen',aviator:'aviatorScreen',live:'liveScreen',jackpot:'jackpotScreen',mybets:'mybetsScreen',betslip:'betslipScreen',profile:'profileScreen'};
+const SCREENS={sports:'sportsScreen',aviator:'aviatorScreen',live:'liveScreen',jackpot:'jackpotScreen',lucky:'luckyScreen',mybets:'mybetsScreen',betslip:'betslipScreen',profile:'profileScreen'};
 window.navTo=function(key){
   Object.values(SCREENS).forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('active');});
   const t=document.getElementById(SCREENS[key]);if(t)t.classList.add('active');
@@ -1089,6 +1146,7 @@ window.navTo=function(key){
   if(key==='mybets')renderMyBets();
   if(key==='betslip')renderBetslip();
   if(key==='live')renderLiveGames();
+  if(key==='lucky')renderLuckySpin();
 };
 window.openSidebar=function(){document.getElementById('sidebar').classList.add('open');};
 window.closeSidebar=function(){document.getElementById('sidebar').classList.remove('open');};
@@ -2154,7 +2212,7 @@ function renderProfileScreen(){
 
 // ── STORE CONFIG ──
 async function loadStoreConfig(){
-  try{if(unsubStore)unsubStore();unsubStore=onSnapshot(doc(db,'siteConfig','storeSettings'),snap=>{if(!snap.exists())return;const d=snap.data();storeConfig={depositsEnabled:d.depositsEnabled!==false,minDeposit:d.minDeposit??100,maxDeposit:d.maxDeposit??100000,withdrawalsEnabled:d.withdrawalsEnabled!==false,minWithdrawal:d.minWithdrawal??200,maxWithdrawal:d.maxWithdrawal??50000,withdrawLockAmount:d.withdrawLockAmount??500,minBet:d.minBet??50};_applyStoreConfigToUI();});}catch(e){console.warn(e.message);}
+  try{if(unsubStore)unsubStore();unsubStore=onSnapshot(doc(db,'siteConfig','storeSettings'),snap=>{if(!snap.exists())return;const d=snap.data();storeConfig={depositsEnabled:d.depositsEnabled!==false,minDeposit:d.minDeposit??100,maxDeposit:d.maxDeposit??100000,withdrawalsEnabled:d.withdrawalsEnabled!==false,minWithdrawal:d.minWithdrawal??200,maxWithdrawal:d.maxWithdrawal??50000,withdrawLockAmount:d.withdrawLockAmount??500,minBet:d.minBet??50};const L=d.luckySpin||{};luckySpinConfig={enabled:L.enabled!==false,stakeOptions:Array.isArray(L.stakeOptions)&&L.stakeOptions.length?L.stakeOptions:[50,100,200,500],baseStake:typeof L.baseStake==='number'&&L.baseStake>0?L.baseStake:50,segments:Array.isArray(L.segments)&&L.segments.length?L.segments:[0,10,20,50,100,200,500,1000,1500],winRate:typeof L.winRate==='number'?L.winRate:0.25,bigWinRate:typeof L.bigWinRate==='number'?L.bigWinRate:0.05,bigWinThreshold:typeof L.bigWinThreshold==='number'?L.bigWinThreshold:500,newUserWinRate:typeof L.newUserWinRate==='number'?L.newUserWinRate:0.45,newUserSpins:typeof L.newUserSpins==='number'?L.newUserSpins:3,newUserMaxPrize:typeof L.newUserMaxPrize==='number'?L.newUserMaxPrize:100};renderLuckySpin();_applyStoreConfigToUI();});}catch(e){console.warn(e.message);}
 }
 function _applyStoreConfigToUI(){
   const mwn=document.getElementById('minWdNote');if(mwn)mwn.textContent='Minimum withdrawal: KES '+storeConfig.minWithdrawal.toLocaleString();
@@ -2342,6 +2400,8 @@ onAuthStateChanged(auth,async user=>{
   ensureRoundRunning();
   // Restore any picks transferred from index.html (placed on this page)
   restorePendingPicks();
+  // Promo cards: Lucky Spin right after login, Aviator a few minutes later (once per session)
+  scheduleSessionAds();
 });
 
 async function loadUserData(){
@@ -2497,7 +2557,7 @@ function updateBalDisplay(){
   if(csym) csym.textContent=activeCurrency?activeCurrency.code:'KES';
 
   // Withdrawal / wallet panels — show converted
-  ['wdBalDisplay','wdScreenBal','walletBal','slipBalDisplay'].forEach(id=>{
+  ['wdBalDisplay','wdScreenBal','walletBal','slipBalDisplay','spinBalDisplay'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el) return;
     el.textContent = (activeCurrency&&activeCurrency.code!=='KES')
@@ -2615,7 +2675,7 @@ async function addTransaction(tx){
   const now=new Date();tx.time=now.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'})+' '+now.toLocaleDateString('en-KE',{day:'2-digit',month:'short'});tx.uid=USER.uid;
   await updateDoc(doc(db,'users',USER.uid),{transactions:arrayUnion(tx)});
 }
-window.doLogout=async function(){if(unsubUser)unsubUser();if(unsubStore)unsubStore();await signOut(auth);window.location.replace('index.html');};
+window.doLogout=async function(){if(unsubUser)unsubUser();if(unsubStore)unsubStore();try{sessionStorage.removeItem('scAdsShown_'+USER.uid);}catch(e){}await signOut(auth);window.location.replace('index.html');};
 
 // ══════════════════════════════════════════════
 // DEPOSIT WIZARD — Country → Method → Payment
@@ -2899,7 +2959,7 @@ window.closeWallet=function(){document.getElementById('walletScreen').classList.
 function renderTxList(txs){
   const list=document.getElementById('txList'),empty=document.getElementById('txEmpty');document.getElementById('txCount').textContent=txs.length;
   if(!txs.length){list.innerHTML='';empty.classList.remove('hidden');return;}empty.classList.add('hidden');
-  const icons={deposit:'⬆️',withdraw:'⬇️',win:'🏆',loss:'💔'};const colors={deposit:'text-orange-400',withdraw:'text-emerald-400',win:'text-yellow-400',loss:'text-red-400'};
+  const icons={deposit:'⬆️',withdraw:'⬇️',win:'🏆',loss:'💔',spin:'🎰'};const colors={deposit:'text-orange-400',withdraw:'text-emerald-400',win:'text-yellow-400',loss:'text-red-400',spin:'text-purple-400'};
   list.innerHTML=[...txs].reverse().slice(0,30).map(tx=>`<div class="flex items-center gap-3 bg-[#1a2b3d] rounded-2xl px-4 py-3 border border-white/5"><div class="w-9 h-9 rounded-2xl bg-white/5 flex items-center justify-center text-base flex-shrink-0">${icons[tx.type]||'💳'}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm capitalize">${tx.type}</div><div class="text-white/35 text-xs truncate">${tx.note||tx.method||''} · ${tx.time||''}</div></div><div class="text-right flex-shrink-0"><div class="font-black font-mono text-sm ${colors[tx.type]||'text-white'}">${tx.type==='withdraw'||tx.type==='loss'?'-':'+'}KES ${Number(tx.amount).toLocaleString()}</div><div class="text-xs mt-0.5"><span class="px-2 py-0.5 rounded-full font-bold ${tx.status==='success'?'status-success':'status-pending'}">${(tx.status||'pending').toUpperCase()}</span></div></div></div>`).join('');
 }
 
@@ -3137,6 +3197,219 @@ window.switchTab=function(n){document.getElementById('stakePanel').style.display
 window.switchLiveTab=function(n){document.getElementById('liveBetsPanel').style.display=n===0?'block':'none';document.getElementById('withdrawPanel').style.display=n===1?'block':'none';document.getElementById('chatPanel').style.display=n===2?'block':'none';['ltab0','ltab1','ltab2'].forEach((id,i)=>{document.getElementById(id).className='flex-1 py-3.5 text-xs font-black transition '+(i===n?'ltab-on':'ltab-off');});if(n===1)renderWithdrawals();if(n===2)renderChat();const ls=document.getElementById('liveSection');if(ls)ls.scrollIntoView({behavior:'smooth',block:'start'});};
 window.runAI=function(){const el=document.getElementById('aiMsg');el.textContent='Analysing last '+crashHist.length+' rounds…';setTimeout(()=>{const avg=crashHist.reduce((s,v)=>s+v,0)/crashHist.length;const sugAt=Math.max(1.3,Math.min(3.5,avg*0.65)).toFixed(2);const sugBet=Math.round(balance*0.03/50)*50||100;el.innerHTML=`<strong>Based on ${crashHist.length} rounds</strong> (avg ${avg.toFixed(2)}x):<br><br>💡 Bet <strong>KES ${sugBet}</strong> with auto cash-out at <strong>${sugAt}x</strong><br><span class="text-xs text-white/35 mt-2 block">Conservative strategy — 65% of average crash point</span>`;},1000);};
 window.toggleSound=function(){soundOn=!soundOn;document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇';showToast(soundOn?'Sound ON 🔊':'Sound OFF 🔇','purple');};
+
+// ══════════════════════════════════════════════
+// LUCKY SPIN — Wheel of fortune
+// ══════════════════════════════════════════════
+let _spinState={stake:50,spinning:false,rotation:0,lastWinIdx:-1};
+
+function luckyPrizeFor(value){
+  if(value<=0)return 0;
+  const c=luckySpinConfig;
+  const base=Math.max(1,c.baseStake||50);
+  return Math.round(value*(_spinState.stake/base));
+}
+
+function drawLuckyWheel(){
+  const cv=document.getElementById('luckyWheel');
+  if(!cv)return;
+  const size=Math.min(cv.clientWidth,cv.clientHeight)||380;
+  const dpr=window.devicePixelRatio||1;
+  cv.width=size*dpr;cv.height=size*dpr;
+  const ctx=cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const cx=size/2,cy=size/2,R=size/2-6;
+  const segs=luckySpinConfig.segments||[];
+  const N=segs.length,segAngle=Math.PI*2/Math.max(1,N);
+  const WHEEL_COLORS=[
+    {bg:'#e11d48',fg:'#ffffff'},
+    {bg:'#f59e0b',fg:'#1f2937'},
+    {bg:'#0ea5e9',fg:'#ffffff'},
+    {bg:'#10b981',fg:'#1f2937'},
+    {bg:'#f97316',fg:'#ffffff'},
+    {bg:'#8b5cf6',fg:'#ffffff'},
+    {bg:'#06b6d4',fg:'#1f2937'},
+    {bg:'#ef4444',fg:'#ffffff'},
+    {bg:'#d946ef',fg:'#ffffff'}
+  ];
+  ctx.clearRect(0,0,size,size);
+  ctx.beginPath();ctx.arc(cx,cy,R+5,0,Math.PI*2);ctx.fillStyle='#0d1a26';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,R+5,0,Math.PI*2);ctx.strokeStyle='#facc15';ctx.lineWidth=2.5;ctx.stroke();
+  for(let i=0;i<N;i++){
+    const a0=_spinState.rotation+i*segAngle;
+    const a1=a0+segAngle;
+    const label=luckyPrizeFor(segs[i]);
+    const boosted=label!==segs[i];
+    const zero=segs[i]===0;
+    const stakeIdx=Math.max(0,(luckySpinConfig.stakeOptions||[]).indexOf(_spinState.stake));
+    const col=zero?{bg:'#7f1d1d',fg:'#fca5a5'}:(WHEEL_COLORS[(i+stakeIdx)%WHEEL_COLORS.length]);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a1);ctx.closePath();
+    ctx.fillStyle=col.bg;
+    ctx.fill();
+    ctx.strokeStyle=boosted?'#facc15':'rgba(0,0,0,0.35)';
+    ctx.lineWidth=boosted?3:1.5;
+    ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(a0+segAngle/2);
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold '+Math.max(12,size*0.034)+'px Arial';
+    ctx.fillStyle=col.fg;
+    ctx.shadowColor='rgba(0,0,0,0.6)';ctx.shadowBlur=3;
+    ctx.fillText(String(label),R*0.62,0);
+    if(boosted){
+      ctx.font='bold '+Math.max(8,size*0.022)+'px Arial';
+      ctx.fillStyle='#facc15';
+      ctx.fillText('★',R*0.3,0);
+    }
+    ctx.restore();
+  }
+  ctx.beginPath();ctx.arc(cx,cy,R*0.18,0,Math.PI*2);ctx.fillStyle='#facc15';ctx.fill();
+  ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#000';ctx.font='bold '+Math.max(11,size*0.06)+'px Arial';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('SPIN',cx,cy);
+}
+
+function renderLuckyStakes(){
+  const wrap=document.getElementById('spinStakeOptions');
+  if(!wrap)return;
+  const opts=luckySpinConfig.stakeOptions||[10,50,100];
+  if(!opts.includes(_spinState.stake))_spinState.stake=opts[Math.min(1,opts.length-1)]||opts[0]||50;
+  wrap.innerHTML=opts.map(s=>{
+    const sel=s===_spinState.stake;
+    return `<button onclick="setSpinStake(${s})" style="flex:1;min-width:58px;padding:10px 6px;border-radius:12px;font-weight:900;font-size:13px;cursor:pointer;border:1.5px solid ${sel?'#facc15':'rgba(255,255,255,0.1)'};background:${sel?'rgba(250,204,21,0.15)':'rgba(255,255,255,0.05)'};color:${sel?'#facc15':'white'};transition:all 0.15s;">${Number(s).toLocaleString()}</button>`;
+  }).join('');
+}
+window.setSpinStake=function(s){_spinState.stake=s;renderLuckyStakes();renderLuckyPrizes();drawLuckyWheel();};
+
+function renderLuckyPrizes(){
+  const table=document.getElementById('spinPrizeTable');
+  const note=document.getElementById('spinBoostNote');
+  const label=document.getElementById('spinStakeLabel');
+  if(!table)return;
+  if(label)label.textContent='Stake KES '+(_spinState.stake||0).toLocaleString();
+  const segs=luckySpinConfig.segments||[];
+  table.innerHTML=segs.map(v=>{
+    const prize=luckyPrizeFor(v);
+    const isZero=v===0;
+    const boosted=prize!==v;
+    return `<div style="background:${isZero?'rgba(239,68,68,0.1)':'rgba(255,255,255,0.05)'};border:1px solid ${isZero?'rgba(239,68,68,0.3)':boosted?'rgba(250,204,21,0.4)':'rgba(255,255,255,0.08)'};border-radius:10px;padding:8px 4px;text-align:center;">
+      <div style="font-size:9px;font-weight:800;color:${isZero?'rgba(248,113,113,0.8)':'rgba(255,255,255,0.4)'};text-transform:uppercase;letter-spacing:0.5px;">${isZero?'Lose':'Win'}</div>
+      <div style="font-weight:900;font-size:14px;font-family:monospace;color:${isZero?'#f87171':boosted?'#facc15':'#34d399'};">${prize.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+  const c=luckySpinConfig;
+  const mult=_spinState.stake/Math.max(1,c.baseStake||50);
+  if(mult!==1){
+    note.style.display='block';
+    note.textContent='💰 Bigger stake = bigger prizes: KES '+Number(_spinState.stake).toLocaleString()+' stake pays x'+mult+' on every segment!';
+  }else note.style.display='none';
+}
+
+function renderLuckySpin(){
+  renderLuckyStakes();
+  renderLuckyPrizes();
+  drawLuckyWheel();
+}
+
+function _weightedPick(items,weights){
+  const total=weights.reduce((s,w)=>s+w,0);
+  let r=Math.random()*total;
+  for(let i=0;i<items.length;i++){r-=weights[i];if(r<=0)return items[i];}
+  return items[items.length-1];
+}
+
+// Rigged outcome: wins are rare (winRate), and when it DOES win the needle lands
+// on ANY positive number at random — never on 0 and never on the middle line.
+// New users win a bit more often but only on smaller prizes.
+function rollLuckyOutcome(stake){
+  const c=luckySpinConfig;
+  const stats=(userData&&userData.stats)||{};
+  const spinsDone=stats.spin_spins||0;
+  const isNew=spinsDone<c.newUserSpins;
+  const winRate=isNew?c.newUserWinRate:c.winRate;
+  const segs=c.segments||[];
+  if(Math.random()<winRate){
+    let pool=segs.map((v,i)=>v>0?i:-1).filter(i=>i>=0);
+    if(!pool.length){return {won:false,index:Math.floor(Math.random()*Math.max(1,segs.length)),value:0,boundary:true};}
+    let idx=pool[Math.floor(Math.random()*pool.length)];
+    if(isNew&&c.newUserMaxPrize>0){
+      const capped=pool.filter(i=>luckyPrizeFor(segs[i])<=c.newUserMaxPrize);
+      if(capped.length)idx=capped[Math.floor(Math.random()*capped.length)];
+    }
+    return {won:true,index:idx,value:segs[idx],boundary:false};
+  }
+  // Loss — the needle lands exactly on the line in the middle of two prices (always a loss)
+  return {won:false,index:Math.floor(Math.random()*Math.max(1,segs.length)),value:0,boundary:true};
+}
+
+function showSpinResult(txt,kind){
+  const el=document.getElementById('spinResultMsg');
+  if(!el)return;
+  el.textContent=txt;
+  el.style.display='block';
+  el.style.background=kind==='won'?'#059669':'#ef4444';
+  el.style.color='white';
+}
+function hideSpinResult(){
+  const el=document.getElementById('spinResultMsg');
+  if(el)el.style.display='none';
+}
+
+window.spinLuckyWheel=function(){
+  const c=luckySpinConfig;
+  if(!c.enabled){showToast('Lucky Spin is temporarily disabled.','red');return;}
+  if(_spinState.spinning)return;
+  const stake=_spinState.stake;
+  if(!stake||stake<=0){showToast('Choose a stake first.','red');return;}
+  if(balance<stake){showToast('Insufficient balance!','red');return;}
+  const btn=document.getElementById('spinBtn');if(btn)btn.disabled=true;
+  _spinState.spinning=true;
+  hideSpinResult();
+  balance-=stake;
+  updateBalDisplay();
+  saveUserField({balance:increment(-stake),'stats.spin_staked':increment(stake),'stats.spin_spins':increment(1)}).catch(()=>{});
+  const outcome=rollLuckyOutcome(stake);
+  const segs=c.segments||[];
+  const N=segs.length,segAngle=Math.PI*2/Math.max(1,N);
+  let target=outcome.boundary
+    ?(-Math.PI/2-(outcome.index+1)*segAngle)
+    :(-Math.PI/2-(outcome.index+0.5)*segAngle);
+  target=((target%(Math.PI*2))+(Math.PI*2))%(Math.PI*2);
+  const cur=((_spinState.rotation%(Math.PI*2))+(Math.PI*2))%(Math.PI*2);
+  let delta=target-cur;
+  while(delta<0)delta+=Math.PI*2;
+  delta+=Math.PI*2*(4+Math.floor(Math.random()*2));
+  const start=_spinState.rotation,total=delta,dur=5200,t0=performance.now();
+  function frame(t){
+    const p=Math.min(1,(t-t0)/dur);
+    const eased=1-Math.pow(1-p,5);
+    _spinState.rotation=start+total*eased;
+    drawLuckyWheel();
+    if(p<1)requestAnimationFrame(frame);
+    else completeSpin(outcome,stake);
+  }
+  requestAnimationFrame(frame);
+};
+
+function completeSpin(outcome,stake){
+  _spinState.spinning=false;
+  const btn=document.getElementById('spinBtn');if(btn)btn.disabled=false;
+  if(outcome.won){
+    const prize=luckyPrizeFor(outcome.value);
+    balance+=prize;
+    saveUserField({balance:increment(prize),'stats.won':increment(prize)}).catch(()=>{});
+    addTransaction({type:'win',amount:prize,method:'Lucky Spin',status:'success',note:'Lucky Spin win (stake KES '+stake+')'}).catch(()=>{});
+    updateBalDisplay();
+    showSpinResult('+KES '+Number(prize).toLocaleString(),'won');
+    showToast('🎰 You won +KES '+Number(prize).toLocaleString()+'!','emerald');
+  }else{
+    addTransaction({type:'loss',amount:stake,method:'Lucky Spin',status:'failed',note:'Lucky Spin loss'}).catch(()=>{});
+    updateBalDisplay();
+    showSpinResult('LOST -KES '+Number(stake).toLocaleString(),'lost');
+    showToast('😔 Better luck next spin!','red');
+  }
+}
+
 function showToast(text,color){const cols={emerald:'#059669',red:'#ef4444',purple:'#eab308'};const t=document.createElement('div');t.style.cssText=`position:fixed;bottom:82px;left:50%;transform:translateX(-50%);background:${cols[color]||cols.purple};color:white;padding:11px 20px;border-radius:9999px;box-shadow:0 6px 20px rgba(0,0,0,0.4);white-space:nowrap;z-index:9999;font-size:13px;font-weight:700;pointer-events:none;transition:opacity 0.3s;`;t.textContent=text;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2800);}
 window.showToast=showToast;
 
@@ -3151,6 +3424,68 @@ function initApp(){
   const io=document.getElementById('idleOverlay');if(io)io.style.display='flex';
 }
 window.addEventListener('resize',resizeCvs);
+
+// ══════════════════════════════════════════════
+// PRODUCT ADS (once per login / signup)
+// ══════════════════════════════════════════════
+const AD_AVIATOR_DELAY_MS=50000;
+function scheduleSessionAds(){
+  try{sessionStorage.removeItem('scAdsShown_'+USER.uid);}catch(e){}
+  setTimeout(()=>{
+    if(luckySpinConfig.enabled){
+      showProductAd({
+        key:'lucky',
+        icon:'🎰',
+        title:'Play Lucky Spin!',
+        desc:'Spin the wheel and win up to huge prizes — boosted rewards every stake!',
+        btn:'🎰 Play Lucky Spin',
+        nav:'lucky'
+      });
+    }
+  },2500);
+  setTimeout(()=>{
+    showProductAd({
+      key:'aviator',
+      icon:'✈️',
+      title:'Play Aviator!',
+      desc:'Cash out before the plane flies away. Double your money in seconds!',
+      btn:'✈️ Play Aviator',
+      nav:'aviator'
+    });
+  },AD_AVIATOR_DELAY_MS);
+}
+function showProductAd(ad){
+  const m=document.getElementById('adModal');
+  if(!m)return;
+  if(m.dataset.key===ad.key)return;
+  m.dataset.key=ad.key;
+  document.getElementById('adIcon').textContent=ad.icon;
+  document.getElementById('adTitle').textContent=ad.title;
+  document.getElementById('adDesc').textContent=ad.desc;
+  const btn=document.getElementById('adBtn');
+  btn.textContent=ad.btn;
+  btn.onclick=()=>{closeProductAd();navTo(ad.nav);};
+  m.style.display='flex';
+}
+function closeProductAd(){
+  const m=document.getElementById('adModal');
+  if(m)m.style.display='none';
+}
+window.closeProductAd=closeProductAd;
 </script>
+<!-- PRODUCT AD MODAL -->
+<div id="adModal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.74);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#1a2b3d;border-radius:24px;max-width:320px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6);position:relative;animation:scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);border:1px solid rgba(255,255,255,0.08);">
+    <button onclick="closeProductAd()" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:white;font-size:15px;cursor:pointer;z-index:2;line-height:1;">✕</button>
+    <div style="background:linear-gradient(135deg,rgba(250,204,21,0.22),rgba(0,0,0,0.3));padding:28px 20px 10px;text-align:center;">
+      <div id="adIcon" style="font-size:54px;line-height:1;filter:drop-shadow(0 6px 14px rgba(250,204,21,0.35));"></div>
+    </div>
+    <div style="padding:14px 20px 22px;text-align:center;">
+      <div id="adTitle" style="font-weight:900;font-size:19px;color:white;margin-bottom:6px;"></div>
+      <div id="adDesc" style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;margin-bottom:18px;"></div>
+      <button id="adBtn" style="width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#facc15,#eab308);color:#000;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 6px 18px rgba(234,179,8,0.4);"></button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

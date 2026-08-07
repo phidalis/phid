@@ -1497,6 +1497,77 @@
         </div>
       </div>
 
+      <div class="section-title">🎰 Lucky Spin Settings</div>
+      <div class="card">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Lucky Spin Enabled</div>
+            <div class="toggle-sub">Allow players to play the spin wheel</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="luckySpinEnabled" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
+          <div>
+            <div class="field-label">Win Rate (%)</div>
+            <input type="number" class="inp" id="luckyWinRate" placeholder="e.g. 25" min="0" max="100">
+          </div>
+          <div>
+            <div class="field-label">Big Win Rate (%)</div>
+            <input type="number" class="inp" id="luckyBigWinRate" placeholder="e.g. 5" min="0" max="100">
+          </div>
+          <div>
+            <div class="field-label">Big Win Threshold (KES)</div>
+            <input type="number" class="inp" id="luckyBigWinThreshold" placeholder="e.g. 500" min="0">
+          </div>
+          <div>
+            <div class="field-label">New User Win Rate (%)</div>
+            <input type="number" class="inp" id="luckyNewUserWinRate" placeholder="e.g. 45" min="0" max="100">
+          </div>
+          <div>
+            <div class="field-label">New User Spin Count</div>
+            <input type="number" class="inp" id="luckyNewUserSpins" placeholder="e.g. 3" min="0">
+          </div>
+          <div>
+            <div class="field-label">New User Max Prize (KES)</div>
+            <input type="number" class="inp" id="luckyNewUserMaxPrize" placeholder="e.g. 100" min="0">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
+          <div>
+            <div class="field-label">Prize Base Stake (KES)</div>
+            <input type="number" class="inp" id="luckyBaseStake" placeholder="e.g. 50" min="1">
+            <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">This stake shows the base prizes below. Higher stakes multiply every prize by (stake ÷ base).</div>
+          </div>
+          <div>
+            <div class="field-label">Stake Options (comma separated)</div>
+            <input type="text" class="inp" id="luckyStakeOptions" placeholder="50, 100, 200, 500">
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <div class="field-label">Prize Segments (comma separated)</div>
+          <input type="text" class="inp" id="luckySegments" placeholder="0, 10, 20, 50, 100, 200, 500, 1000, 1500">
+          <div style="font-size:10px;color:var(--text-dim);margin-top:6px;line-height:1.5;">
+            A segment of <strong>0</strong> means LOSE. On a loss the needle lands exactly on the line in the middle of two prizes.
+          </div>
+        </div>
+
+        <div style="margin-top:14px;background:rgba(168,85,247,0.07);border:1.5px solid rgba(168,85,247,0.3);border-radius:14px;padding:14px;">
+          <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:6px;">🎯 How the rig works</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.7;">
+            <strong style="color:#c084fc;">Win Rate</strong> = how often any spin wins (0% = never, 100% = always).<br>
+            <strong style="color:#c084fc;">Big Win Rate</strong> = chance (among wins) of hitting a prize at or above the threshold — keep this low so jackpots are rare.<br>
+            <strong style="color:#c084fc;">New User</strong> settings give fresh accounts a slightly better win rate but cap their prizes to small amounts.<br>
+            Small prizes are always weighted to hit much more often than big ones. Changes apply to players in real-time.
+          </div>
+        </div>
+      </div>
+
       <div style="margin-top:6px;">
         <button class="save-btn full" id="saveStoreBtn" onclick="saveStoreSettings()">
           💾 Save All Store Settings
@@ -2412,6 +2483,19 @@ async function loadStoreSettings() {
     document.getElementById('storeBettingWindow').value  = d.bettingWindowSecs ?? 7;
     document.getElementById('storeMinBet').value         = d.minBet ?? 50;
 
+    // Lucky Spin
+    const L = d.luckySpin || {};
+    document.getElementById('luckySpinEnabled').checked  = L.enabled !== false;
+    document.getElementById('luckyWinRate').value        = (L.winRate ?? 0.25) * 100;
+    document.getElementById('luckyBigWinRate').value     = (L.bigWinRate ?? 0.05) * 100;
+    document.getElementById('luckyBigWinThreshold').value = L.bigWinThreshold ?? 500;
+    document.getElementById('luckyNewUserWinRate').value = (L.newUserWinRate ?? 0.45) * 100;
+    document.getElementById('luckyNewUserSpins').value   = L.newUserSpins ?? 3;
+    document.getElementById('luckyNewUserMaxPrize').value = L.newUserMaxPrize ?? 100;
+    document.getElementById('luckyStakeOptions').value   = (L.stakeOptions || [50,100,200,500]).join(', ');
+    document.getElementById('luckyBaseStake').value      = L.baseStake ?? 50;
+    document.getElementById('luckySegments').value       = (L.segments || [0,10,20,50,100,200,500,1000,1500]).join(', ');
+
     const statusEl = document.getElementById('storeSettingsStatus');
     if (snap.exists()) {
       statusEl.style.display = 'flex';
@@ -2435,6 +2519,26 @@ window.saveStoreSettings = async function() {
   const lockAmt = parseFloat(document.getElementById('storeWithdrawLockAmount').value)  ?? 200;
   const bWindow = parseInt(document.getElementById('storeBettingWindow').value)         || 7;
   const minBet  = parseFloat(document.getElementById('storeMinBet').value)              || 50;
+
+  // Lucky Spin parsing
+  const luckyWinRate       = (parseFloat(document.getElementById('luckyWinRate').value) ?? 25) / 100;
+  const luckyBigWinRate    = (parseFloat(document.getElementById('luckyBigWinRate').value) ?? 5) / 100;
+  const luckyNewUserWinRate= (parseFloat(document.getElementById('luckyNewUserWinRate').value) ?? 45) / 100;
+  let luckyStakeOptions = (document.getElementById('luckyStakeOptions').value || '')
+    .split(',')
+    .map(s => parseFloat(s.trim()))
+    .filter(v => !isNaN(v) && v > 0);
+  let luckySegments = (document.getElementById('luckySegments').value || '')
+    .split(',')
+    .map(s => parseFloat(s.trim()))
+    .filter(v => !isNaN(v) && v >= 0);
+  const luckyBaseStake = parseFloat(document.getElementById('luckyBaseStake').value) || 50;
+  if (luckyBaseStake <= 0) {
+    toast('❌ Prize base stake must be greater than 0', 'warn');
+    btn.disabled = false; btn.textContent = '💾 Save All Store Settings'; return;
+  }
+  if (!luckyStakeOptions.length) luckyStakeOptions = [50,100,200,500];
+  if (!luckySegments.length) luckySegments = [0,10,20,50,100,200,500,1000,1500];
 
   if (minDep >= maxDep) {
     toast('❌ Min deposit must be less than max deposit', 'warn');
@@ -2464,6 +2568,18 @@ window.saveStoreSettings = async function() {
     autoAdvance:         document.getElementById('storeAutoAdvance').checked,
     bettingWindowSecs:   bWindow,
     minBet:              minBet,
+    luckySpin: {
+      enabled:           document.getElementById('luckySpinEnabled').checked,
+      winRate:           luckyWinRate,
+      bigWinRate:        luckyBigWinRate,
+      bigWinThreshold:   parseFloat(document.getElementById('luckyBigWinThreshold').value) || 500,
+      newUserWinRate:    luckyNewUserWinRate,
+      newUserSpins:      parseInt(document.getElementById('luckyNewUserSpins').value) || 3,
+      newUserMaxPrize:   parseFloat(document.getElementById('luckyNewUserMaxPrize').value) || 100,
+      stakeOptions:      luckyStakeOptions,
+      baseStake:         luckyBaseStake,
+      segments:          luckySegments,
+    },
     updatedAt:           serverTimestamp(),
     updatedBy:           currentAdminUid,
   };
