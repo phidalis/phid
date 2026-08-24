@@ -1005,6 +1005,9 @@ const fbApp = initializeApp(FIREBASE_CONFIG);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 
+// Render backend (same server used for M-Pesa deposits)
+const BACKEND_URL = 'https://sportybet-jjiu.onrender.com';
+
 // ════════════════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════════════════
@@ -1878,20 +1881,11 @@ window.doSignup = async function() {
   // Flag: tell onAuthStateChanged not to redirect — doSignup() will do it after Firestore write
   window._signingUp = true;
   try {
-    // ── Resolve referral code (optional) ──
-    let referrer = null;
-    if (refCodeInput) {
-      try {
-        const rq = await getDocs(query(collection(db,'users'), where('referralCode','==',refCodeInput)));
-        if (!rq.empty) referrer = { id: rq.docs[0].id, ...rq.docs[0].data() };
-      } catch(e) { console.warn('Referral lookup failed:', e.message); }
-    }
+    // NOTE: no client-side referrer lookup here — reading other users' docs
+    // is blocked by Firestore security rules. The backend validates the code
+    // and credits both users via the Admin SDK.
     const email = phone.replace(/\+/,'') + '@sportybet.site';
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    // Referral rewards: KES 20 to the new user (welcome bonus), KES 20 to the referrer
-    const REF_BONUS = 20;
-    let startBalance = 0;
-    if (referrer && referrer.id !== cred.user.uid) startBalance = REF_BONUS;
     // Generate this user's own referral code
     const myRefCode = genReferralCode();
     // Wait for Firestore doc to be fully written BEFORE redirecting
@@ -1904,30 +1898,27 @@ window.doSignup = async function() {
       dialCode: selectedCountry.dial,
       currency: selectedCountry.code === 'US' || selectedCountry.code === 'AU' || selectedCountry.code === 'CA' ? 'USD' : 'KES',
       email,
-      balance: startBalance,
+      balance: 0,                     // referral bonus credited by backend
       referralCode: myRefCode,        // this user's shareable code
-      referredBy: referrer ? refCodeInput : null,
+      referredBy: refCodeInput || null,
       createdAt: serverTimestamp(),
     });
-    // Credit the referrer & log the referral
-    if (referrer && referrer.id !== cred.user.uid) {
+    // ── Credit referrer + new user KES 20 each — SERVER-SIDE (Admin SDK) ──
+    // Client-side cross-user reads/writes are blocked by Firestore security
+    // rules, so the backend validates the code and performs both credits.
+    if (refCodeInput) {
       try {
-        await updateDoc(doc(db,'users',referrer.id), {
-          balance: increment(REF_BONUS),
-          referralCount: increment(1),
-          referralEarned: increment(REF_BONUS),
+        const rRes = await fetch(BACKEND_URL + '/api/referral', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: refCodeInput, newUserId: cred.user.uid, newName: name, newPhone: phone }),
         });
-        await addDoc(collection(db,'referrals'), {
-          referrerUid:   referrer.id,
-          referrerName:  referrer.name || '',
-          referrerCode:  refCodeInput,
-          referredUid:   cred.user.uid,
-          referredName:  name,
-          referredPhone: phone,
-          bonus:         REF_BONUS,
-          createdAt:     serverTimestamp(),
-        });
-      } catch(e) { console.error('Referral credit failed:', e.message); }
+        const rData = await rRes.json().catch(() => ({}));
+        console.log('[Referral] Backend response:', rRes.status, rData);
+        if (!rRes.ok || rData.success === false) {
+          console.warn('[Referral] Not credited:', rData.error || 'unknown error');
+        }
+      } catch(e) { console.error('Referral credit request failed:', e.message); }
     }
     sessionStorage.removeItem('refCode');
     // Doc confirmed written — safe to redirect now

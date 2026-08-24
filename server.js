@@ -463,6 +463,108 @@ app.post('/api/callback', async (req, res) => {
 app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'aviator.html')));
 app.get('/',     (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
+// ── POST /api/referral — credit referrer + new user KES 20 each ───────────
+// Runs with Admin SDK so Firestore security rules cannot block cross-user writes.
+const REFERRAL_BONUS = 20;
+
+app.post('/api/referral', async (req, res) => {
+  if (!db) return res.status(500).json({ success: false, error: 'Firebase not initialized' });
+
+  const { code, newUserId, newName, newPhone } = req.body || {};
+  if (!code || !newUserId) {
+    return res.status(400).json({ success: false, error: 'code and newUserId are required' });
+  }
+  const norm = String(code).trim().toUpperCase();
+
+  try {
+    // Deterministic referral doc ID (= newUserId) makes this idempotent —
+    // retries can never double-credit anyone.
+    const referralRef = db.collection('referrals').doc(newUserId);
+    const existing    = await referralRef.get();
+    if (existing.exists) {
+      return res.json({ success: true, message: 'Referral already processed' });
+    }
+
+    // Look up the referrer by their shareable code
+    const rq = await db.collection('users')
+      .where('referralCode', '==', norm)
+      .limit(1)
+      .get();
+
+    if (rq.empty) {
+      console.warn('[Referral] No user owns code:', norm);
+      return res.status(404).json({ success: false, error: 'Invalid referral code' });
+    }
+    const referrerRef  = rq.docs[0].ref;
+    const referrerData = rq.docs[0].data();
+
+    if (referrerRef.id === newUserId) {
+      return res.status(400).json({ success: false, error: 'Cannot refer yourself' });
+    }
+
+    const now     = new Date();
+    const timeStr = now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
+                  + ' ' + now.toLocaleDateString('en-KE', { day: '2-digit', month: 'short' });
+
+    await db.runTransaction(async tx => {
+      // Re-check inside the transaction (race safety)
+      const dup = await tx.get(referralRef);
+      if (dup.exists) return;
+
+      tx.update(referrerRef, {
+        balance:        admin.firestore.FieldValue.increment(REFERRAL_BONUS),
+        referralCount:  admin.firestore.FieldValue.increment(1),
+        referralEarned: admin.firestore.FieldValue.increment(REFERRAL_BONUS),
+      });
+      // Welcome bonus for the newly referred player
+      tx.update(db.collection('users').doc(newUserId), {
+        balance:    admin.firestore.FieldValue.increment(REFERRAL_BONUS),
+        referredBy: norm,
+      });
+      tx.set(referralRef, {
+        referrerUid:   referrerRef.id,
+        referrerName:  referrerData.name || '',
+        referrerCode:  norm,
+        referredUid:   newUserId,
+        referredName:  newName || '',
+        referredPhone: newPhone || '',
+        bonus:         REFERRAL_BONUS,
+        status:        'credited',
+        createdAt:     admin.firestore.FieldValue.serverTimestamp(),
+        displayTime:   timeStr,
+      });
+    });
+
+    console.log('[Referral] Credited KES', REFERRAL_BONUS,
+      '| referrer:', referrerRef.id, '| new user:', newUserId, '| code:', norm);
+    return res.json({ success: true, bonus: REFERRAL_BONUS });
+
+  } catch (e) {
+    console.error('[Referral] FAILED:', e.message);
+    return res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// ── GET /api/referral/check?uid= — how many people a user has referred ────
+app.get('/api/referral/check', async (req, res) => {
+  if (!db) return res.status(500).json({ success: false, error: 'Firebase not initialized' });
+  const { uid } = req.query;
+  if (!uid) return res.status(400).json({ success: false, error: 'uid is required' });
+  try {
+    const snap = await db.collection('users').doc(uid).get();
+    if (!snap.exists) return res.status(404).json({ success: false, error: 'User not found' });
+    const d = snap.data();
+    return res.json({
+      success: true,
+      referralCount: d.referralCount || 0,
+      referralEarned: d.referralEarned || 0,
+      referralCode: d.referralCode || null,
+    });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log('[Server] Running on port', PORT);
   console.log('[Server] PayHero:', PAYHERO_AUTH_TOKEN ? 'Configured' : 'MISSING AUTH TOKEN');
