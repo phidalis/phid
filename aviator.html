@@ -975,7 +975,7 @@ const FIREBASE_CONFIG={apiKey:"AIzaSyBfGx3mLuZ85b_JkRUJXwloLJXNT3uyn7M",authDoma
 const BACKEND_URL="https://sportybet-jjiu.onrender.com";
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import{getAuth,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,increment,serverTimestamp,onSnapshot,collection,addDoc,getDocs,query,where,orderBy}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,increment,serverTimestamp,onSnapshot,collection,addDoc,getDocs,query,where,orderBy,runTransaction}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const app=initializeApp(FIREBASE_CONFIG);const auth=getAuth(app);const db=getFirestore(app);
 let USER=null,userData=null,balance=0,crashHist=[2.30,2.28,1.74,2.29,28.70,1.05,4.10,93.31],unsubUser=null;
 let storeConfig={depositsEnabled:true,minDeposit:100,maxDeposit:100000,withdrawalsEnabled:true,minWithdrawal:200,maxWithdrawal:50000,withdrawLockAmount:500,minBet:50};
@@ -2292,36 +2292,62 @@ function buildReferralLink(){return 'https://www.sportycash.site/index.html?ref=
 // ── Referral listener: live count + auto-claim KES 20 per referred signup ──
 let unsubReferrals=null;
 let myReferralRecords=[];
+const claimedRefIds=new Set();   // in-flight / done guard — stops double-claims
 
 function startReferralListener(){
   if(unsubReferrals)unsubReferrals();
   if(!USER)return;
   const q=query(collection(db,'referrals'),where('referrerUid','==',USER.uid));
-  unsubReferrals=onSnapshot(q,async snap=>{
+  unsubReferrals=onSnapshot(q,snap=>{
     myReferralRecords=snap.docs.map(d=>({id:d.id,...d.data()}));
-    // Live count — always accurate, straight from the referral records
-    const rc=document.getElementById('refCount');
-    if(rc)rc.textContent=myReferralRecords.length;
-    const earnedEl=document.getElementById('refEarnedVal');
-    if(earnedEl)earnedEl.textContent='KES '+(myReferralRecords.filter(r=>r.creditedAt).length*20).toLocaleString();
-    const rer=document.getElementById('refEarnedRow');
-    if(rer)rer.style.display=myReferralRecords.length>0?'block':'none';
-    // Claim any bonuses not yet credited (writes ONLY to own doc — never blocked)
-    const pending=myReferralRecords.filter(r=>!r.creditedAt);
-    let claimed=0;
-    for(const r of pending){
-      try{
-        await updateDoc(doc(db,'users',USER.uid),{
-          balance:increment(20),
-          referralCount:increment(1),
-          referralEarned:increment(20),
-        });
-        await updateDoc(doc(db,'referrals',r.id),{creditedAt:serverTimestamp(),status:'credited'});
-        claimed++;
-      }catch(e){console.warn('referral claim failed:',e.message);break;}
-    }
-    if(claimed>0)showToast(`🎁 KES ${claimed*20} referral bonus added!`,'purple');
+    renderReferralStats();
+    processPendingReferralClaims();
   },err=>console.warn('referrals listener:',err.message));
+}
+
+function renderReferralStats(){
+  const creditedN=myReferralRecords.filter(r=>r.creditedAt||claimedRefIds.has(r.id)).length;
+  const rc=document.getElementById('refCount');
+  if(rc)rc.textContent=myReferralRecords.length;
+  const earnedEl=document.getElementById('refEarnedVal');
+  if(earnedEl)earnedEl.textContent='KES '+(creditedN*20).toLocaleString();
+  const rer=document.getElementById('refEarnedRow');
+  if(rer)rer.style.display=myReferralRecords.length>0?'block':'none';
+}
+
+// Atomically claim one referral: the transaction re-reads creditedAt inside
+// Firestore, so even overlapping runs can only ever credit ONCE.
+async function claimReferralOnce(refId){
+  try{
+    await runTransaction(db,async tx=>{
+      const rec=await tx.get(doc(db,'referrals',refId));
+      if(!rec.exists()||rec.data().creditedAt)return;
+      const u=await tx.get(doc(db,'users',USER.uid));
+      const d=u.exists?(u.data()||{}):{};
+      tx.update(doc(db,'users',USER.uid),{
+        balance:(d.balance||0)+20,
+        referralCount:(d.referralCount||0)+1,
+        referralEarned:(d.referralEarned||0)+20,
+      });
+      tx.update(doc(db,'referrals',refId),{creditedAt:serverTimestamp(),status:'credited'});
+    });
+    return true;
+  }catch(e){console.warn('referral claim failed:',e.message);return false;}
+}
+
+async function processPendingReferralClaims(){
+  const pending=myReferralRecords.filter(r=>!r.creditedAt&&!claimedRefIds.has(r.id));
+  let claimed=0;
+  for(const r of pending){
+    claimedRefIds.add(r.id);            // reserve immediately
+    const ok=await claimReferralOnce(r.id);
+    if(ok){claimed++;}
+    else{claimedRefIds.delete(r.id);}   // failed — allow a later retry
+  }
+  if(claimed>0){
+    showToast(`🎁 KES ${claimed*20} referral bonus added!`,'purple');
+    renderReferralStats();
+  }
 }
 async function _copyToClipboard(text){
   try{await navigator.clipboard.writeText(text);return true;}
