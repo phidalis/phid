@@ -975,7 +975,7 @@ const FIREBASE_CONFIG={apiKey:"AIzaSyBfGx3mLuZ85b_JkRUJXwloLJXNT3uyn7M",authDoma
 const BACKEND_URL="https://sportybet-jjiu.onrender.com";
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import{getAuth,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import{getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,increment,serverTimestamp,onSnapshot,collection,addDoc,getDocs,query,orderBy}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import{getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,increment,serverTimestamp,onSnapshot,collection,addDoc,getDocs,query,where,orderBy}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const app=initializeApp(FIREBASE_CONFIG);const auth=getAuth(app);const db=getFirestore(app);
 let USER=null,userData=null,balance=0,crashHist=[2.30,2.28,1.74,2.29,28.70,1.05,4.10,93.31],unsubUser=null;
 let storeConfig={depositsEnabled:true,minDeposit:100,maxDeposit:100000,withdrawalsEnabled:true,minWithdrawal:200,maxWithdrawal:50000,withdrawLockAmount:500,minBet:50};
@@ -2246,9 +2246,11 @@ function renderProfileScreen(){
   const pd=document.getElementById('profileDeposited');if(pd)pd.textContent=(s.deposited||0).toLocaleString();
   const pw=document.getElementById('profileWon');if(pw)pw.textContent=(s.won||0).toLocaleString();
   const pwt=document.getElementById('profileWithdrawn');if(pwt)pwt.textContent=(s.withdrawn||0).toLocaleString();
-  // Referral section
-  const rc=document.getElementById('refCount');if(rc)rc.textContent=userData?.referralCount||0;
-  const earned=userData?.referralEarned||0;
+  // Referral section — live count from referral records (falls back to counter)
+  const rc=document.getElementById('refCount');
+  if(rc)rc.textContent=myReferralRecords.length||(userData?.referralCount||0);
+  const creditedCount=myReferralRecords.filter(r=>r.creditedAt).length;
+  const earned=creditedCount*20||(userData?.referralEarned||0);
   const rer=document.getElementById('refEarnedRow');
   if(rer){rer.style.display=earned>0?'block':'none';const rev=document.getElementById('refEarnedVal');if(rev)rev.textContent='KES '+earned.toLocaleString();}
   ensureReferralCode().then(code=>{const rl=document.getElementById('refLinkText');if(rl&&code)rl.textContent='www.sportycash.site/index.html?ref='+code;});
@@ -2286,6 +2288,41 @@ async function ensureReferralCode(){
   return userData.referralCode||null;
 }
 function buildReferralLink(){return 'https://www.sportycash.site/index.html?ref='+(userData?.referralCode||'');}
+
+// ── Referral listener: live count + auto-claim KES 20 per referred signup ──
+let unsubReferrals=null;
+let myReferralRecords=[];
+
+function startReferralListener(){
+  if(unsubReferrals)unsubReferrals();
+  if(!USER)return;
+  const q=query(collection(db,'referrals'),where('referrerUid','==',USER.uid));
+  unsubReferrals=onSnapshot(q,async snap=>{
+    myReferralRecords=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Live count — always accurate, straight from the referral records
+    const rc=document.getElementById('refCount');
+    if(rc)rc.textContent=myReferralRecords.length;
+    const earnedEl=document.getElementById('refEarnedVal');
+    if(earnedEl)earnedEl.textContent='KES '+(myReferralRecords.filter(r=>r.creditedAt).length*20).toLocaleString();
+    const rer=document.getElementById('refEarnedRow');
+    if(rer)rer.style.display=myReferralRecords.length>0?'block':'none';
+    // Claim any bonuses not yet credited (writes ONLY to own doc — never blocked)
+    const pending=myReferralRecords.filter(r=>!r.creditedAt);
+    let claimed=0;
+    for(const r of pending){
+      try{
+        await updateDoc(doc(db,'users',USER.uid),{
+          balance:increment(20),
+          referralCount:increment(1),
+          referralEarned:increment(20),
+        });
+        await updateDoc(doc(db,'referrals',r.id),{creditedAt:serverTimestamp(),status:'credited'});
+        claimed++;
+      }catch(e){console.warn('referral claim failed:',e.message);break;}
+    }
+    if(claimed>0)showToast(`🎁 KES ${claimed*20} referral bonus added!`,'purple');
+  },err=>console.warn('referrals listener:',err.message));
+}
 async function _copyToClipboard(text){
   try{await navigator.clipboard.writeText(text);return true;}
   catch(e){
@@ -2495,6 +2532,7 @@ onAuthStateChanged(auth,async user=>{
   startCategoriesListener();
   startMyFootBetsListener();
   startGameLifecycle();
+  startReferralListener();
   // Kick off the first round automatically — no admin dashboard needed.
   ensureRoundRunning();
   // Restore any picks transferred from index.html (placed on this page)

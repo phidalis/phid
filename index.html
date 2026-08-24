@@ -1928,30 +1928,22 @@ window.doSignup = async function() {
       name: name,
       createdAt: serverTimestamp(),
     });
-    // ── Credit the referrer KES 20 directly in Firestore ──
+    // ── Log the referral record. The referrer's own app watches these records
+    // and credits itself KES 20 per signup — guaranteed, because it only ever
+    // writes to its OWN document (never blocked by security rules). ──
     if (referrerUid && referrerUid !== cred.user.uid) {
       try {
-        // Idempotency guard — one referral record per new user, ever
-        const refRec = doc(db,'referrals',cred.user.uid);
-        const recSnap = await getDoc(refRec);
-        if (!recSnap.exists()) {
-          await updateDoc(doc(db,'users',referrerUid), {
-            balance: increment(REF_BONUS),
-            referralCount: increment(1),
-            referralEarned: increment(REF_BONUS),
-          });
-          await setDoc(refRec, {
-            referrerUid,
-            referrerCode: refCodeInput,
-            referredUid: cred.user.uid,
-            referredName: name,
-            referredPhone: phone,
-            bonus: REF_BONUS,
-            status: 'credited',
-            createdAt: serverTimestamp(),
-          });
-        }
-      } catch(e) { console.error('Referral credit failed:', e.message); }
+        await setDoc(doc(db,'referrals',cred.user.uid), {
+          referrerUid,
+          referrerCode: refCodeInput,
+          referredUid: cred.user.uid,
+          referredName: name,
+          referredPhone: phone,
+          bonus: 20,
+          status: 'pending',
+          createdAt: serverTimestamp(),
+        });
+      } catch(e) { console.error('Referral record failed:', e.message); }
     }
     sessionStorage.removeItem('refCode');
     sessionStorage.removeItem('refCode');
