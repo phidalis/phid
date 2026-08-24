@@ -580,6 +580,29 @@
         <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Won</div><div class="text-xl font-black font-mono text-emerald-400">KES <span id="profileWon">0</span></div></div>
         <div class="stat-card"><div class="text-xs text-white/35 font-bold uppercase tracking-wider mb-1">Total Withdrawn</div><div class="text-xl font-black font-mono text-yellow-400">KES <span id="profileWithdrawn">0</span></div></div>
       </div>
+      <!-- REFER & EARN -->
+      <div class="bg-gradient-to-br from-purple-900/60 to-black border border-purple-500/30 rounded-2xl p-4 mb-5">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🎁</div>
+          <div class="flex-1 min-w-0">
+            <div class="font-black text-sm">Refer &amp; Earn KES 20</div>
+            <div class="text-white/40 text-xs">You get KES 20 per friend · They get KES 20 free</div>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <div class="text-lg font-black text-emerald-400" id="refCount">0</div>
+            <div style="font-size:9px;" class="text-white/35 font-bold uppercase tracking-wider">Friends Joined</div>
+          </div>
+        </div>
+        <div id="refEarnedRow" style="display:none;margin-bottom:10px;" class="bg-black/30 border border-white/10 rounded-xl px-3 py-2">
+          <span class="text-white/40" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">Total Referral Earnings</span>
+          <div class="text-emerald-400 font-black font-mono text-base" id="refEarnedVal">KES 0</div>
+        </div>
+        <div class="flex items-center gap-2 bg-black/40 border border-white/10 rounded-xl px-3 py-2 mb-2">
+          <span class="flex-1 text-xs font-mono text-white/70 truncate" id="refLinkText">Loading your link…</span>
+          <button onclick="copyReferralLink()" class="btn-orange px-3 py-1.5 text-xs font-black rounded-lg flex-shrink-0">📋 COPY</button>
+        </div>
+        <button onclick="shareReferralLink()" class="btn-cash w-full py-2.5 text-xs font-black rounded-xl">📤 SHARE REFERRAL LINK</button>
+      </div>
       <div class="space-y-3 mb-5">
         <div class="profile-menu-item" onclick="openWallet()"><div class="w-10 h-10 bg-orange-500/15 rounded-2xl flex items-center justify-center text-xl">💼</div><div class="flex-1"><div class="font-bold">My Wallet</div><div class="text-white/40 text-xs">Transactions &amp; history</div></div><span class="text-white/30">›</span></div>
         <div class="profile-menu-item" onclick="navTo('mybets')"><div class="w-10 h-10 bg-blue-500/15 rounded-2xl flex items-center justify-center text-xl">📋</div><div class="flex-1"><div class="font-bold">My Bets</div><div class="text-white/40 text-xs">Bet history &amp; results</div></div><span class="text-white/30">›</span></div>
@@ -2223,7 +2246,51 @@ function renderProfileScreen(){
   const pd=document.getElementById('profileDeposited');if(pd)pd.textContent=(s.deposited||0).toLocaleString();
   const pw=document.getElementById('profileWon');if(pw)pw.textContent=(s.won||0).toLocaleString();
   const pwt=document.getElementById('profileWithdrawn');if(pwt)pwt.textContent=(s.withdrawn||0).toLocaleString();
+  // Referral section
+  const rc=document.getElementById('refCount');if(rc)rc.textContent=userData?.referralCount||0;
+  const earned=userData?.referralEarned||0;
+  const rer=document.getElementById('refEarnedRow');
+  if(rer){rer.style.display=earned>0?'block':'none';const rev=document.getElementById('refEarnedVal');if(rev)rev.textContent='KES '+earned.toLocaleString();}
+  ensureReferralCode().then(code=>{const rl=document.getElementById('refLinkText');if(rl&&code)rl.textContent='www.sportycash.site/index.html?ref='+code;});
 }
+
+// ── REFERRAL SYSTEM ──
+function genReferralCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';
+  for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+async function ensureReferralCode(){
+  if(!userData)return null;
+  if(userData.referralCode)return userData.referralCode;
+  const code=genReferralCode();
+  try{await updateDoc(doc(db,'users',USER.uid),{referralCode:code});userData.referralCode=code;}
+  catch(e){console.warn('referralCode save failed:',e.message);}
+  return userData.referralCode||null;
+}
+function buildReferralLink(){return 'https://www.sportycash.site/index.html?ref='+(userData?.referralCode||'');}
+async function _copyToClipboard(text){
+  try{await navigator.clipboard.writeText(text);return true;}
+  catch(e){
+    try{const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0;';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();return true;}
+    catch(e2){return false;}
+  }
+}
+window.copyReferralLink=async function(){
+  await ensureReferralCode();
+  if(!userData?.referralCode){showToast('Could not generate your link. Try again.','red');return;}
+  const ok=await _copyToClipboard(buildReferralLink());
+  showToast(ok?'✅ Referral link copied!':'❌ Copy failed — long-press to copy',ok?'purple':'red');
+};
+window.shareReferralLink=async function(){
+  await ensureReferralCode();
+  if(!userData?.referralCode){showToast('Could not generate your link. Try again.','red');return;}
+  const link=buildReferralLink();
+  const msg=`Join me on SportyCash! 🎉 Sign up with my link and we EACH get KES 20 free: ${link}`;
+  if(navigator.share){try{await navigator.share({title:'SportyCash — Refer & Earn',text:msg,url:link});return;}catch(e){if(e.name==='AbortError')return;}}
+  const ok=await _copyToClipboard(msg);
+  showToast(ok?'✅ Invite message copied — paste it anywhere!':'❌ Copy failed',ok?'purple':'red');
+};
 
 // ── STORE CONFIG ──
 async function loadStoreConfig(){

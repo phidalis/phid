@@ -925,6 +925,10 @@
       <label>Confirm Password</label>
       <input class="inp" id="suPass2" type="password" placeholder="Repeat password">
     </div>
+    <div class="field">
+      <label>Referral Code <span style="opacity:0.5;font-weight:600;">(Optional — KES 20 free for both!)</span></label>
+      <input class="inp" id="suRef" type="text" placeholder="Enter referral code" autocapitalize="characters" style="text-transform:uppercase;">
+    </div>
     <button class="btn-auth" onclick="doSignup()" id="signupBtn">CREATE MY ACCOUNT →</button>
   </div>
 </div>
@@ -1853,6 +1857,7 @@ window.doSignup = async function() {
   const rawPhone = document.getElementById('suPhone').value.trim();
   const pass  = document.getElementById('suPass').value;
   const pass2 = document.getElementById('suPass2').value;
+  const refCodeInput = (document.getElementById('suRef')?.value || '').trim().toUpperCase();
   const err   = document.getElementById('signupErr');
   err.classList.remove('show');
   if (!name || !rawPhone || !pass) { err.textContent='Please fill all fields'; err.classList.add('show'); return; }
@@ -1873,8 +1878,22 @@ window.doSignup = async function() {
   // Flag: tell onAuthStateChanged not to redirect — doSignup() will do it after Firestore write
   window._signingUp = true;
   try {
+    // ── Resolve referral code (optional) ──
+    let referrer = null;
+    if (refCodeInput) {
+      try {
+        const rq = await getDocs(query(collection(db,'users'), where('referralCode','==',refCodeInput)));
+        if (!rq.empty) referrer = { id: rq.docs[0].id, ...rq.docs[0].data() };
+      } catch(e) { console.warn('Referral lookup failed:', e.message); }
+    }
     const email = phone.replace(/\+/,'') + '@sportybet.site';
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    // Referral rewards: KES 20 to the new user (welcome bonus), KES 20 to the referrer
+    const REF_BONUS = 20;
+    let startBalance = 0;
+    if (referrer && referrer.id !== cred.user.uid) startBalance = REF_BONUS;
+    // Generate this user's own referral code
+    const myRefCode = genReferralCode();
     // Wait for Firestore doc to be fully written BEFORE redirecting
     await setDoc(doc(db,'users',cred.user.uid), {
       name,
@@ -1885,9 +1904,32 @@ window.doSignup = async function() {
       dialCode: selectedCountry.dial,
       currency: selectedCountry.code === 'US' || selectedCountry.code === 'AU' || selectedCountry.code === 'CA' ? 'USD' : 'KES',
       email,
-      balance: 0,
+      balance: startBalance,
+      referralCode: myRefCode,        // this user's shareable code
+      referredBy: referrer ? refCodeInput : null,
       createdAt: serverTimestamp(),
     });
+    // Credit the referrer & log the referral
+    if (referrer && referrer.id !== cred.user.uid) {
+      try {
+        await updateDoc(doc(db,'users',referrer.id), {
+          balance: increment(REF_BONUS),
+          referralCount: increment(1),
+          referralEarned: increment(REF_BONUS),
+        });
+        await addDoc(collection(db,'referrals'), {
+          referrerUid:   referrer.id,
+          referrerName:  referrer.name || '',
+          referrerCode:  refCodeInput,
+          referredUid:   cred.user.uid,
+          referredName:  name,
+          referredPhone: phone,
+          bonus:         REF_BONUS,
+          createdAt:     serverTimestamp(),
+        });
+      } catch(e) { console.error('Referral credit failed:', e.message); }
+    }
+    sessionStorage.removeItem('refCode');
     // Doc confirmed written — safe to redirect now
     persistPendingFbPicks();
     window.location.href = 'aviator.html';
@@ -1899,6 +1941,30 @@ window.doSignup = async function() {
   }
   btn.disabled = false; btn.textContent = 'CREATE MY ACCOUNT →';
 };
+
+// ── Referral helpers ────────────────────────────────────────────
+function genReferralCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
+// Prefill referral code from ?ref= link and open signup screen automatically
+(function initReferralFromLink() {
+  const params = new URLSearchParams(location.search);
+  const rc = (params.get('ref') || '').trim().toUpperCase();
+  if (!rc) {
+    // Restore from sessionStorage if user navigated around before signing up
+    const saved = sessionStorage.getItem('refCode');
+    if (saved) { const f = document.getElementById('suRef'); if (f && !f.value) f.value = saved; }
+    return;
+  }
+  sessionStorage.setItem('refCode', rc);
+  const f = document.getElementById('suRef');
+  if (f) f.value = rc;
+  openScreen('signupScreen');
+})();
 
 // ════════════════════════════════════════════════════════════
 //  DEPOSIT MODAL
