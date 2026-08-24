@@ -464,43 +464,143 @@ app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'aviator.html')
 app.get('/',     (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // ── POST /api/referral — credit referrer + new user KES 20 each ───────────
-// Runs with Admin SDK so Firestore security rules cannot block cross-user writes.
-const REFERRAL_BONUS = 20;
+// Runs with Admin SDK so Firestore security rules cannot block cross-user reads/writes.
+const REFERRAL_BONUS       = 20;
+const REFERRAL_CODE_CHARS  = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
+function randomReferralCode(len = 6) {
+  let s = '';
+  for (let i = 0; i < len; i++) s += REFERRAL_CODE_CHARS[Math.floor(Math.random() * REFERRAL_CODE_CHARS.length)];
+  return s;
+}
+
+// Generates a code that is provably NOT used by any client document in Firestore
+async function generateUniqueReferralCode() {
+  if (!db) throw new Error('Firebase not initialized');
+  for (let attempt = 0; attempt < 25; attempt++) {
+    const code = randomReferralCode(6);
+    const snap = await db.collection('users').where('referralCode', '==', code).limit(1).get();
+    if (snap.empty) return code;
+  }
+  return randomReferralCode(9); // practically impossible to collide fallback
+}
+
+// Seeds a unique referral code into EVERY client document that doesn't have one
+async function seedAllReferralCodes() {
+  if (!db) { console.warn('[Seed] Skipped — Firebase not initialized'); return 0; }
+  try {
+    const snap     = await db.collection('users').get();
+    let assigned   = 0;
+    let alreadyHad = 0;
+    for (const d of snap.docs) {
+      if (d.data().referralCode) { alreadyHad++; continue; }
+      const code = await generateUniqueReferralCode();
+      await d.ref.update({ referralCode: code });
+      assigned++;
+      console.log('[Seed] Code', code, '→', d.id);
+    }
+    console.log(`[Seed] Done — assigned: ${assigned}, already had code: ${alreadyHad}`);
+    return assigned;
+  } catch (e) {
+    console.error('[Seed] FAILED:', e.message);
+    return 0;
+  }
+}
+
+// Validate a referral code exists in Firestore (used live on the signup form)
+app.get('/api/referral/validate', async (req, res) => {
+  if (!db) return res.status(500).json({ success: false, error: 'Firebase not initialized' });
+  const norm = String(req.query.code || '').trim().toUpperCase();
+  if (!norm) return res.json({ valid: false });
+  try {
+    const snap = await db.collection('users').where('referralCode', '==', norm).limit(1).get();
+    return res.json({ valid: !snap.empty });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// Ensure a signed-in client has their own unique referral code saved on their doc
+app.post('/api/referral/code', async (req, res) => {
+  if (!db) return res.status(500).json({ success: false, error: 'Firebase not initialized' });
+  const { userId } = req.body || {};
+  if (!userId) return res.status(400).json({ success: false, error: 'userId is required' });
+  try {
+    const ref  = db.collection('users').doc(userId);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ success: false, error: 'User not found' });
+    if (snap.data().referralCode) {
+      return res.json({ success: true, code: snap.data().referralCode });
+    }
+    const code = await generateUniqueReferralCode();
+    await ref.update({ referralCode: code });
+    console.log('[Referral] Assigned new code', code, 'to', userId);
+    return res.json({ success: true, code });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// Main referral processing: validates code, credits BOTH parties KES 20,
+// and makes sure the new client's own shareable code is saved on their doc.
 app.post('/api/referral', async (req, res) => {
   if (!db) return res.status(500).json({ success: false, error: 'Firebase not initialized' });
 
   const { code, newUserId, newName, newPhone } = req.body || {};
-  if (!code || !newUserId) {
-    return res.status(400).json({ success: false, error: 'code and newUserId are required' });
+  if (!newUserId) {
+    return res.status(400).json({ success: false, error: 'newUserId is required' });
   }
-  const norm = String(code).trim().toUpperCase();
+  const norm = String(code || '').trim().toUpperCase();
 
   try {
-    // Deterministic referral doc ID (= newUserId) makes this idempotent —
-    // retries can never double-credit anyone.
-    const referralRef = db.collection('referrals').doc(newUserId);
-    const existing    = await referralRef.get();
-    if (existing.exists) {
-      return res.json({ success: true, message: 'Referral already processed' });
+    const newUserSnap = await db.collection('users').doc(newUserId).get();
+    if (!newUserSnap.exists) {
+      return res.status(404).json({ success: false, error: 'New user not found' });
     }
 
-    // Look up the referrer by their shareable code
+    // Every client must have their own unique shareable referral code
+    let pendingCodeUpdate = null;
+    if (!newUserSnap.data().referralCode) {
+      pendingCodeUpdate = await generateUniqueReferralCode();
+    }
+
+    // No referral code supplied — just save the new user's own code
+    if (!norm) {
+      if (pendingCodeUpdate) {
+        await db.collection('users').doc(newUserId).update({ referralCode: pendingCodeUpdate });
+        console.log('[Referral] Saved own code', pendingCodeUpdate, 'for', newUserId);
+      }
+      return res.json({
+        success: true,
+        message: 'No referral code supplied',
+        yourCode: pendingCodeUpdate || newUserSnap.data().referralCode,
+      });
+    }
+
+    // Check Firestore: unknown code → invalid
     const rq = await db.collection('users')
       .where('referralCode', '==', norm)
       .limit(1)
       .get();
 
     if (rq.empty) {
-      console.warn('[Referral] No user owns code:', norm);
+      if (pendingCodeUpdate) {
+        await db.collection('users').doc(newUserId).update({ referralCode: pendingCodeUpdate });
+      }
+      console.warn('[Referral] INVALID code entered:', norm);
       return res.status(404).json({ success: false, error: 'Invalid referral code' });
     }
+
     const referrerRef  = rq.docs[0].ref;
     const referrerData = rq.docs[0].data();
 
     if (referrerRef.id === newUserId) {
       return res.status(400).json({ success: false, error: 'Cannot refer yourself' });
     }
+
+    // Deterministic referral doc ID (= newUserId) makes this idempotent —
+    // retries can never double-credit anyone.
+    const referralRef = db.collection('referrals').doc(newUserId);
 
     const now     = new Date();
     const timeStr = now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
@@ -516,11 +616,14 @@ app.post('/api/referral', async (req, res) => {
         referralCount:  admin.firestore.FieldValue.increment(1),
         referralEarned: admin.firestore.FieldValue.increment(REFERRAL_BONUS),
       });
-      // Welcome bonus for the newly referred player
-      tx.update(db.collection('users').doc(newUserId), {
+
+      const newUserUpdate = {
         balance:    admin.firestore.FieldValue.increment(REFERRAL_BONUS),
         referredBy: norm,
-      });
+      };
+      if (pendingCodeUpdate) newUserUpdate.referralCode = pendingCodeUpdate;
+      tx.update(db.collection('users').doc(newUserId), newUserUpdate);
+
       tx.set(referralRef, {
         referrerUid:   referrerRef.id,
         referrerName:  referrerData.name || '',
@@ -537,7 +640,7 @@ app.post('/api/referral', async (req, res) => {
 
     console.log('[Referral] Credited KES', REFERRAL_BONUS,
       '| referrer:', referrerRef.id, '| new user:', newUserId, '| code:', norm);
-    return res.json({ success: true, bonus: REFERRAL_BONUS });
+    return res.json({ success: true, bonus: REFERRAL_BONUS, yourCode: pendingCodeUpdate || newUserSnap.data().referralCode });
 
   } catch (e) {
     console.error('[Referral] FAILED:', e.message);
@@ -564,6 +667,15 @@ app.get('/api/referral/check', async (req, res) => {
     return res.status(500).json({ success: false, error: e.message });
   }
 });
+
+// ── POST /api/referral/seed — manually re-run code seeding ────────────────
+app.post('/api/referral/seed', async (req, res) => {
+  const assigned = await seedAllReferralCodes();
+  res.json({ success: true, assigned });
+});
+
+// On boot: give every active client without a code their unique referral code
+setTimeout(() => { seedAllReferralCodes(); }, 5000);
 
 app.listen(PORT, () => {
   console.log('[Server] Running on port', PORT);

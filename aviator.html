@@ -2263,6 +2263,13 @@ function genReferralCode(){
 async function ensureReferralCode(){
   if(!userData)return null;
   if(userData.referralCode)return userData.referralCode;
+  // Ask the backend for a VERIFIED-UNIQUE code (checks Firestore before assigning)
+  try{
+    const r=await fetch(`${BACKEND_URL}/api/referral/code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:USER.uid})});
+    const d=await r.json();
+    if(d&&d.success&&d.code){userData.referralCode=d.code;return d.code;}
+  }catch(e){console.warn('referral code backend failed:',e.message);}
+  // Fallback if backend unreachable — seed job will fix any rare collision
   const code=genReferralCode();
   try{await updateDoc(doc(db,'users',USER.uid),{referralCode:code});userData.referralCode=code;}
   catch(e){console.warn('referralCode save failed:',e.message);}
