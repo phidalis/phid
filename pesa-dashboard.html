@@ -1628,22 +1628,38 @@
         </select>
       </div>
 
-      <!-- Live Now -->
-      <div class="section-title" id="sectionLive">🔴 LIVE NOW</div>
-      <div id="liveGamesList">
-        <div class="empty-state">No games currently live</div>
+      <!-- Games Tab Bar -->
+      <div id="gamesTabBar" style="display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <button id="tabIncomingBtn" onclick="switchGamesTab('incoming')" style="flex:1;background:rgba(160,32,240,0.15);border:none;border-bottom:3px solid #a020f0;color:#c084fc;padding:11px 8px;font-size:12px;font-weight:800;cursor:pointer;">⚽ INCOMING <span id="tabIncomingCount" style="opacity:0.7;">0</span></button>
+        <button id="tabFinishedBtn" onclick="switchGamesTab('finished')" style="flex:1;background:transparent;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,0.45);padding:11px 8px;font-size:12px;font-weight:800;cursor:pointer;">✅ FINISHED <span id="tabFinishedCount" style="opacity:0.7;">0</span></button>
       </div>
 
-      <!-- Upcoming -->
-      <div class="section-title" id="sectionUpcoming">📅 Upcoming (Scheduled)</div>
-      <div id="upcomingGamesList">
-        <div class="empty-state">No upcoming games scheduled</div>
+      <!-- Incoming tab (Live + Upcoming) -->
+      <div id="gamesTabIncoming">
+        <!-- Live Now -->
+        <div class="section-title" id="sectionLive">🔴 LIVE NOW</div>
+        <div id="liveGamesList">
+          <div class="empty-state">No games currently live</div>
+        </div>
+
+        <!-- Upcoming -->
+        <div class="section-title" id="sectionUpcoming">📅 Upcoming (Scheduled)</div>
+        <div id="upcomingGamesList">
+          <div class="empty-state">No upcoming games scheduled</div>
+        </div>
       </div>
 
-      <!-- Finished -->
-      <div class="section-title" id="sectionFinished">✅ Finished Today</div>
-      <div id="finishedGamesList">
-        <div class="empty-state">No finished games yet</div>
+      <!-- Finished tab -->
+      <div id="gamesTabFinished" style="display:none;">
+        <div class="section-title" id="sectionFinished" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <span>✅ Finished Games</span>
+          <span style="display:flex;gap:8px;">
+            <button id="selectAllEndedBtn" onclick="toggleFinishedSelectAll()" style="background:rgba(160,32,240,0.15);border:1px solid rgba(160,32,240,0.4);color:#c084fc;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:800;cursor:pointer;">🔘 Select All</button>
+            <button id="deleteEndedBtn" onclick="deleteSelectedFinishedGames()" style="display:none;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#f87171;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:800;cursor:pointer;">🗑️ Delete Selected</button>
+          </span>
+        </div>
+        <div id="finishedGamesList">
+          <div class="empty-state">No finished games yet</div>
       </div>
 
       <!-- Filtered results (shown when search/filter active) -->
@@ -1760,7 +1776,7 @@ import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/fire
 import { getAuth, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc, onSnapshot,
-         collection, getDocs, addDoc, query, orderBy, serverTimestamp }
+         collection, getDocs, addDoc, query, orderBy, serverTimestamp, writeBatch }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const fbApp = initializeApp(FIREBASE_CONFIG);
@@ -2991,6 +3007,15 @@ function renderAllGames() {
   document.getElementById('upcomingGamesList').innerHTML = upcoming.length ? upcoming.map(gameCardHTML).join('') : '<div class="empty-state">No upcoming games scheduled</div>';
   document.getElementById('finishedGamesList').innerHTML = finished.length ? finished.map(gameCardHTML).join('') : '<div class="empty-state">No finished games today</div>';
 
+  // Tab counts
+  const incCount = document.getElementById('tabIncomingCount');
+  const finCount = document.getElementById('tabFinishedCount');
+  if (incCount) incCount.textContent = `(${live.length + upcoming.length})`;
+  if (finCount) finCount.textContent = `(${finished.length})`;
+
+  // Reset ended-games selection UI (cards were rebuilt)
+  updateDeleteEndedBtn();
+
   // Start timers for live games
   live.forEach(g => startGameTimer(g));
   // Stop timers for non-live
@@ -3070,6 +3095,7 @@ function gameCardHTML(game) {
 
   return `
   <div class="game-card ${isLive?'live-card':isUpcoming?'upcoming-card':'finished-card'}" id="gcard_${game.id}">
+    ${isFinished ? `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><input type="checkbox" class="finished-game-chk" data-gid="${game.id}" onchange="updateDeleteEndedBtn()" style="width:16px;height:16px;accent-color:#ef4444;cursor:pointer;"><span style="font-size:10px;color:var(--text-dim);font-weight:700;">SELECT</span></div>` : ''}
     <div class="game-header">
       <div style="display:flex;flex-direction:column;gap:4px;">
         <div class="game-league">${game.league || 'Match'}</div>
@@ -3775,6 +3801,72 @@ window.deleteGame = async function(gameId) {
   } catch(e) { toast('❌ ' + e.message, 'warn'); }
 };
 
+// ── Games tabs (Incoming / Finished) ───────────────────────────
+let activeGamesTab = 'incoming';
+
+window.switchGamesTab = function(tab) {
+  activeGamesTab = tab;
+  const incoming = document.getElementById('gamesTabIncoming');
+  const finished = document.getElementById('gamesTabFinished');
+  const btnIn    = document.getElementById('tabIncomingBtn');
+  const btnFi    = document.getElementById('tabFinishedBtn');
+  if (!incoming || !finished || !btnIn || !btnFi) return;
+  const isIncoming  = tab === 'incoming';
+  incoming.style.display = isIncoming ? '' : 'none';
+  finished.style.display = isIncoming ? 'none' : '';
+  const activeStyle   = 'flex:1;background:rgba(160,32,240,0.15);border:none;border-bottom:3px solid #a020f0;color:#c084fc;padding:11px 8px;font-size:12px;font-weight:800;cursor:pointer;';
+  const inactiveStyle = 'flex:1;background:transparent;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,0.45);padding:11px 8px;font-size:12px;font-weight:800;cursor:pointer;';
+  btnIn.style.cssText = isIncoming  ? activeStyle : inactiveStyle;
+  btnFi.style.cssText = !isIncoming ? activeStyle : inactiveStyle;
+};
+
+// ── Select / delete ended (finished) games ─────────────────────
+window.toggleFinishedSelectAll = function() {
+  const chks = [...document.querySelectorAll('.finished-game-chk')];
+  if (!chks.length) { toast('No finished games to select', 'warn'); return; }
+  const allChecked = chks.every(c => c.checked);
+  chks.forEach(c => { c.checked = !allChecked; });
+  updateSelectAllEndedBtn();
+  updateDeleteEndedBtn();
+};
+
+function updateSelectAllEndedBtn() {
+  const btn = document.getElementById('selectAllEndedBtn');
+  if (!btn) return;
+  const chks = [...document.querySelectorAll('.finished-game-chk')];
+  const allChecked = chks.length > 0 && chks.every(c => c.checked);
+  btn.textContent = allChecked ? '⭕ Deselect All' : '🔘 Select All';
+}
+
+window.updateDeleteEndedBtn = function() {
+  const btn = document.getElementById('deleteEndedBtn');
+  if (!btn) return;
+  const sel = [...document.querySelectorAll('.finished-game-chk')].filter(c => c.checked).length;
+  btn.style.display = sel > 0 ? 'inline-block' : 'none';
+  btn.textContent = `🗑️ Delete Selected (${sel})`;
+  updateSelectAllEndedBtn();
+};
+
+window.deleteSelectedFinishedGames = async function() {
+  const selected = [...document.querySelectorAll('.finished-game-chk')]
+    .filter(c => c.checked)
+    .map(c => c.dataset.gid);
+  if (!selected.length) return;
+  if (!confirm(`Delete ${selected.length} ended game(s)? This cannot be undone.`)) return;
+  try {
+    // Firestore allows max 500 ops per batch — chunk to be safe
+    for (let i = 0; i < selected.length; i += 450) {
+      const batch = writeBatch(db);
+      selected.slice(i, i + 450).forEach(id => batch.delete(doc(db, 'footballGames', id)));
+      await batch.commit();
+    }
+    toast(`🗑️ ${selected.length} ended game(s) deleted`);
+    // Reset selection UI
+    document.querySelectorAll('.finished-game-chk').forEach(c => { c.checked = false; });
+    updateDeleteEndedBtn();
+  } catch(e) { toast('❌ ' + e.message, 'warn'); }
+};
+
 // ── Betslips ───────────────────────────────────────────────────
 function refreshGameFilter() {
   const sel = document.getElementById('betslipGameFilter');
@@ -4099,12 +4191,13 @@ window.filterGamesDisplay = function() {
 
   const isFiltered = query || catId || status;
   const filteredSection = document.getElementById('filteredGamesSection');
-  const defaultSections = ['sectionLive','sectionUpcoming','sectionFinished','liveGamesList','upcomingGamesList','finishedGamesList'];
+  const defaultSections = ['gamesTabBar','gamesTabIncoming','gamesTabFinished'];
 
   if (!isFiltered) {
     // Show default sections
     defaultSections.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = ''; });
     if (filteredSection) filteredSection.style.display = 'none';
+    switchGamesTab(activeGamesTab);
     return;
   }
 
