@@ -1005,9 +1005,6 @@ const fbApp = initializeApp(FIREBASE_CONFIG);
 const auth  = getAuth(fbApp);
 const db    = getFirestore(fbApp);
 
-// Render backend (same server used for M-Pesa deposits)
-const BACKEND_URL = 'https://sportybet-jjiu.onrender.com';
-
 // ════════════════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════════════════
@@ -1874,20 +1871,23 @@ window.doSignup = async function() {
   }
   // Build full international phone: +dialCode + digits
   const phone = selectedCountry.dial + digits;
-  // ── Validate referral code against Firestore BEFORE creating the account ──
+  // ── Validate referral code directly against Firestore BEFORE creating the account ──
+  let referrerUid = null;
   if (refCodeInput) {
     const vBtn = document.getElementById('signupBtn');
     vBtn.disabled = true; vBtn.innerHTML = '<div class="spinner"></div>';
     try {
-      const vRes  = await fetch(BACKEND_URL + '/api/referral/validate?code=' + encodeURIComponent(refCodeInput));
-      const vData = await vRes.json().catch(() => ({ valid: true })); // backend down? don't block signup
-      if (!vData.valid) {
+      const codeSnap = await getDoc(doc(db, 'referralCodes', refCodeInput));
+      if (!codeSnap.exists()) {
         err.textContent = '❌ Invalid referral code — check it or leave the field empty';
         err.classList.add('show');
         vBtn.disabled = false; vBtn.textContent = 'CREATE MY ACCOUNT →';
         return;
       }
-    } catch(e) { console.warn('Referral validation unreachable:', e.message); }
+      referrerUid = codeSnap.data().uid || null;
+    } catch(e) {
+      console.warn('Referral validation failed:', e.message);
+    }
     vBtn.disabled = false; vBtn.textContent = 'CREATE MY ACCOUNT →';
   }
   const btn = document.getElementById('signupBtn');
@@ -1897,14 +1897,15 @@ window.doSignup = async function() {
   // Flag: tell onAuthStateChanged not to redirect — doSignup() will do it after Firestore write
   window._signingUp = true;
   try {
-    // NOTE: no client-side referrer lookup here — reading other users' docs
-    // is blocked by Firestore security rules. The backend validates the code
-    // and credits both users via the Admin SDK.
     const email = phone.replace(/\+/,'') + '@sportybet.site';
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    // ── Generate this client's own UNIQUE referral code (checked against
+    // the public referralCodes collection so it has never been used) ──
+    const myRefCode = await uniqueReferralCode();
+    // Referral rewards: KES 20 welcome bonus for the new client, KES 20 for the referrer
+    const REF_BONUS = 20;
+    const startBalance = referrerUid && referrerUid !== cred.user.uid ? REF_BONUS : 0;
     // Wait for Firestore doc to be fully written BEFORE redirecting
-    // NOTE: referralCode is NOT generated here — the backend assigns a
-    // verified-unique code (checks Firestore so it has never been used).
     await setDoc(doc(db,'users',cred.user.uid), {
       name,
       phone,                          // full intl format e.g. +254712345678
@@ -1914,25 +1915,45 @@ window.doSignup = async function() {
       dialCode: selectedCountry.dial,
       currency: selectedCountry.code === 'US' || selectedCountry.code === 'AU' || selectedCountry.code === 'CA' ? 'USD' : 'KES',
       email,
-      balance: 0,                     // referral bonus credited by backend
-      referredBy: refCodeInput || null,
+      balance: startBalance,          // includes KES 20 referral bonus when referred
+      referralCode: myRefCode,        // this client's shareable code — saved on their doc
+      referralCount: 0,
+      referralEarned: 0,
+      referredBy: referrerUid ? refCodeInput : null,
       createdAt: serverTimestamp(),
     });
-    // ── SERVER-SIDE (Admin SDK): saves this client's own unique referral
-    // code on their doc; validates the entered code against Firestore and
-    // credits KES 20 to BOTH the new client and the referrer. ──
-    try {
-      const rRes = await fetch(BACKEND_URL + '/api/referral', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: refCodeInput || null, newUserId: cred.user.uid, newName: name, newPhone: phone }),
-      });
-      const rData = await rRes.json().catch(() => ({}));
-      console.log('[Referral] Backend response:', rRes.status, rData);
-      if (!rRes.ok || rData.success === false) {
-        console.warn('[Referral] Not credited:', rData.error || 'unknown error');
-      }
-    } catch(e) { console.error('Referral credit request failed:', e.message); }
+    // Register the code in the public lookup collection so others can use it
+    await setDoc(doc(db,'referralCodes',myRefCode), {
+      uid: cred.user.uid,
+      name: name,
+      createdAt: serverTimestamp(),
+    });
+    // ── Credit the referrer KES 20 directly in Firestore ──
+    if (referrerUid && referrerUid !== cred.user.uid) {
+      try {
+        // Idempotency guard — one referral record per new user, ever
+        const refRec = doc(db,'referrals',cred.user.uid);
+        const recSnap = await getDoc(refRec);
+        if (!recSnap.exists()) {
+          await updateDoc(doc(db,'users',referrerUid), {
+            balance: increment(REF_BONUS),
+            referralCount: increment(1),
+            referralEarned: increment(REF_BONUS),
+          });
+          await setDoc(refRec, {
+            referrerUid,
+            referrerCode: refCodeInput,
+            referredUid: cred.user.uid,
+            referredName: name,
+            referredPhone: phone,
+            bonus: REF_BONUS,
+            status: 'credited',
+            createdAt: serverTimestamp(),
+          });
+        }
+      } catch(e) { console.error('Referral credit failed:', e.message); }
+    }
+    sessionStorage.removeItem('refCode');
     sessionStorage.removeItem('refCode');
     // Doc confirmed written — safe to redirect now
     persistPendingFbPicks();
@@ -1946,7 +1967,24 @@ window.doSignup = async function() {
   btn.disabled = false; btn.textContent = 'CREATE MY ACCOUNT →';
 };
 
-// ── Referral: prefill code from ?ref= link and open signup automatically ──
+// ── Referral helpers ────────────────────────────────────────────
+// Generates a code that has NEVER been used before (checked live in Firestore)
+async function uniqueReferralCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  for (let attempt = 0; attempt < 25; attempt++) {
+    let s = '';
+    for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    try {
+      const exists = await getDoc(doc(db, 'referralCodes', s));
+      if (!exists.exists()) return s;
+    } catch(e) { return s; } // lookup blocked/unreachable — accept candidate
+  }
+  let long = '';
+  for (let i = 0; i < 9; i++) long += chars[Math.floor(Math.random() * chars.length)];
+  return long; // practically impossible to collide fallback
+}
+
+// Prefill code from ?ref= link and open signup automatically
 (function initReferralFromLink() {
   const params = new URLSearchParams(location.search);
   const rc = (params.get('ref') || '').trim().toUpperCase();

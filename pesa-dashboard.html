@@ -1335,7 +1335,10 @@
           </div>
           <div style="font-size:11px;color:var(--text-dim);white-space:nowrap;" id="playerCountLabel">Loading…</div>
         </div>
-        <button onclick="zeroAllBalances()" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0;" title="Set every player balance to KES 0">⚠️ Zero All Balances</button>
+        <div style="display:flex;gap:8px;">
+          <button id="seedRefBtn" onclick="seedReferralCodes()" style="background:rgba(160,32,240,0.12);border:1px solid rgba(160,32,240,0.35);color:#c084fc;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0;" title="Give every player without a code their unique referral code">🎁 Seed Referral Codes</button>
+          <button onclick="zeroAllBalances()" style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0;" title="Set every player balance to KES 0">⚠️ Zero All Balances</button>
+        </div>
       </div>
       <div id="playersList">
         <div class="empty-state"><div class="spinner" style="margin:0 auto 10px;"></div>Loading players…</div>
@@ -1776,7 +1779,7 @@ import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/fire
 import { getAuth, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc, onSnapshot,
-         collection, getDocs, addDoc, query, orderBy, serverTimestamp, writeBatch }
+         collection, getDocs, addDoc, query, where, orderBy, serverTimestamp, writeBatch }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const fbApp = initializeApp(FIREBASE_CONFIG);
@@ -3865,6 +3868,57 @@ window.deleteSelectedFinishedGames = async function() {
     document.querySelectorAll('.finished-game-chk').forEach(c => { c.checked = false; });
     updateDeleteEndedBtn();
   } catch(e) { toast('❌ ' + e.message, 'warn'); }
+};
+
+// ── Seed unique referral codes to every player missing one ─────
+const REF_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+async function generateUniqueCodeAdmin() {
+  for (let attempt = 0; attempt < 25; attempt++) {
+    let s = '';
+    for (let i = 0; i < 6; i++) s += REF_CODE_CHARS[Math.floor(Math.random() * REF_CODE_CHARS.length)];
+    try {
+      const inUsers = await getDocs(query(collection(db,'users'), where('referralCode','==',s)));
+      if (!inUsers.empty) continue;
+      const inRegistry = await getDoc(doc(db,'referralCodes',s));
+      if (inRegistry.exists()) continue;
+      return s;
+    } catch(e) { console.warn('code check failed:', e.message); return null; }
+  }
+  return null;
+}
+
+window.seedReferralCodes = async function() {
+  if (!confirm('Assign a unique referral code to every player who does not have one yet?\n(Also initializes referral counters where missing)')) return;
+  const btn = document.getElementById('seedRefBtn');
+  btn.disabled = true; btn.textContent = '⏳ Seeding…';
+  try {
+    const snap = await getDocs(collection(db,'users'));
+    let assigned = 0, patched = 0, alreadyHad = 0, failed = 0;
+    for (const d of snap.docs) {
+      const data = d.data();
+      try {
+        // Initialize missing referral counters so rule-validated credits work
+        const patch = {};
+        if (typeof data.referralCount !== 'number') patch.referralCount = 0;
+        if (typeof data.referralEarned !== 'number') patch.referralEarned = 0;
+        if (!data.referralCode) {
+          const code = await generateUniqueCodeAdmin();
+          if (!code) { failed++; continue; }
+          patch.referralCode = code;
+          await updateDoc(doc(db,'users',d.id), patch);
+          await setDoc(doc(db,'referralCodes',code), { uid: d.id, name: data.name || '', createdAt: serverTimestamp() });
+          assigned++;
+        } else if (Object.keys(patch).length) {
+          await updateDoc(doc(db,'users',d.id), patch);
+          patched++;
+        } else {
+          alreadyHad++;
+        }
+      } catch(e) { console.warn('seed skip', d.id, e.message); failed++; }
+    }
+    toast(`✅ Seeded ${assigned} code(s) · counters fixed: ${patched} · already complete: ${alreadyHad}${failed ? ' · ⚠️ skipped: ' + failed : ''}`);
+  } catch(e) { toast('❌ ' + e.message, 'warn'); }
+  btn.disabled = false; btn.textContent = '🎁 Seed Referral Codes';
 };
 
 // ── Betslips ───────────────────────────────────────────────────

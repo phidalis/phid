@@ -2262,16 +2262,26 @@ function genReferralCode(){
 }
 async function ensureReferralCode(){
   if(!userData)return null;
-  if(userData.referralCode)return userData.referralCode;
-  // Ask the backend for a VERIFIED-UNIQUE code (checks Firestore before assigning)
+  // Already have a code — just make sure it's registered in the public lookup
+  if(userData.referralCode){
+    try{const reg=await getDoc(doc(db,'referralCodes',userData.referralCode));
+        if(!reg.exists())await setDoc(doc(db,'referralCodes',userData.referralCode),{uid:USER.uid,name:userData.name||'',createdAt:serverTimestamp()});}catch(e){}
+    return userData.referralCode;
+  }
+  // Generate a code that has NEVER been used before (checked in Firestore)
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code=null;
+  for(let attempt=0;attempt<25;attempt++){
+    let s='';for(let i=0;i<6;i++)s+=chars[Math.floor(Math.random()*chars.length)];
+    try{const ex=await getDoc(doc(db,'referralCodes',s));if(!ex.exists()){code=s;break;}}
+    catch(e){code=s;break;}
+  }
+  if(!code){for(let i=0;i<9;i++)code+=chars[Math.floor(Math.random()*chars.length)];}
   try{
-    const r=await fetch(`${BACKEND_URL}/api/referral/code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:USER.uid})});
-    const d=await r.json();
-    if(d&&d.success&&d.code){userData.referralCode=d.code;return d.code;}
-  }catch(e){console.warn('referral code backend failed:',e.message);}
-  // Fallback if backend unreachable — seed job will fix any rare collision
-  const code=genReferralCode();
-  try{await updateDoc(doc(db,'users',USER.uid),{referralCode:code});userData.referralCode=code;}
+    await updateDoc(doc(db,'users',USER.uid),{referralCode:code});
+    await setDoc(doc(db,'referralCodes',code),{uid:USER.uid,name:userData.name||'',createdAt:serverTimestamp()});
+    userData.referralCode=code;
+  }
   catch(e){console.warn('referralCode save failed:',e.message);}
   return userData.referralCode||null;
 }
