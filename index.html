@@ -926,7 +926,7 @@
       <input class="inp" id="suPass2" type="password" placeholder="Repeat password">
     </div>
     <div class="field">
-      <label>Referral Code <span style="opacity:0.5;font-weight:600;">(Optional — KES 20 free for both!)</span></label>
+      <label>Referral Code <span id="refSignupHint" style="opacity:0.5;font-weight:600;">(Optional — KES 20 free for both!)</span></label>
       <input class="inp" id="suRef" type="text" placeholder="Enter referral code" autocapitalize="characters" style="text-transform:uppercase;">
     </div>
     <button class="btn-auth" onclick="doSignup()" id="signupBtn">CREATE MY ACCOUNT →</button>
@@ -1552,6 +1552,20 @@ window.copyIndexBetCode = function() {
   document.head.appendChild(s);
   window.addEventListener('load', function() {
     startFbGamesListener();
+    // Load referral bonus amounts from admin settings (Store Settings → Referral Settings)
+    try {
+      getDoc(doc(db, 'siteConfig', 'storeSettings')).then(cfgSnap => {
+        if (!cfgSnap.exists()) return;
+        const R = (cfgSnap.data().referralBonus) || {};
+        const rr = Number(R.referrer);
+        const rf = Number(R.referee);
+        const hint = document.getElementById('refSignupHint');
+        if (!hint) return;
+        if (!isNaN(rr) && !isNaN(rf) && rr >= 0 && rf >= 0) {
+          hint.textContent = `(Optional — you get KES ${rf.toLocaleString()} free, referrer gets KES ${rr.toLocaleString()})`;
+        }
+      }).catch(() => {});
+    } catch(e) {}
   });
 })();
 
@@ -1902,9 +1916,18 @@ window.doSignup = async function() {
     // ── Generate this client's own UNIQUE referral code (checked against
     // the public referralCodes collection so it has never been used) ──
     const myRefCode = await uniqueReferralCode();
-    // Referral rewards: KES 20 welcome bonus for the new client, KES 20 for the referrer
-    const REF_BONUS = 20;
-    const startBalance = referrerUid && referrerUid !== cred.user.uid ? REF_BONUS : 0;
+    // Referral rewards — amounts are editable in admin (Store Settings → Referral Settings).
+    // Referee bonus is what a new player gets when they sign up with a code.
+    let refereeBonus = 20;
+    try {
+      const cfgSnap = await getDoc(doc(db, 'siteConfig', 'storeSettings'));
+      if (cfgSnap.exists()) {
+        const R = (cfgSnap.data().referralBonus) || {};
+        const v = Number(R.referee);
+        if (!isNaN(v) && v >= 0) refereeBonus = v;
+      }
+    } catch(e) { console.warn('referral config load failed:', e.message); }
+    const startBalance = referrerUid && referrerUid !== cred.user.uid ? refereeBonus : 0;
     // Wait for Firestore doc to be fully written BEFORE redirecting
     await setDoc(doc(db,'users',cred.user.uid), {
       name,
@@ -1915,7 +1938,7 @@ window.doSignup = async function() {
       dialCode: selectedCountry.dial,
       currency: selectedCountry.code === 'US' || selectedCountry.code === 'AU' || selectedCountry.code === 'CA' ? 'USD' : 'KES',
       email,
-      balance: startBalance,          // includes KES 20 referral bonus when referred
+      balance: startBalance,          // includes referee referral bonus when referred
       referralCode: myRefCode,        // this client's shareable code — saved on their doc
       referralCount: 0,
       referralEarned: 0,
@@ -1929,7 +1952,7 @@ window.doSignup = async function() {
       createdAt: serverTimestamp(),
     });
     // ── Log the referral record. The referrer's own app watches these records
-    // and credits itself KES 20 per signup — guaranteed, because it only ever
+    // and credits itself its referral bonus per signup — guaranteed, because it only ever
     // writes to its OWN document (never blocked by security rules). ──
     if (referrerUid && referrerUid !== cred.user.uid) {
       try {
@@ -1939,7 +1962,7 @@ window.doSignup = async function() {
           referredUid: cred.user.uid,
           referredName: name,
           referredPhone: phone,
-          bonus: 20,
+          bonus: refereeBonus,
           status: 'pending',
           createdAt: serverTimestamp(),
         });
@@ -2325,7 +2348,7 @@ function renderAccountMenu() {
       <div class="menu-arrow">›</div>
     </div>
     <div class="menu-item">
-      <div class="menu-item-left"><div class="menu-icon" style="background:rgba(234,179,8,0.15);">👥</div><div><div class="menu-label">Refer & Earn</div><div class="menu-sub">KES 200 per friend</div></div></div>
+      <div class="menu-item-left"><div class="menu-icon" style="background:rgba(234,179,8,0.15);">👥</div><div><div class="menu-label">Refer & Earn</div><div class="menu-sub">Share your code & earn cash</div></div></div>
       <div class="menu-arrow">›</div>
     </div>
     <div class="menu-item">

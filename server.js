@@ -463,10 +463,30 @@ app.post('/api/callback', async (req, res) => {
 app.get('/game', (req, res) => res.sendFile(path.join(__dirname, 'aviator.html')));
 app.get('/',     (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
-// ── POST /api/referral — credit referrer + new user KES 20 each ───────────
+// ── POST /api/referral — credit referrer + new user referral bonuses ──────
 // Runs with Admin SDK so Firestore security rules cannot block cross-user reads/writes.
-const REFERRAL_BONUS       = 20;
+// Bonus amounts are NOT hardcoded — they are read from siteConfig/storeSettings
+// (editable from the admin dashboard → Store Settings → Referral Settings).
 const REFERRAL_CODE_CHARS  = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+async function getReferralBonuses() {
+  const fallback = { referrer: 20, referee: 20 };
+  if (!db) return fallback;
+  try {
+    const snap = await db.collection('siteConfig').doc('storeSettings').get();
+    if (!snap.exists) return fallback;
+    const R = (snap.data() && snap.data().referralBonus) || {};
+    const referrer = Number(R.referrer);
+    const referee  = Number(R.referee);
+    return {
+      referrer: (!isNaN(referrer) && referrer >= 0) ? referrer : fallback.referrer,
+      referee:  (!isNaN(referee)  && referee  >= 0) ? referee  : fallback.referee,
+    };
+  } catch (e) {
+    console.warn('[Referral] Failed to read bonuses from Firestore:', e.message);
+    return fallback;
+  }
+}
 
 function randomReferralCode(len = 6) {
   let s = '';
@@ -541,7 +561,8 @@ app.post('/api/referral/code', async (req, res) => {
   }
 });
 
-// Main referral processing: validates code, credits BOTH parties KES 20,
+// Main referral processing: validates code, credits BOTH parties their referral
+// bonus (read live from siteConfig/storeSettings, editable in the admin).
 // and makes sure the new client's own shareable code is saved on their doc.
 app.post('/api/referral', async (req, res) => {
   if (!db) return res.status(500).json({ success: false, error: 'Firebase not initialized' });
@@ -602,6 +623,11 @@ app.post('/api/referral', async (req, res) => {
     // retries can never double-credit anyone.
     const referralRef = db.collection('referrals').doc(newUserId);
 
+    // Read the current bonuses from Firestore (admin-adjustable, not hardcoded)
+    const bonuses      = await getReferralBonuses();
+    const referrerBonus = bonuses.referrer;
+    const refereeBonus  = bonuses.referee;
+
     const now     = new Date();
     const timeStr = now.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' })
                   + ' ' + now.toLocaleDateString('en-KE', { day: '2-digit', month: 'short' });
@@ -612,13 +638,13 @@ app.post('/api/referral', async (req, res) => {
       if (dup.exists) return;
 
       tx.update(referrerRef, {
-        balance:        admin.firestore.FieldValue.increment(REFERRAL_BONUS),
+        balance:        admin.firestore.FieldValue.increment(referrerBonus),
         referralCount:  admin.firestore.FieldValue.increment(1),
-        referralEarned: admin.firestore.FieldValue.increment(REFERRAL_BONUS),
+        referralEarned: admin.firestore.FieldValue.increment(referrerBonus),
       });
 
       const newUserUpdate = {
-        balance:    admin.firestore.FieldValue.increment(REFERRAL_BONUS),
+        balance:    admin.firestore.FieldValue.increment(refereeBonus),
         referredBy: norm,
       };
       if (pendingCodeUpdate) newUserUpdate.referralCode = pendingCodeUpdate;
@@ -631,16 +657,17 @@ app.post('/api/referral', async (req, res) => {
         referredUid:   newUserId,
         referredName:  newName || '',
         referredPhone: newPhone || '',
-        bonus:         REFERRAL_BONUS,
+        bonus:         refereeBonus,
+        referrerBonus: referrerBonus,
         status:        'credited',
         createdAt:     admin.firestore.FieldValue.serverTimestamp(),
         displayTime:   timeStr,
       });
     });
 
-    console.log('[Referral] Credited KES', REFERRAL_BONUS,
-      '| referrer:', referrerRef.id, '| new user:', newUserId, '| code:', norm);
-    return res.json({ success: true, bonus: REFERRAL_BONUS, yourCode: pendingCodeUpdate || newUserSnap.data().referralCode });
+    console.log('[Referral] Credited KES', referrerBonus, '-> referrer:', referrerRef.id,
+      '| KES', refereeBonus, '-> new user:', newUserId, '| code:', norm);
+    return res.json({ success: true, bonus: refereeBonus, referrerBonus, yourCode: pendingCodeUpdate || newUserSnap.data().referralCode });
 
   } catch (e) {
     console.error('[Referral] FAILED:', e.message);

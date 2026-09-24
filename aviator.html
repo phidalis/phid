@@ -585,8 +585,8 @@
         <div class="flex items-center gap-3 mb-3">
           <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🎁</div>
           <div class="flex-1 min-w-0">
-            <div class="font-black text-sm">Refer &amp; Earn KES 20</div>
-            <div class="text-white/40 text-xs">You get KES 20 per friend · They get KES 20 free</div>
+            <div class="font-black text-sm">Refer &amp; Earn</div>
+            <div class="text-white/40 text-xs" id="refHeroSub">You get KES 20 per friend · They get KES 20 free</div>
           </div>
           <div class="text-right flex-shrink-0">
             <div class="text-lg font-black text-emerald-400" id="refCount">0</div>
@@ -978,7 +978,7 @@ import{getAuth,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasej
 import{getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,arrayUnion,increment,serverTimestamp,onSnapshot,collection,addDoc,getDocs,query,where,orderBy,runTransaction}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 const app=initializeApp(FIREBASE_CONFIG);const auth=getAuth(app);const db=getFirestore(app);
 let USER=null,userData=null,balance=0,crashHist=[2.30,2.28,1.74,2.29,28.70,1.05,4.10,93.31],unsubUser=null;
-let storeConfig={depositsEnabled:true,minDeposit:100,maxDeposit:100000,withdrawalsEnabled:true,minWithdrawal:200,maxWithdrawal:50000,withdrawLockAmount:500,minBet:50};
+let storeConfig={depositsEnabled:true,minDeposit:100,maxDeposit:100000,withdrawalsEnabled:true,minWithdrawal:200,maxWithdrawal:50000,withdrawLockAmount:500,minBet:50,referrerBonus:20,refereeBonus:20};
 let luckySpinConfig={
   enabled:true,
   stakeOptions:[50,100,200,500],
@@ -2250,7 +2250,7 @@ function renderProfileScreen(){
   const rc=document.getElementById('refCount');
   if(rc)rc.textContent=myReferralRecords.length||(userData?.referralCount||0);
   const creditedCount=myReferralRecords.filter(r=>r.creditedAt).length;
-  const earned=creditedCount*20||(userData?.referralEarned||0);
+  const earned=creditedCount*storeConfig.referrerBonus||(userData?.referralEarned||0);
   const rer=document.getElementById('refEarnedRow');
   if(rer){rer.style.display=earned>0?'block':'none';const rev=document.getElementById('refEarnedVal');if(rev)rev.textContent='KES '+earned.toLocaleString();}
   ensureReferralCode().then(code=>{const rl=document.getElementById('refLinkText');if(rl&&code)rl.textContent='www.sportycash.site/index.html?ref='+code;});
@@ -2289,7 +2289,7 @@ async function ensureReferralCode(){
 }
 function buildReferralLink(){return 'https://www.sportycash.site/index.html?ref='+(userData?.referralCode||'');}
 
-// ── Referral listener: live count + auto-claim KES 20 per referred signup ──
+// ── Referral listener: live count + auto-claim referral bonus per referred signup ─
 let unsubReferrals=null;
 let myReferralRecords=[];
 const claimedRefIds=new Set();   // in-flight / done guard — stops double-claims
@@ -2310,7 +2310,7 @@ function renderReferralStats(){
   const rc=document.getElementById('refCount');
   if(rc)rc.textContent=myReferralRecords.length;
   const earnedEl=document.getElementById('refEarnedVal');
-  if(earnedEl)earnedEl.textContent='KES '+(creditedN*20).toLocaleString();
+  if(earnedEl)earnedEl.textContent='KES '+(creditedN*storeConfig.referrerBonus).toLocaleString();
   const rer=document.getElementById('refEarnedRow');
   if(rer)rer.style.display=myReferralRecords.length>0?'block':'none';
 }
@@ -2324,12 +2324,13 @@ async function claimReferralOnce(refId){
       if(!rec.exists()||rec.data().creditedAt)return;
       const u=await tx.get(doc(db,'users',USER.uid));
       const d=u.exists?(u.data()||{}):{};
+      const bonus=storeConfig.referrerBonus;
       tx.update(doc(db,'users',USER.uid),{
-        balance:(d.balance||0)+20,
+        balance:(d.balance||0)+bonus,
         referralCount:(d.referralCount||0)+1,
-        referralEarned:(d.referralEarned||0)+20,
+        referralEarned:(d.referralEarned||0)+bonus,
       });
-      tx.update(doc(db,'referrals',refId),{creditedAt:serverTimestamp(),status:'credited'});
+      tx.update(doc(db,'referrals',refId),{creditedAt:serverTimestamp(),status:'credited',bonus});
     });
     return true;
   }catch(e){console.warn('referral claim failed:',e.message);return false;}
@@ -2345,7 +2346,7 @@ async function processPendingReferralClaims(){
     else{claimedRefIds.delete(r.id);}   // failed — allow a later retry
   }
   if(claimed>0){
-    showToast(`🎁 KES ${claimed*20} referral bonus added!`,'purple');
+    showToast(`🎁 KES ${(claimed*storeConfig.referrerBonus).toLocaleString()} referral bonus added!`,'purple');
     renderReferralStats();
   }
 }
@@ -2366,7 +2367,7 @@ window.shareReferralLink=async function(){
   await ensureReferralCode();
   if(!userData?.referralCode){showToast('Could not generate your link. Try again.','red');return;}
   const link=buildReferralLink();
-  const msg=`Join me on SportyCash! 🎉 Sign up with my link and we EACH get KES 20 free: ${link}`;
+  const msg=`Join me on SportyCash! 🎉 Sign up with my link and you get KES ${storeConfig.refereeBonus.toLocaleString()} free, and I get KES ${storeConfig.referrerBonus.toLocaleString()}. ${link}`;
   if(navigator.share){try{await navigator.share({title:'SportyCash — Refer & Earn',text:msg,url:link});return;}catch(e){if(e.name==='AbortError')return;}}
   const ok=await _copyToClipboard(msg);
   showToast(ok?'✅ Invite message copied — paste it anywhere!':'❌ Copy failed',ok?'purple':'red');
@@ -2374,9 +2375,14 @@ window.shareReferralLink=async function(){
 
 // ── STORE CONFIG ──
 async function loadStoreConfig(){
-  try{if(unsubStore)unsubStore();unsubStore=onSnapshot(doc(db,'siteConfig','storeSettings'),snap=>{if(!snap.exists())return;const d=snap.data();storeConfig={depositsEnabled:d.depositsEnabled!==false,minDeposit:d.minDeposit??100,maxDeposit:d.maxDeposit??100000,withdrawalsEnabled:d.withdrawalsEnabled!==false,minWithdrawal:d.minWithdrawal??200,maxWithdrawal:d.maxWithdrawal??50000,withdrawLockAmount:d.withdrawLockAmount??500,minBet:d.minBet??50};const L=d.luckySpin||{};luckySpinConfig={enabled:L.enabled!==false,stakeOptions:Array.isArray(L.stakeOptions)&&L.stakeOptions.length?L.stakeOptions:[50,100,200,500],baseStake:typeof L.baseStake==='number'&&L.baseStake>0?L.baseStake:50,segments:Array.isArray(L.segments)&&L.segments.length?L.segments:[0,10,20,50,100,200,500,1000,1500],winRate:typeof L.winRate==='number'?L.winRate:0.25,bigWinRate:typeof L.bigWinRate==='number'?L.bigWinRate:0.05,bigWinThreshold:typeof L.bigWinThreshold==='number'?L.bigWinThreshold:500,newUserWinRate:typeof L.newUserWinRate==='number'?L.newUserWinRate:0.45,newUserSpins:typeof L.newUserSpins==='number'?L.newUserSpins:3,newUserMaxPrize:typeof L.newUserMaxPrize==='number'?L.newUserMaxPrize:100};renderLuckySpin();_applyStoreConfigToUI();});}catch(e){console.warn(e.message);}
+  try{if(unsubStore)unsubStore();unsubStore=onSnapshot(doc(db,'siteConfig','storeSettings'),snap=>{if(!snap.exists())return;const d=snap.data();storeConfig={depositsEnabled:d.depositsEnabled!==false,minDeposit:d.minDeposit??100,maxDeposit:d.maxDeposit??100000,withdrawalsEnabled:d.withdrawalsEnabled!==false,minWithdrawal:d.minWithdrawal??200,maxWithdrawal:d.maxWithdrawal??50000,withdrawLockAmount:d.withdrawLockAmount??500,minBet:d.minBet??50,referrerBonus:(d.referralBonus&&typeof d.referralBonus.referrer==='number')?d.referralBonus.referrer:20,refereeBonus:(d.referralBonus&&typeof d.referralBonus.referee==='number')?d.referralBonus.referee:20};const L=d.luckySpin||{};luckySpinConfig={enabled:L.enabled!==false,stakeOptions:Array.isArray(L.stakeOptions)&&L.stakeOptions.length?L.stakeOptions:[50,100,200,500],baseStake:typeof L.baseStake==='number'&&L.baseStake>0?L.baseStake:50,segments:Array.isArray(L.segments)&&L.segments.length?L.segments:[0,10,20,50,100,200,500,1000,1500],winRate:typeof L.winRate==='number'?L.winRate:0.25,bigWinRate:typeof L.bigWinRate==='number'?L.bigWinRate:0.05,bigWinThreshold:typeof L.bigWinThreshold==='number'?L.bigWinThreshold:500,newUserWinRate:typeof L.newUserWinRate==='number'?L.newUserWinRate:0.45,newUserSpins:typeof L.newUserSpins==='number'?L.newUserSpins:3,newUserMaxPrize:typeof L.newUserMaxPrize==='number'?L.newUserMaxPrize:100};renderLuckySpin();_applyStoreConfigToUI();});}catch(e){console.warn(e.message);}
+}
+function _applyReferralConfigToUI(){
+  const sub=document.getElementById('refHeroSub');
+  if(sub)sub.textContent=`You get KES ${storeConfig.referrerBonus.toLocaleString()} per friend · They get KES ${storeConfig.refereeBonus.toLocaleString()} free`;
 }
 function _applyStoreConfigToUI(){
+  _applyReferralConfigToUI();
   const mwn=document.getElementById('minWdNote');if(mwn)mwn.textContent='Minimum withdrawal: KES '+storeConfig.minWithdrawal.toLocaleString();
   const mwi=document.getElementById('minWdInlineNote');if(mwi)mwi.textContent='KES '+storeConfig.minWithdrawal.toLocaleString();
   const di=document.getElementById('depInput');if(di){di.min=storeConfig.minDeposit;di.placeholder=`Amount (KES min. ${storeConfig.minDeposit.toLocaleString()})`;}

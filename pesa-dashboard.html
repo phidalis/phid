@@ -1571,6 +1571,25 @@
         </div>
       </div>
 
+      <div class="section-title">🎁 Referral Settings</div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div class="field-label">Referrer Bonus (KES)</div>
+            <input type="number" class="inp" id="storeReferrerBonus" placeholder="e.g. 20" min="0">
+            <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">Amount the person who invites gets per successful signup.</div>
+          </div>
+          <div>
+            <div class="field-label">Referee Bonus (KES)</div>
+            <input type="number" class="inp" id="storeRefereeBonus" placeholder="e.g. 20" min="0">
+            <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">Amount the new player who signs up with a code gets.</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:12px;line-height:1.6;">
+          ⚡ These amounts are used live at signup and when the referrer's app claims a bonus. Set to 0 to disable a bonus.
+        </div>
+      </div>
+
       <div style="margin-top:6px;">
         <button class="save-btn full" id="saveStoreBtn" onclick="saveStoreSettings()">
           💾 Save All Store Settings
@@ -2515,6 +2534,11 @@ async function loadStoreSettings() {
     document.getElementById('luckyBaseStake').value      = L.baseStake ?? 50;
     document.getElementById('luckySegments').value       = (L.segments || [0,10,20,50,100,200,500,1000,1500]).join(', ');
 
+    // Referrals
+    const R = d.referralBonus || {};
+    document.getElementById('storeReferrerBonus').value   = R.referrer ?? 20;
+    document.getElementById('storeRefereeBonus').value    = R.referee  ?? 20;
+
     const statusEl = document.getElementById('storeSettingsStatus');
     if (snap.exists()) {
       statusEl.style.display = 'flex';
@@ -2575,6 +2599,12 @@ window.saveStoreSettings = async function() {
     toast('❌ Minimum bet must be at least KES 1', 'warn');
     btn.disabled = false; btn.textContent = '💾 Save All Store Settings'; return;
   }
+  const refBonusReferrer = parseFloat(document.getElementById('storeReferrerBonus').value) ?? 20;
+  const refBonusReferee  = parseFloat(document.getElementById('storeRefereeBonus').value)  ?? 20;
+  if (isNaN(refBonusReferrer) || refBonusReferrer < 0 || isNaN(refBonusReferee) || refBonusReferee < 0) {
+    toast('❌ Referral bonuses cannot be negative', 'warn');
+    btn.disabled = false; btn.textContent = '💾 Save All Store Settings'; return;
+  }
 
   const payload = {
     depositsEnabled:     document.getElementById('storeDepositsEnabled').checked,
@@ -2588,18 +2618,22 @@ window.saveStoreSettings = async function() {
     bettingWindowSecs:   bWindow,
     minBet:              minBet,
     luckySpin: {
-      enabled:           document.getElementById('luckySpinEnabled').checked,
-      winRate:           luckyWinRate,
-      bigWinRate:        luckyBigWinRate,
-      bigWinThreshold:   parseFloat(document.getElementById('luckyBigWinThreshold').value) || 500,
-      newUserWinRate:    luckyNewUserWinRate,
-      newUserSpins:      parseInt(document.getElementById('luckyNewUserSpins').value) || 3,
-      newUserMaxPrize:   parseFloat(document.getElementById('luckyNewUserMaxPrize').value) || 100,
-      stakeOptions:      luckyStakeOptions,
-      baseStake:         luckyBaseStake,
-      segments:          luckySegments,
-    },
-    updatedAt:           serverTimestamp(),
+        enabled:           document.getElementById('luckySpinEnabled').checked,
+        winRate:           luckyWinRate,
+        bigWinRate:        luckyBigWinRate,
+        bigWinThreshold:   parseFloat(document.getElementById('luckyBigWinThreshold').value) || 500,
+        newUserWinRate:    luckyNewUserWinRate,
+        newUserSpins:      parseInt(document.getElementById('luckyNewUserSpins').value) || 3,
+        newUserMaxPrize:   parseFloat(document.getElementById('luckyNewUserMaxPrize').value) || 100,
+        stakeOptions:      luckyStakeOptions,
+        baseStake:         luckyBaseStake,
+        segments:          luckySegments,
+      },
+      referralBonus: {
+        referrer:          refBonusReferrer,
+        referee:           refBonusReferee,
+      },
+      updatedAt:           serverTimestamp(),
     updatedBy:           currentAdminUid,
   };
 
