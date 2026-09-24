@@ -747,11 +747,13 @@
       <div style="text-align:center;color:rgba(255,255,255,0.25);font-size:11px;margin-bottom:10px;">— or enter custom amount —</div>
       <input id="depInput" type="number" min="100" placeholder="Amount (KES min. 100)" style="width:100%;background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;color:white;font-size:20px;font-family:monospace;text-align:center;outline:none;box-sizing:border-box;margin-bottom:16px;transition:border-color 0.2s;" onfocus="this.style.borderColor='#eab308'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       <div style="margin-bottom:20px;">
-        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">M-Pesa Number</div>
-        <div style="background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;">
-          <span id="depPhoneDisplay" style="color:white;font-weight:700;font-size:17px;font-family:monospace;">—</span>
-          <span style="font-size:11px;font-weight:800;color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:99px;padding:4px 10px;">✔ VERIFIED</span>
+        <div style="font-size:11px;font-weight:800;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Pay From</div>
+        <select id="depPhoneSelect" onchange="depPhoneChanged()" style="width:100%;background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;color:white;font-size:17px;font-family:monospace;outline:none;box-sizing:border-box;margin-bottom:10px;"></select>
+        <div id="depPhoneNewRow" style="display:flex;gap:8px;align-items:center;">
+          <input id="depPhoneNew" type="tel" placeholder="Use a different number e.g. 07XX XXX XXX" style="flex:1;min-width:0;background:#1a2b3d;border:1.5px solid rgba(255,255,255,0.1);border-radius:14px;padding:12px 14px;color:white;font-size:15px;font-family:monospace;outline:none;box-sizing:border-box;transition:border-color 0.2s;" oninput="depPhoneNewInput()" onfocus="this.style.borderColor='#eab308'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          <button id="depPhoneSaveBtn" onclick="saveMpesaPhone()" disabled style="background:linear-gradient(135deg,#059669,#047857);border:none;color:white;font-weight:900;font-size:12px;padding:12px 14px;border-radius:14px;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;">SAVE</button>
         </div>
+        <div id="depPhoneHint" style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;line-height:1.5;">Type a new M-Pesa number and tap SAVE — it will be remembered for next time.</div>
       </div>
       <button id="depBtn" onclick="initiateDeposit()" style="width:100%;background:linear-gradient(135deg,#f97316,#ea580c);border:none;color:white;font-weight:900;font-size:18px;padding:18px;border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 24px rgba(249,115,22,0.35);">
         <span id="depBtnTxt">📱 PAY WITH M-PESA</span>
@@ -2884,6 +2886,7 @@ let _depStep = 1;
 let _depCountry = null;
 let _depMethod  = null;
 let depPollTimer = null, depRef = null, depExtRef = null, depAmount = 0;
+let savedMpesaPhones = [];   // alternative M-Pesa numbers the user has saved for deposits
 
 /* ── STEP NAVIGATION ─────────────────────── */
 function depSetStep(n) {
@@ -3005,12 +3008,60 @@ window.openDeposit = function(){
   document.getElementById('countrySearch').value='';
   depRenderCountries();
   depSetStep(1);
-  // phone prefill for mpesa
-  const phone=(userData&&userData.phone)?userData.phone:(USER&&USER.email?USER.email.split('@')[0]:'—');
-  const pd=document.getElementById('depPhoneDisplay'); if(pd) pd.textContent=phone;
+  // phone prefill for mpesa — show signup number + any saved alternate numbers
+  const signupPhone=(userData&&userData.phone)?userData.phone:(USER&&USER.email?USER.email.split('@')[0]:'');
+  savedMpesaPhones=Array.isArray(userData&&userData.mpesaPhones)?userData.mpesaPhones.slice():[];
+  if(signupPhone&&!savedMpesaPhones.includes(signupPhone))savedMpesaPhones.unshift(signupPhone);
+  renderDepPhoneSelector(signupPhone);
   const di=document.getElementById('depInput'); if(di) di.value='';
   const db2=document.getElementById('depBtn'); if(db2){db2.disabled=false;db2.innerHTML=`<span id="depBtnTxt">📱 PAY WITH M-PESA</span>`;}
   const er=document.getElementById('depErr'); if(er) er.style.display='none';
+};
+
+function renderDepPhoneSelector(prefer){
+  const sel=document.getElementById('depPhoneSelect'); if(!sel) return;
+  const opts=savedMpesaPhones.filter(Boolean);
+  if(!opts.length) opts.push('—');
+  sel.innerHTML=opts.map(p=>`<option value="${p.replace(/"/g,'&quot;')}">${p==='—'?'No saved number':p}</option>`).join('');
+  // pick the preferred (newly saved or signup) number if present
+  if(prefer&&opts.includes(prefer))sel.value=prefer;
+  depPhoneChanged();
+}
+
+function depPhoneChanged(){
+  const sel=document.getElementById('depPhoneSelect'); if(!sel) return;
+  const hint=document.getElementById('depPhoneHint'); if(hint) hint.textContent='Type a new M-Pesa number and tap SAVE — it will be remembered for next time.';
+}
+
+function depPhoneNewInput(){
+  const inp=document.getElementById('depPhoneNew'),btn=document.getElementById('depPhoneSaveBtn');
+  if(!inp||!btn)return;
+  const v=inp.value.replace(/\D/g,'');
+  btn.disabled=v.length<9;
+}
+
+window.saveMpesaPhone=async function(){
+  const inp=document.getElementById('depPhoneNew'); if(!inp)return;
+  const raw=inp.value.trim().replace(/[\s-]/g,'');
+  const digits=raw.replace(/\D/g,'');
+  if(digits.length<9){showToast('Enter a valid phone number','red');return;}
+  const phone='+'+digits;
+  const already=savedMpesaPhones.find(p=>String(p).replace(/\D/g,'')===digits);
+  if(already){showToast('That number is already saved','warn');const sel=document.getElementById('depPhoneSelect');if(sel)sel.value=already;inp.value='';const btn=document.getElementById('depPhoneSaveBtn');if(btn)btn.disabled=true;return;}
+  const btn=document.getElementById('depPhoneSaveBtn');if(btn){btn.disabled=true;btn.textContent='…';}
+  try{
+    await updateDoc(doc(db,'users',USER.uid),{mpesaPhones:arrayUnion(phone)});
+    if(userData){userData.mpesaPhones=Array.isArray(userData.mpesaPhones)?userData.mpesaPhones:[];if(!userData.mpesaPhones.includes(phone))userData.mpesaPhones.push(phone);}
+    if(!savedMpesaPhones.includes(phone))savedMpesaPhones.push(phone);
+    renderDepPhoneSelector(phone);
+    inp.value='';
+    if(btn){btn.textContent='SAVE';}
+    showToast('✅ Number saved — select it anytime','emerald');
+  }catch(e){
+    console.warn('save mpesa phone failed:',e.message);
+    showToast('❌ Could not save number','red');
+    if(btn){btn.textContent='SAVE';btn.disabled=false;}
+  }
 };
 window.closeDeposit = function(){ window.cancelPoll&&window.cancelPoll(); _depStep=1; document.getElementById('depositScreen')?.classList.remove('open'); };
 
@@ -3039,7 +3090,13 @@ window.depAmtChanged = function(){};
 /* ── M-PESA INITIATE ──────────────────────── */
 window.initiateDeposit = async function(){
   const amt=parseInt(document.getElementById('depInput').value)||0;
-  const phone=userData?.phone||(USER?.email?.split('@')[0]||'');
+  const sel=document.getElementById('depPhoneSelect');
+  let phone=(sel&&sel.value&&sel.value!=='—')?sel.value:(userData?.phone||(USER?.email?.split('@')[0]||''));
+  const newDigits=((document.getElementById('depPhoneNew')||{}).value||'').replace(/\D/g,'');
+  if(newDigits.length>=9)phone='+'+newDigits;
+  if(!phone||phone==='—'){showToast('Select or enter your M-Pesa number','warn');return;}
+  const normDigits=phone.replace(/\D/g,'');
+  if(normDigits.length<9){showToast('Enter a valid M-Pesa number','red');return;}
   if(!storeConfig.depositsEnabled){showToast('Deposits temporarily disabled.','red');return;}
   if(amt<storeConfig.minDeposit){showToast(`Minimum deposit is KES ${storeConfig.minDeposit.toLocaleString()}`,'red');return;}
   if(amt>storeConfig.maxDeposit){showToast(`Maximum deposit is KES ${storeConfig.maxDeposit.toLocaleString()}`,'red');return;}
